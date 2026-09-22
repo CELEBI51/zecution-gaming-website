@@ -1,0 +1,12 @@
+{
+  "name": "zecution-gaming-website",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev",
+    "server": "npm --prefix backend run dev",
+    "server:start": "npm --prefix backend run start",
+    "start": "npm --prefix frontend run preview"
+  }
+}

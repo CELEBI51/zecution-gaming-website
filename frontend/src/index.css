@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #f4f1ea;
+  --muted: #a8a6a1;
+  --black: #070707;
+  --panel: #101010;
+  --line: rgba(255, 255, 255, 0.16);
+  --violet: #7f22c9;
+  --violet-bright: #b13cff;
+  --sans: "Bahnschrift", "Arial Narrow", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--black);
+  font-family: var(--sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--black); scroll-behavior: smooth; }
+body { min-width: 320px; margin: 0; overflow-x: hidden; background: var(--black); }
+button, a { color: inherit; font: inherit; }
+button { border: 0; }
+a { text-decoration: none; }
+img, canvas, video { display: block; }
+::selection { color: white; background: var(--violet); }
+:focus-visible { outline: 2px solid var(--violet-bright); outline-offset: 5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: zecution-backend-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run db:deploy
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: TRUST_PROXY
+        value: true
+      - key: FRONTEND_ORIGIN
+        value: https://zecution-gaming-website.vercel.app
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false

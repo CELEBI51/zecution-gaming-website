@@ -1,0 +1,49 @@
+{
+  "name": "zecution-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zecution Gaming içerik ve admin API'si",
+  "type": "module",
+  "main": "src/server.js",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/server.js",
+    "test": "vitest run",
+    "test:smoke": "node scripts/smoke-test.js",
+    "test:admin": "node scripts/test-admin-login.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:deploy:pg": "node scripts/deploy-migrations-pg.js",
+    "db:seed": "prisma db seed",
+    "admin:create": "node scripts/create-admin.js",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^6.12.0",
+    "@prisma/client": "6.12.0",
+    "argon2": "^0.44.0",
+    "cloudinary": "^2.11.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.0",
+    "helmet": "^8.0.0",
+    "multer": "^2.0.0",
+    "pg": "^8.0.0",
+    "pino": "^10.0.0",
+    "pino-http": "^11.0.0",
+    "sharp": "^0.35.4",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "prisma": "6.12.0",
+    "supertest": "^7.0.0",
+    "vitest": "^4.0.0"
+  }
+}
