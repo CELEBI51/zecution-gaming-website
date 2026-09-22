@@ -168,6 +168,7 @@ function App() {
       <header className={`site-header ${phase > 0 ? 'site-header--visible' : ''}`}>
         <Brand compact />
         <nav className="desktop-nav" aria-label="Ana menü">
+          <a href="/teklif-al">Teklif Al</a>
           <a href="#mod-galerisi">Modlar</a>
           <a href="#rehberler">Rehberler</a>
           <a href="#hizmetler">Hizmetler</a>
@@ -186,6 +187,7 @@ function App() {
 
       {menuOpen && (
         <nav className="mobile-nav" aria-label="Mobil menü">
+          <a href="/teklif-al">Teklif Al</a>
           <a href="#mod-galerisi" onClick={() => setMenuOpen(false)}>Modlar</a>
           <a href="#rehberler" onClick={() => setMenuOpen(false)}>Rehberler</a>
           <a href="#hizmetler" onClick={() => setMenuOpen(false)}>Hizmetler</a>
@@ -310,10 +312,7 @@ function App() {
           <div className="service-slider" ref={servicesRef}>
             <a
               className="service-card service-card--model"
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => copyInquiry('model')}
+              href="/teklif-al?type=MODEL"
             >
               <div className="service-card-bg service-card-bg--model" aria-hidden="true" />
               <div className="service-card-overlay" aria-hidden="true" />
@@ -323,15 +322,12 @@ function App() {
                   <h3>3D Model</h3>
                   <p>Oyun, görselleştirme veya kişisel projen için özel model talebi oluştur.</p>
                 </div>
-                <span className="service-action">Instagram’dan yaz <ArrowUpRight size={18} /></span>
+                <span className="service-action">Teklif al <ArrowUpRight size={18} /></span>
               </div>
             </a>
             <a
               className="service-card service-card--accent service-card--custom"
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => copyInquiry('vehicle')}
+              href="/teklif-al?type=VEHICLE"
             >
               <div className="service-card-bg service-card-bg--custom" aria-hidden="true" />
               <div className="service-card-overlay" aria-hidden="true" />
@@ -341,7 +337,7 @@ function App() {
                   <h3>Kişiye Özel<br />Araç Modu</h3>
                   <p>İstediğin aracı ve proje detaylarını paylaş, birlikte kapsamı belirleyelim.</p>
                 </div>
-                <span className="service-action">Teklif için yaz <ArrowUpRight size={18} /></span>
+                <span className="service-action">Teklif al <ArrowUpRight size={18} /></span>
               </div>
             </a>
             <a
@@ -382,6 +378,7 @@ function App() {
           <div className="contact-content">
             <span className="eyebrow">Bir proje mi var?</span>
             <h2>Konuşalım.</h2>
+            <div style={{ marginBottom: '1.5rem' }}><a href="/teklif-al">Mod talebi oluştur / Teklif al <ArrowUpRight /></a></div>
             <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
               <MessageCircle /> @zecution_gaming <ArrowUpRight />
             </a>
@@ -397,6 +394,7 @@ function App() {
           </div>
           <nav className="footer-nav" aria-label="Footer menüsü">
             <span>Keşfet</span>
+            <a href="/teklif-al">Teklif Al</a>
             <a href="#mod-galerisi">Modlar</a>
             <a href="#rehberler">Rehberler</a>
             <a href="#hizmetler">Hizmetler</a>

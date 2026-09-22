@@ -1,0 +1,38 @@
+.quote-page { min-height: 100vh; background: radial-gradient(ellipse at 10% 25%, #67239724, transparent 55%), #09080c; color: #f4f0f8; }
+.quote-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.2rem clamp(1rem, 5vw, 5rem); border-bottom: 1px solid #ffffff18; }
+.quote-header a, .quote-brand { display: flex; align-items: center; gap: .7rem; font-size: .85rem; }
+.quote-brand img { width: 2.8rem; height: 2.8rem; border-radius: .6rem; }
+.quote-brand { font-weight: 700; }
+.quote-layout { max-width: 88rem; margin: auto; display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(2rem, 6vw, 6rem); padding: clamp(2rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem); align-items: start; }
+.quote-eyebrow { color: #c486ff; text-transform: uppercase; font-size: .75rem; letter-spacing: .15em; font-weight: 700; }
+.quote-intro h1 { font-size: clamp(2.5rem, 4.5vw, 5rem); line-height: 1; letter-spacing: -.045em; margin: 1.3rem 0 1.5rem; }
+.quote-intro p { line-height: 1.75; color: #b6aebe; }
+.quote-steps { counter-reset: step; list-style: none; padding: 0; margin: 2.5rem 0; }
+.quote-steps li { counter-increment: step; display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-top: 1px solid #ffffff18; }
+.quote-steps li::before { content: '0' counter(step); color: #c486ff; font-size: .85rem; }
+.quote-card { min-width: 0; border: 1px solid #ffffff1f; border-radius: 1rem; padding: clamp(1.2rem, 3vw, 2.2rem); background: #141218; }
+.quote-card h2 { margin: 0 0 .75rem; font-size: 1.5rem; font-weight: 700; }
+.quote-hint, .quote-form small { color: #aaa1b3; font-size: .82rem; line-height: 1.6; }
+.quote-form fieldset { border: 0; padding: 0; margin: 1.5rem 0 0; min-width: 0; }
+.quote-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1rem; }
+.quote-form label { display: flex; flex-direction: column; min-width: 0; gap: .45rem; margin-bottom: 1.2rem; font-size: .9rem; font-weight: 600; }
+.quote-form label span { color: #aaa1b3; font-size: .75rem; font-weight: 400; }
+.quote-form input, .quote-form textarea, .quote-form select { width: 100%; padding: .8rem; background: #201c25; border: 1px solid #ffffff26; border-radius: .5rem; color: #fff; font: inherit; font-size: 1rem; color-scheme: dark; }
+.quote-form select option { color: #fff; background: #201c25; }
+.quote-form textarea { resize: vertical; }
+.quote-button { display: inline-flex; justify-content: center; align-items: center; gap: .6rem; background: #8629d1; color: #fff; font-weight: 700; padding: .85rem 1.3rem; border-radius: .5rem; cursor: pointer; }
+.quote-button:disabled, fieldset:disabled .quote-button { opacity: .6; cursor: wait; }
+.quote-form .quote-button { width: 100%; margin-top: 1rem; }
+.quote-error { padding: .8rem 1rem; border: 1px solid #f8717166; color: #ffb6b6; background: #ef444414; border-radius: .5rem; margin-block: 1rem; }
+.quote-trap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.quote-photo-field { margin-block: 1.5rem; }
+.quote-photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); gap: .75rem; }
+.quote-photo-preview { min-width: 0; padding: .5rem; border: 1px solid #ffffff26; border-radius: .5rem; }
+.quote-photo-preview img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: .3rem; }
+.quote-photo-preview small { display: block; overflow-wrap: anywhere; margin-block: .5rem; }
+.quote-photo-preview button { padding: .4rem .7rem; background: #ffffff16; border-radius: .3rem; cursor: pointer; }
+.quote-success { display: grid; gap: 1rem; }
+.quote-success > svg { color: #b386f4; }
+.quote-success code { overflow-wrap: anywhere; font-size: .85rem; }
+@media (max-width: 850px) { .quote-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .quote-grid { grid-template-columns: minmax(0, 1fr); } .quote-brand span { display: none; } }

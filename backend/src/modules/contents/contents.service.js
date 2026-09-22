@@ -1,6 +1,7 @@
 import { prisma } from '../../config/database.js'
 import { slugify } from '../../utils/slug.js'
 import { BadRequestError, NotFoundError } from '../../utils/api-error.js'
+import { validateContentCategory } from '../categories/category-rules.js'
 
 /**
  * Slug çakışmalarını önlemek için benzersiz slug üretir.
@@ -51,10 +52,19 @@ export async function listPublicContents({
   }
 
   if (category) {
-    where.OR = [
-      { category: { slug: category } },
-      { category: { parent: { slug: category } } },
-    ]
+    const categories = await prisma.category.findMany({
+      where: section ? { section } : {},
+      select: { id: true, slug: true, parentId: true },
+    })
+    const ids = new Set(categories.filter(c => c.slug === category).map(c => c.id))
+    let previousSize
+    do {
+      previousSize = ids.size
+      for (const child of categories) {
+        if (ids.has(child.parentId)) ids.add(child.id)
+      }
+    } while (ids.size !== previousSize)
+    where.categoryId = { in: [...ids] }
   }
 
   if (search) {
@@ -77,7 +87,7 @@ export async function listPublicContents({
       where,
       skip,
       take: limit,
-      orderBy: [{ sortOrder: 'asc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       select: {
         id: true,
         title: true,
@@ -212,7 +222,7 @@ export async function listAdminContents({
       where,
       skip,
       take: limit,
-      orderBy: [{ sortOrder: 'asc' }, { updatedAt: 'desc' }],
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       include: {
         game: { select: { id: true, name: true, slug: true } },
         category: { select: { id: true, name: true, slug: true } },
@@ -265,6 +275,7 @@ export async function getAdminContentById(id) {
 }
 
 export async function createContent(data) {
+  await validateContentCategory(data)
   const slug = data.slug
     ? await generateUniqueSlug(data.slug)
     : await generateUniqueSlug(data.title)
@@ -290,6 +301,7 @@ export async function updateContent(id, data) {
   }
 
   const updateData = { ...data }
+  await validateContentCategory({ ...existing, ...data })
 
   if (data.slug && data.slug !== existing.slug) {
     updateData.slug = await generateUniqueSlug(data.slug, id)
@@ -324,6 +336,9 @@ export async function softDeleteContent(id) {
 }
 
 export async function restoreContent(id) {
+  const existing = await prisma.content.findUnique({ where: { id } })
+  if (!existing) throw new NotFoundError('İçerik bulunamadı')
+  await validateContentCategory(existing)
   try {
     return await prisma.content.update({
       where: { id },
@@ -343,9 +358,7 @@ export async function publishContent(id) {
 
   if (!content) throw new NotFoundError('İçerik bulunamadı')
 
-  if (!content.categoryId) {
-    throw new BadRequestError('İçeriği yayınlamak için kategori seçilmelidir')
-  }
+  await validateContentCategory({ ...content, status: 'PUBLISHED' })
 
   return prisma.content.update({
     where: { id },

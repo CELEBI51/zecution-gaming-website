@@ -19,12 +19,18 @@
 }
 
 * { box-sizing: border-box; }
-html { background: var(--black); scroll-behavior: smooth; }
+html { background: var(--black); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { min-width: 320px; margin: 0; overflow-x: hidden; background: var(--black); }
 button, a { color: inherit; font: inherit; }
 button { border: 0; }
 a { text-decoration: none; }
-img, canvas, video { display: block; }
+img, canvas, video { display: block; max-width: 100%; }
+input, select, textarea { min-width: 0; max-width: 100%; }
+h1, h2, h3, p, dd, dt { overflow-wrap: anywhere; }
+
+@media (max-width: 600px) {
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
+}
 ::selection { color: white; background: var(--violet); }
 :focus-visible { outline: 2px solid var(--violet-bright); outline-offset: 5px; }
 

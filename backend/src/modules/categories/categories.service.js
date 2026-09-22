@@ -1,6 +1,7 @@
 import { prisma } from '../../config/database.js'
 import { slugify } from '../../utils/slug.js'
 import { BadRequestError, NotFoundError } from '../../utils/api-error.js'
+import { validateCategoryParent } from './category-rules.js'
 
 export async function listCategories({ section, game } = {}, isPublic = true) {
   const where = {}
@@ -21,6 +22,7 @@ export async function listCategories({ section, game } = {}, isPublic = true) {
     where,
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     include: {
+      ...(!isPublic ? { _count: { select: { contents: true } } } : {}),
       game: {
         select: { id: true, name: true, slug: true },
       },
@@ -36,6 +38,7 @@ export async function listCategories({ section, game } = {}, isPublic = true) {
 }
 
 export async function createCategory(data) {
+  await validateCategoryParent(null, data)
   const slug = data.slug ? slugify(data.slug) : slugify(data.name)
 
   if (!slug) {
@@ -55,6 +58,17 @@ export async function createCategory(data) {
 }
 
 export async function updateCategory(id, data) {
+  const existing = await prisma.category.findUnique({ where: { id } })
+  if (!existing) throw new NotFoundError('Kategori bulunamadı')
+  const next = { ...existing, ...data }
+  await validateCategoryParent(id, next, next.parentId !== existing.parentId)
+  if (next.section !== existing.section) {
+    const [children, contents] = await Promise.all([
+      prisma.category.count({ where: { parentId: id } }),
+      prisma.content.count({ where: { categoryId: id } }),
+    ])
+    if (children || contents) throw new BadRequestError('Alt kategorisi veya içeriği olan kategorinin bölümü değiştirilemez; önce bağlı kayıtları taşıyınız')
+  }
   const updatePayload = { ...data }
 
   if (data.name && !data.slug) {

@@ -3,8 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Check,
-  CheckCircle2,
-  Image as ImageIcon,
   Loader2,
   Plus,
   Save,
@@ -14,13 +12,13 @@ import {
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
 import './ContentForm.css'
+import { categoryRows } from '../../../utils/categories.js'
 
 export default function ContentForm() {
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
 
-  const [activeTab, setActiveTab] = useState('general')
   const [loading, setLoading] = useState(isEdit)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -30,7 +28,6 @@ export default function ContentForm() {
   // Form durumları
   const [formData, setFormData] = useState({
     title: '',
-    slug: '',
     section: 'STORE',
     status: 'DRAFT',
     saleMethod: 'CONTACT',
@@ -43,7 +40,6 @@ export default function ContentForm() {
     priceLabel: 'Fiyat için iletişime geç',
     downloadUrl: '',
     isFeatured: false,
-    sortOrder: 0,
   })
 
   const [games, setGames] = useState([])
@@ -72,7 +68,6 @@ export default function ContentForm() {
 
           setFormData({
             title: content.title || '',
-            slug: content.slug || '',
             section: content.section || 'STORE',
             status: content.status || 'DRAFT',
             saleMethod: content.saleMethod || 'CONTACT',
@@ -85,7 +80,6 @@ export default function ContentForm() {
             priceLabel: content.priceLabel || '',
             downloadUrl: content.downloadUrl || '',
             isFeatured: Boolean(content.isFeatured),
-            sortOrder: content.sortOrder || 0,
           })
 
           setMediaList(content.media || [])
@@ -110,12 +104,21 @@ export default function ContentForm() {
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
+      ...(name === 'section' ? { categoryId: '' } : {}),
     }))
   }
 
   // Formu kaydet
   const handleSave = async (e) => {
     if (e) e.preventDefault()
+    if (!formData.title.trim()) {
+      setError('İçerik başlığı zorunludur.')
+      return
+    }
+    if (invalidCategory) {
+      setError('Seçili kategori içerik kabul etmiyor. Aktif bir alt kategori seçiniz.')
+      return
+    }
     setError('')
     setNotice('')
     setSaving(true)
@@ -124,8 +127,11 @@ export default function ContentForm() {
       ...formData,
       gameId: formData.gameId || null,
       categoryId: formData.categoryId || null,
-      price: formData.price ? Number(formData.price) : null,
-      sortOrder: Number(formData.sortOrder) || 0,
+      status: isEdit ? formData.status : 'DRAFT',
+      saleMethod: formData.section === 'STORE' ? 'CONTACT' : 'FREE',
+      price: formData.section === 'STORE' && formData.price ? Number(formData.price) : null,
+      priceLabel: formData.section === 'STORE' ? formData.priceLabel : null,
+      downloadUrl: formData.section === 'GALLERY' ? formData.downloadUrl : null,
     }
 
     try {
@@ -236,7 +242,9 @@ export default function ContentForm() {
   }
 
   // Bölüme göre filtrelenmiş kategoriler
-  const availableCategories = categories.filter((c) => c.section === formData.section)
+  const categoryTree = categoryRows(categories.filter((c) => c.section === formData.section))
+  const availableCategories = categoryTree.filter((c) => !c.hasChildren && c.branchActive)
+  const invalidCategory = formData.categoryId && !availableCategories.some(c => c.id === formData.categoryId)
 
   if (loading) {
     return (
@@ -306,48 +314,8 @@ export default function ContentForm() {
           </div>
         )}
 
-        {/* Sekmeler */}
-        <div className="content-form-tabs">
-          <button
-            type="button"
-            className={`content-form-tab ${activeTab === 'general' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('general')}
-          >
-            1. Genel Bilgiler
-          </button>
-          <button
-            type="button"
-            className={`content-form-tab ${activeTab === 'classification' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('classification')}
-          >
-            2. Sınıflandırma
-          </button>
-          <button
-            type="button"
-            className={`content-form-tab ${activeTab === 'pricing' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('pricing')}
-          >
-            3. Satış & İndirme
-          </button>
-          <button
-            type="button"
-            className={`content-form-tab ${activeTab === 'media' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('media')}
-          >
-            4. Görseller ({mediaList.length})
-          </button>
-          <button
-            type="button"
-            className={`content-form-tab ${activeTab === 'features' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('features')}
-          >
-            5. Teknik Özellikler ({features.length})
-          </button>
-        </div>
-
-        {/* Sekme 1: Genel Bilgiler */}
-        {activeTab === 'general' && (
-          <div className="content-form-card">
+        <div className="content-form-card">
+            <h2 className="content-form-heading">Genel Bilgiler</h2>
             <div className="form-field">
               <label htmlFor="title">İçerik Başlığı *</label>
               <input
@@ -361,17 +329,6 @@ export default function ContentForm() {
               />
             </div>
 
-            <div className="form-field">
-              <label htmlFor="slug">URL Slug (Boş bırakırsanız başlıktan otomatik üretilir)</label>
-              <input
-                id="slug"
-                name="slug"
-                type="text"
-                placeholder="vw-polo-1-4-tdi"
-                value={formData.slug}
-                onChange={handleChange}
-              />
-            </div>
 
             <div className="form-field">
               <label htmlFor="producer">Yapımcı</label>
@@ -408,11 +365,10 @@ export default function ContentForm() {
               />
             </div>
           </div>
-        )}
 
-        {/* Sekme 2: Sınıflandırma */}
-        {activeTab === 'classification' && (
-          <div className="content-form-card">
+
+        <div className="content-form-card">
+            <h2 className="content-form-heading">Bölüm ve Kategori</h2>
             <div className="form-grid-2">
               <div className="form-field">
                 <label htmlFor="section">Yayın Bölümü *</label>
@@ -422,6 +378,7 @@ export default function ContentForm() {
                 </select>
               </div>
 
+              {isEdit && (
               <div className="form-field">
                 <label htmlFor="status">Yayın Durumu *</label>
                 <select id="status" name="status" value={formData.status} onChange={handleChange}>
@@ -430,6 +387,7 @@ export default function ContentForm() {
                   <option value="ARCHIVED">Arşiv (Gizli)</option>
                 </select>
               </div>
+              )}
             </div>
 
             <div className="form-grid-2">
@@ -447,11 +405,13 @@ export default function ContentForm() {
 
               <div className="form-field">
                 <label htmlFor="categoryId">Kategori</label>
+                <small style={{ color: '#aaa' }}>Yalnızca alt kategorisi olmayan aktif kategorilere içerik eklenebilir.</small>
                 <select id="categoryId" name="categoryId" value={formData.categoryId} onChange={handleChange}>
                   <option value="">Kategori Seçiniz</option>
+                  {invalidCategory && <option value={formData.categoryId} disabled>Geçersiz kategori — alt kategori seçiniz</option>}
                   {availableCategories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.parent ? `${c.parent.name} / ${c.name}` : c.name}
+                      {c.pathLabel}
                     </option>
                   ))}
                 </select>
@@ -459,16 +419,6 @@ export default function ContentForm() {
             </div>
 
             <div className="form-grid-2">
-              <div className="form-field">
-                <label htmlFor="sortOrder">Sıralama Önceliği (Küçük sayılar önce çıkar)</label>
-                <input
-                  id="sortOrder"
-                  name="sortOrder"
-                  type="number"
-                  value={formData.sortOrder}
-                  onChange={handleChange}
-                />
-              </div>
 
               <div className="form-field" style={{ justifyContent: 'center' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}>
@@ -484,19 +434,12 @@ export default function ContentForm() {
               </div>
             </div>
           </div>
-        )}
 
-        {/* Sekme 3: Satış & İndirme */}
-        {activeTab === 'pricing' && (
-          <div className="content-form-card">
-            <div className="form-field">
-              <label htmlFor="saleMethod">Satış / Dağıtım Yöntemi</label>
-              <select id="saleMethod" name="saleMethod" value={formData.saleMethod} onChange={handleChange}>
-                <option value="CONTACT">İletişim Üzerinden Satış (Instagram / Discord)</option>
-                <option value="FREE">Ücretsiz Doğrudan İndirme</option>
-              </select>
-            </div>
 
+        <div className="content-form-card">
+            <h2 className="content-form-heading">{formData.section === 'STORE' ? 'Ücret Bilgileri' : 'Mod İndirme Bağlantısı'}</h2>
+
+            {formData.section === 'STORE' && (
             <div className="form-grid-2">
               <div className="form-field">
                 <label htmlFor="price">Fiyat (TL)</label>
@@ -523,7 +466,9 @@ export default function ContentForm() {
                 />
               </div>
             </div>
+            )}
 
+            {formData.section === 'GALLERY' && (
             <div className="form-field">
               <label htmlFor="downloadUrl">Ücretsiz Mod İndirme Bağlantısı (Varsa)</label>
               <input
@@ -535,12 +480,12 @@ export default function ContentForm() {
                 onChange={handleChange}
               />
             </div>
+            )}
           </div>
-        )}
 
-        {/* Sekme 4: Görseller (Media Manager) */}
-        {activeTab === 'media' && (
-          <div className="content-form-card">
+
+        <div className="content-form-card">
+            <h2 className="content-form-heading">Görseller</h2>
             {!isEdit ? (
               <div style={{ textAlign: 'center', padding: '2rem', color: '#ffffff8c' }}>
                 <p>Görsel yükleyebilmek için lütfen önce içeriği oluşturup kaydediniz.</p>
@@ -640,10 +585,9 @@ export default function ContentForm() {
               </div>
             )}
           </div>
-        )}
 
-        {/* Sekme 5: Teknik Özellikler */}
-        {activeTab === 'features' && (
+
+        {/* Teknik özellikler */}
           <div className="content-form-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <div>
@@ -726,7 +670,7 @@ export default function ContentForm() {
               </div>
             )}
           </div>
-        )}
+
       </div>
     </div>
   )

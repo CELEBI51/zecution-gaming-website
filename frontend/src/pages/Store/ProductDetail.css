@@ -276,6 +276,7 @@
 }
 
 .product-information {
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(22rem, 1.1fr);
   gap: clamp(3rem, 7vw, 7rem);
@@ -283,6 +284,9 @@
   padding-top: 2.2rem;
   border-top: 1px solid #242027;
 }
+
+.product-information > *, .product-features dl > div > * { min-width: 0; }
+.product-breadcrumb { flex-wrap: wrap; overflow-wrap: anywhere; }
 
 .product-information h2 {
   margin: 0;

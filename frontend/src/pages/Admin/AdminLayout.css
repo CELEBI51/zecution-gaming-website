@@ -6,6 +6,21 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* Native dropdown menus need an opaque background for their light text. */
+.admin-shell select {
+  color-scheme: dark;
+}
+
+.admin-shell select option,
+.admin-shell select optgroup {
+  color: #f3f3f3;
+  background-color: #1f1f1f;
+}
+
+.admin-shell select option:disabled {
+  color: #a8a8a8;
+}
+
 .admin-sidebar {
   width: 17rem;
   background: #0d0d0d;
@@ -184,6 +199,8 @@
 }
 
 .admin-topbar {
+  gap: 1rem;
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -197,6 +214,7 @@
 }
 
 .admin-topbar h1 {
+  overflow-wrap: anywhere;
   font-size: 1.35rem;
   font-weight: 700;
   margin: 0;
@@ -205,8 +223,18 @@
 }
 
 .admin-content-area {
+  min-width: 0;
   padding: 2rem;
   flex: 1;
+}
+
+.admin-topbar > div { min-width: 0; }
+.admin-topbar button { flex-shrink: 0; }
+
+@media (max-width: 520px) {
+  .admin-topbar { position: relative; }
+  .admin-topbar > button { width: 100%; justify-content: center; }
+  .admin-nav__link { padding: 0.65rem; gap: 0.5rem; }
 }
 
 @media (max-width: 900px) {

@@ -875,3 +875,6 @@
 @keyframes gallery-orbit {
   to { transform: rotate(360deg); }
 }
+
+.mods-header { gap: 1rem; flex-wrap: wrap; }
+.mods-hero__content, .mods-intro > * { min-width: 0; }

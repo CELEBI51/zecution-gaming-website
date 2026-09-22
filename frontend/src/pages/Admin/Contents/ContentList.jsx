@@ -253,7 +253,7 @@ export default function ContentList() {
             background: '#121212',
             border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: '0.75rem',
-            overflow: 'hidden',
+            overflowX: 'auto',
           }}
         >
           {loading ? (

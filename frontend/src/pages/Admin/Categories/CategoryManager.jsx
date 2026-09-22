@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Edit2, FolderTree, Loader2, Plus, Trash2, X } from 'lucide-react'
+import { categoryRows } from '../../../utils/categories.js'
 import { api } from '../../../services/api.js'
 
 export default function CategoryManager() {
@@ -104,6 +105,9 @@ export default function CategoryManager() {
     }
   }
 
+  const rows = categoryRows(categories)
+  const parentOptions = rows.filter(c => c.section === formData.section && c.id !== editingCategory?.id && !c.ancestorIds.includes(editingCategory?.id))
+
   return (
     <div>
       <div className="admin-topbar">
@@ -144,7 +148,7 @@ export default function CategoryManager() {
           </div>
         )}
 
-        <div style={{ background: '#121212', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '0.75rem', overflow: 'hidden' }}>
+        <div style={{ background: '#121212', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '0.75rem', overflowX: 'auto' }}>
           {loading ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: '#ffffff8c' }}>
               <Loader2 className="animate-spin" size={26} style={{ margin: '0 auto 0.5rem' }} />
@@ -166,10 +170,12 @@ export default function CategoryManager() {
                 </tr>
               </thead>
               <tbody>
-                {categories.map((cat) => (
+                {rows.map((cat) => (
                   <tr key={cat.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
                     <td style={{ padding: '0.85rem 1rem', color: '#fff', fontWeight: 600 }}>
-                      {cat.parent ? `↳ ${cat.name}` : cat.name}
+                      <span style={{ paddingLeft: `${cat.depth * 1.1}rem` }}>{cat.depth ? '↳ ' : ''}{cat.name}</span>
+                      {cat.hasChildren && <small style={{ color: '#d880ff', marginLeft: '0.5rem' }}>Üst kategori</small>}
+                      {cat.hasChildren && cat._count?.contents > 0 && <div style={{ color: '#fbbf24', fontSize: '0.75rem', marginTop: '0.35rem' }}>{cat._count.contents} içerik doğrudan bu üst kategoriye bağlı; içerik düzenleme ekranından alt kategoriye taşıyınız.</div>}
                       {cat.parent && <span style={{ color: '#ffffff59', fontSize: '0.75rem', marginLeft: '0.5rem' }}>({cat.parent.name})</span>}
                     </td>
                     <td style={{ padding: '0.85rem 1rem', color: '#ffffff73', fontFamily: 'monospace', fontSize: '0.8rem' }}>
@@ -211,7 +217,7 @@ export default function CategoryManager() {
         {/* Modal */}
         {modalOpen && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-            <div style={{ width: '100%', maxWidth: '28rem', background: '#121212', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '1rem', padding: '1.75rem', position: 'relative', color: '#fff' }}>
+            <div style={{ width: '100%', maxWidth: '28rem', background: '#121212', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '1rem', padding: '1.75rem', position: 'relative', color: '#fff', maxHeight: 'calc(100dvh - 2rem)', overflowY: 'auto' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>
                   {editingCategory ? 'Kategoriyi Düzenle' : 'Yeni Kategori Ekle'}
@@ -242,7 +248,7 @@ export default function CategoryManager() {
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#ffffffcc' }}>Bölüm *</label>
                   <select
                     value={formData.section}
-                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, section: e.target.value, parentId: '' })}
                     style={{ padding: '0.7rem 0.9rem', background: '#1a1a1a', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '0.5rem', color: '#fff', outline: 'none' }}
                   >
                     <option value="STORE">Mağaza</option>
@@ -274,11 +280,10 @@ export default function CategoryManager() {
                     style={{ padding: '0.7rem 0.9rem', background: '#1a1a1a', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '0.5rem', color: '#fff', outline: 'none' }}
                   >
                     <option value="">Ana Kategori (Üst Kategori Yok)</option>
-                    {categories
-                      .filter((c) => !c.parentId && (!editingCategory || c.id !== editingCategory.id))
+                    {parentOptions
                       .map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.name} ({c.section === 'STORE' ? 'Mağaza' : 'Galeri'})
+                          {c.pathLabel}
                         </option>
                       ))}
                   </select>

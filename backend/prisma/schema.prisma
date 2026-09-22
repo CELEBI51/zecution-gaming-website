@@ -177,3 +177,54 @@ model SiteSetting {
 
   @@map("site_settings")
 }
+
+enum QuoteStatus {
+  NEW
+  REVIEWING
+  QUOTED
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+enum QuoteType {
+  VEHICLE
+  MAP
+  MODIFICATION
+  MODEL
+  OTHER
+}
+
+model QuoteRequest {
+  photos        QuotePhoto[]
+  id            String      @id @default(uuid()) @db.Uuid
+  submissionId  String      @unique @db.Uuid @map("submission_id")
+  name          String      @db.VarChar(120)
+  email         String      @db.VarChar(254)
+  game          String      @db.VarChar(120)
+  type          QuoteType
+  description   String      @db.VarChar(10000)
+  referenceUrl  String?     @map("reference_url") @db.VarChar(2000)
+  budget        String?     @db.VarChar(120)
+  desiredDate   String?     @map("desired_date") @db.VarChar(10)
+  status        QuoteStatus @default(NEW)
+  adminNotes    String      @default("") @map("admin_notes") @db.VarChar(10000)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@map("quote_requests")
+}
+
+model QuotePhoto {
+  id        String       @id @default(uuid()) @db.Uuid
+  quoteId   String       @db.Uuid @map("quote_id")
+  name      String       @db.VarChar(200)
+  data      Bytes
+  sortOrder Int          @map("sort_order")
+  quote     QuoteRequest @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([quoteId])
+  @@map("quote_photos")
+}

@@ -107,7 +107,7 @@ export default function Dashboard() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(13rem, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 13rem), 1fr))',
             gap: '1.25rem',
             marginBottom: '2.5rem',
           }}
@@ -250,7 +250,7 @@ export default function Dashboard() {
         </div>
 
         {/* Hızlı İşlemler & Son İçerikler */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(20rem, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 20rem), 1fr))', gap: '1.5rem' }}>
           {/* Son Eklenen İçerikler */}
           <div
             style={{

@@ -8,6 +8,7 @@ import {
   LogOut,
   Package,
   Settings,
+  MessageSquare,
 } from 'lucide-react'
 import { api } from '../../services/api.js'
 import './AdminLayout.css'
@@ -78,6 +79,9 @@ export default function AdminLayout() {
           </div>
 
           <nav className="admin-nav" aria-label="Admin ana menü">
+            <NavLink to="/admin/talepler" className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
+              <MessageSquare size={19} /><span>Mod Talepleri</span>
+            </NavLink>
             <NavLink
               to="/admin"
               end

@@ -9,13 +9,14 @@ import {
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
 import './Store.css'
+import { categoryRows } from '../../utils/categories.js'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/zecution_gaming/'
 
 function Store() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [categories, setCategories] = useState([{ id: 'all', label: 'Tüm Ürünler' }])
+  const [categories, setCategories] = useState([{ id: 'all', label: 'Tüm Ürünler', depth: 0 }])
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -35,15 +36,15 @@ function Store() {
 
         if (!isMounted) return
 
-        const formattedCategories = [{ id: 'all', label: 'Tüm Ürünler' }]
-        for (const category of categoryData) {
-          formattedCategories.push({
-            id: category.slug,
-            label: category.name,
-            parent: category.parent?.slug || null,
-          })
-        }
-        setCategories(formattedCategories)
+        const rows = categoryRows(categoryData)
+        setCategories([{ id: 'all', label: 'Tüm Ürünler', depth: 0 }, ...rows.map(category => ({
+          id: category.slug,
+          label: category.name,
+          pathLabel: category.pathLabel,
+          depth: category.depth,
+          hasChildren: category.hasChildren,
+          descendantSlugs: rows.filter(row => row.ancestorIds.includes(category.id)).map(row => row.slug),
+        }))])
 
         const formattedProducts = (contentData.items || []).map((item) => ({
           id: item.id,
@@ -77,18 +78,14 @@ function Store() {
   const filteredProducts = useMemo(
     () => products.filter((product) => {
       if (activeCategory === 'all') return true
-      return product.category === activeCategory || product.parentCategory === activeCategory
+      const category = categories.find(c => c.id === activeCategory)
+      return product.category === activeCategory || category?.descendantSlugs?.includes(product.category)
     }),
-    [products, activeCategory],
+    [products, activeCategory, categories],
   )
 
   const activeCategoryInfo = categories.find((category) => category.id === activeCategory)
-  const parentCategoryInfo = activeCategoryInfo?.parent
-    ? categories.find((category) => category.id === activeCategoryInfo.parent)
-    : null
-  const activeCategoryTitle = parentCategoryInfo
-    ? `${parentCategoryInfo.label} / ${activeCategoryInfo.label}`
-    : activeCategoryInfo?.label || 'Tüm Ürünler'
+  const activeCategoryTitle = activeCategoryInfo?.pathLabel || activeCategoryInfo?.label || 'Tüm Ürünler'
 
   const selectCategory = (categoryId) => {
     setActiveCategory(categoryId)
@@ -142,19 +139,20 @@ function Store() {
               </div>
             </div>
             <div className="filter-list">
-              {categories.map(({ id, label, parent }) => {
+              {categories.map(({ id, label, depth, hasChildren, descendantSlugs }) => {
                 const isActive = activeCategory === id
                 const count = id === 'all'
                   ? products.length
                   : products.filter(
-                    (product) => product.category === id || product.parentCategory === id,
+                    (product) => product.category === id || descendantSlugs?.includes(product.category),
                   ).length
 
                 return (
                   <button
                     key={id}
                     type="button"
-                    className={`${parent ? 'is-child' : ''} ${isActive ? 'is-active' : ''}`}
+                    className={`${depth ? 'is-child' : ''} ${hasChildren ? 'is-parent' : ''} ${isActive ? 'is-active' : ''}`}
+                    style={{ '--category-depth': depth }}
                     aria-pressed={isActive}
                     onClick={() => selectCategory(id)}
                   >

@@ -7,6 +7,9 @@ import ModGallery from './pages/Mods/ModGallery.jsx'
 import ModDetail from './pages/Mods/ModDetail.jsx'
 import Store from './pages/Store/Store.jsx'
 import ProductDetail from './pages/Store/ProductDetail.jsx'
+import QuoteForm from './pages/Quotes/QuoteForm.jsx'
+import QuoteList from './pages/Admin/Quotes/QuoteList.jsx'
+import QuoteDetail from './pages/Admin/Quotes/QuoteDetail.jsx'
 
 // Admin Paneli Sayfaları
 import AdminLayout from './pages/Admin/AdminLayout.jsx'
@@ -23,6 +26,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         {/* Herkese Açık Sayfalar */}
         <Route path="/" element={<App />} />
+        <Route path="/teklif-al" element={<QuoteForm />} />
         <Route path="/modlar" element={<ModGallery />} />
         <Route path="/modlar/:slug" element={<ModDetail />} />
         <Route path="/magaza" element={<Store />} />
@@ -37,6 +41,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="icerikler/:id/duzenle" element={<ContentForm />} />
           <Route path="kategoriler" element={<CategoryManager />} />
           <Route path="ayarlar" element={<SettingsManager />} />
+          <Route path="talepler" element={<QuoteList />} />
+          <Route path="talepler/:id" element={<QuoteDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:smoke": "node scripts/smoke-test.js",
     "test:admin": "node scripts/test-admin-login.js",
+    "test:quotes": "node scripts/check-quotes-integration.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

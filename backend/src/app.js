@@ -23,6 +23,7 @@ import {
   contentsAdminRoutes,
 } from './modules/contents/contents.routes.js'
 import { mediaAdminRoutes } from './modules/media/media.routes.js'
+import { quotesPublicRoutes, quotesAdminRoutes } from './modules/quotes/quotes.routes.js'
 import { featuresAdminRoutes } from './modules/features/features.routes.js'
 import {
   settingsPublicRoutes,
@@ -105,11 +106,13 @@ app.use('/api/games', gamesRoutes)
 app.use('/api/categories', categoriesPublicRoutes)
 app.use('/api/contents', contentsPublicRoutes)
 app.use('/api/settings', settingsPublicRoutes)
+app.use('/api/quotes', quotesPublicRoutes)
 
 // Admin API
 app.use('/api/admin/auth', authRoutes)
 app.use('/api/admin/categories', categoriesAdminRoutes)
 app.use('/api/admin/contents', contentsAdminRoutes)
+app.use('/api/admin/quotes', quotesAdminRoutes)
 app.use('/api/admin', mediaAdminRoutes)
 app.use('/api/admin', featuresAdminRoutes)
 app.use('/api/admin/settings', settingsAdminRoutes)

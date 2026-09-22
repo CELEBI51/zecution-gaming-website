@@ -62,6 +62,8 @@ async function request(endpoint, options = {}) {
     credentials: 'include', // HttpOnly çerezlerin taşınması için
   })
 
+  if (response.ok && options.responseType === 'blob') return response.blob()
+
   let data = null
   const contentType = response.headers.get('content-type') || ''
   if (contentType.includes('application/json')) {
@@ -85,6 +87,27 @@ async function request(endpoint, options = {}) {
 }
 
 export const api = {
+  async createQuote(data, photos = []) {
+    const body = new FormData()
+    Object.entries(data).forEach(([key, value]) => body.append(key, value))
+    photos.forEach(file => body.append('photos', file))
+    const res = await request('/quotes', { method: 'POST', body })
+    return res.data
+  },
+  async getQuotePhoto(quoteId, photoId) {
+    return request(`/admin/quotes/${quoteId}/photos/${photoId}`, { responseType: 'blob' })
+  },
+  async getQuotes(params = {}) {
+    return request(`/admin/quotes?${new URLSearchParams(params)}`)
+  },
+  async getQuote(id) {
+    const res = await request(`/admin/quotes/${id}`)
+    return res.data
+  },
+  async updateQuote(id, data) {
+    const res = await request(`/admin/quotes/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
+    return res.data
+  },
   // ----------------- GENEL / KAMU API -----------------
   async getGames() {
     const res = await request('/games')
