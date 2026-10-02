@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { ShieldCheck, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import AuthModal from '../../components/AuthModal.jsx'
 
 export default function AuthPage({ initialMode = 'login' }) {

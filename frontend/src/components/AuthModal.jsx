@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Lock, Mail, User, AlertCircle, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react'
+import { X, Lock, Mail, User, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import './AuthModal.css'
 
@@ -109,11 +109,8 @@ export default function AuthModal() {
           <X size={18} />
         </button>
 
-        {/* Modal Başlık & Logo */}
+        {/* Modal Başlık */}
         <div className="auth-modal-header">
-          <div className="auth-modal-icon-badge">
-            <ShieldCheck size={26} />
-          </div>
           <h2>{modalMode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur'}</h2>
           <p>
             {modalMode === 'login'
@@ -225,7 +222,7 @@ export default function AuthModal() {
                 <input
                   id="reg-username"
                   type="text"
-                  placeholder="Örn: zecution_pilot"
+                  placeholder="Kullanıcı adı"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoComplete="username"
@@ -243,7 +240,7 @@ export default function AuthModal() {
                 <input
                   id="reg-email"
                   type="email"
-                  placeholder="ornek@domain.com"
+                  placeholder="E-posta adresi"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
