@@ -205,7 +205,7 @@ export default function ModSubmissionForm() {
             <div className="modsub-card-header">
               <h2>Mod Yayınlama İsteği</h2>
               <p className="modsub-hint">
-                * işaretli alanlar zorunludur. Dosyalarınızı Google Drive, Mega veya benzeri bir güvenilir bulut sağlayıcısına yükleyip linkini paylaşabilirsiniz.
+                * işaretli alanlar zorunludur. Dosyalarınızı ModsFire, Google Drive, Mega veya benzeri bir güvenilir sağlayıcıya yükleyip linkini paylaşabilirsiniz.
               </p>
             </div>
 
@@ -369,11 +369,11 @@ export default function ModSubmissionForm() {
                   type="url"
                   required
                   maxLength={2000}
-                  placeholder="https://drive.google.com/... veya https://mega.nz/..."
+                  placeholder="https://modsfire.com/... veya https://drive.google.com/..."
                   value={form.downloadUrl}
                   onChange={handleChange}
                 />
-                <small>Mod arşiv dosyanızın (.zip, .rar veya .7z) direkt veya bulut indirme linki.</small>
+                <small>Mod arşiv dosyanızın (.zip, .rar veya .7z) ModsFire, Google Drive veya bulut indirme linki.</small>
               </label>
 
               <label>
