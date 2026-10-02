@@ -42,8 +42,17 @@ app.use(
   })
 )
 
-// 2. CORS (Geliştirme ortamında tüm localhost portlarına, üretimde FRONTEND_ORIGIN'e izin ver)
-const allowedOrigins = [env.FRONTEND_ORIGIN].filter(Boolean)
+// 2. CORS (Geliştirme ortamında tüm localhost portlarına, üretimde FRONTEND_ORIGIN ve zecution alanlarına izin ver)
+const configuredOrigins = (env.FRONTEND_ORIGIN || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
+const allowedOrigins = [
+  'https://zecution.com',
+  'https://www.zecution.com',
+  ...configuredOrigins,
+]
 
 app.use(
   cors({
@@ -53,6 +62,8 @@ app.use(
       if (
         /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
         origin.endsWith('.vercel.app') ||
+        origin.endsWith('.zecution.com') ||
+        origin === 'https://zecution.com' ||
         allowedOrigins.includes(origin)
       ) {
         return callback(null, true)
