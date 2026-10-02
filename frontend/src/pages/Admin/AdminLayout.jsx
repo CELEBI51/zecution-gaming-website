@@ -19,9 +19,9 @@ export default function AdminLayout() {
   const [admin, setAdmin] = useState(null)
   const [loading, setLoading] = useState(true)
   const [counts, setCounts] = useState({
-    unreadCount: 0,
-    totalNewQuotes: 0,
-    totalReviews: 0,
+    unreadTotal: 0,
+    unreadQuotesCount: 0,
+    unreadReviewsCount: 0,
   })
   const navigate = useNavigate()
 
@@ -90,8 +90,8 @@ export default function AdminLayout() {
             <NavLink to="/admin/talepler" className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
               <MessageSquare size={19} />
               <span>Mod Talepleri</span>
-              {counts.totalNewQuotes > 0 && (
-                <span className="admin-nav__counter">{counts.totalNewQuotes}</span>
+              {counts.unreadQuotesCount > 0 && (
+                <span className="admin-nav__counter">{counts.unreadQuotesCount}</span>
               )}
             </NavLink>
             <NavLink
@@ -117,8 +117,8 @@ export default function AdminLayout() {
             >
               <Star size={19} />
               <span>Yorumlar & Puanlar</span>
-              {counts.totalReviews > 0 && (
-                <span className="admin-nav__counter admin-nav__counter--purple">{counts.totalReviews}</span>
+              {counts.unreadReviewsCount > 0 && (
+                <span className="admin-nav__counter admin-nav__counter--purple">{counts.unreadReviewsCount}</span>
               )}
             </NavLink>
 

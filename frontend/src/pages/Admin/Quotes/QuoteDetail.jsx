@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { api } from '../../../services/api.js'
 import { quoteTypes, quoteStatuses, formatQuoteDate } from '../../Quotes/quoteLabels.js'
+import { markQuoteAsRead } from '../../../utils/notifications.js'
 import './QuoteAdmin.css'
 import QuotePhotos from './QuotePhotos.jsx'
 
@@ -28,6 +29,11 @@ export default function QuoteDetail() {
     setError('')
     setNotice('')
     setQuote(null)
+
+    if (id) {
+      markQuoteAsRead(id)
+    }
+
     api
       .getQuote(id)
       .then((data) => {
@@ -35,6 +41,7 @@ export default function QuoteDetail() {
         setQuote(data)
         setStatus(data.status)
         setNotes(data.adminNotes)
+        markQuoteAsRead(id)
       })
       .catch((err) => {
         if (active) setError(err.message)

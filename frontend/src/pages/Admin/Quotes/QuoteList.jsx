@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { AlertCircle, Trash2, X } from 'lucide-react'
 import { api } from '../../../services/api.js'
 import { quoteTypes, quoteStatuses, formatQuoteDate } from '../../Quotes/quoteLabels.js'
+import { markQuoteAsRead } from '../../../utils/notifications.js'
 import './QuoteAdmin.css'
 
 export default function QuoteList() {
@@ -47,6 +48,7 @@ export default function QuoteList() {
     if (!deleteModalItem) return
     try {
       setDeleting(true)
+      markQuoteAsRead(deleteModalItem.id)
       await api.deleteQuote(deleteModalItem.id)
       setDeleteModalItem(null)
       setNotice('Mod talebi başarıyla silindi.')
@@ -167,7 +169,11 @@ export default function QuoteList() {
                         <td>{formatQuoteDate(item.createdAt)}</td>
                         <td>
                           <div className="quote-admin-actions-cell">
-                            <Link className="quote-admin-button" to={`/admin/talepler/${item.id}`}>
+                            <Link
+                              className="quote-admin-button"
+                              to={`/admin/talepler/${item.id}`}
+                              onClick={() => markQuoteAsRead(item.id)}
+                            >
                               İncele
                             </Link>
                             <button

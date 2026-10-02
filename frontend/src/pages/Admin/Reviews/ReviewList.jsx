@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
+import { markReviewAsRead } from '../../../utils/notifications.js'
 import './ReviewList.css'
 
 function formatDate(dateString) {
@@ -70,7 +71,11 @@ export default function ReviewList() {
         isApproved: selectedApproval,
       })
 
-      setReviews(res.items || [])
+      const items = res.items || []
+      setReviews(items)
+      if (items.length > 0) {
+        items.forEach((r) => markReviewAsRead(r.id))
+      }
       if (res.stats) {
         setStats(res.stats)
       }
@@ -112,6 +117,7 @@ export default function ReviewList() {
     if (!deleteModalItem) return
     try {
       setDeleting(true)
+      markReviewAsRead(deleteModalItem.id)
       await api.deleteContentReview(deleteModalItem.id)
       setReviews((prev) => prev.filter((r) => r.id !== deleteModalItem.id))
       setDeleteModalItem(null)

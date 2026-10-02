@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   Bell,
-  Check,
   CheckCheck,
-  ExternalLink,
   MessageSquare,
   Sparkles,
   Star,
@@ -14,6 +12,12 @@ import {
 } from 'lucide-react'
 import { api } from '../../../services/api.js'
 import { isSoundMuted, playNotificationSound, toggleSoundMuted } from '../../../utils/sound.js'
+import {
+  isNotificationRead,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+  subscribeToNotificationUpdates,
+} from '../../../utils/notifications.js'
 import './NotificationCenter.css'
 
 function formatRelativeTime(dateString) {
@@ -48,38 +52,38 @@ export default function NotificationCenter({ onCountsUpdate }) {
   const lastKnownIdRef = useRef(null)
   const navigate = useNavigate()
 
+  const computeAndBroadcastCounts = (items) => {
+    const unreadReviews = items.filter(
+      (n) => n.type === 'REVIEW' && !isNotificationRead(n.id)
+    )
+    const unreadQuotes = items.filter(
+      (n) => n.type === 'QUOTE' && !isNotificationRead(n.id)
+    )
+    const totalUnread = unreadReviews.length + unreadQuotes.length
+
+    setUnreadCount(totalUnread)
+
+    if (onCountsUpdate) {
+      onCountsUpdate({
+        unreadTotal: totalUnread,
+        unreadQuotesCount: unreadQuotes.length,
+        unreadReviewsCount: unreadReviews.length,
+      })
+    }
+  }
+
   const loadNotifications = async (isPolling = false) => {
     try {
-      const lastSeen = localStorage.getItem('zecution_last_seen_activity')
-      const res = await api.getAdminNotifications({ limit: 25 })
+      const res = await api.getAdminNotifications({ limit: 30 })
       const items = res.items || []
 
       setNotifications(items)
+      computeAndBroadcastCounts(items)
 
-      // Unread hesaplama
-      let count = 0
-      if (lastSeen) {
-        const lastSeenDate = new Date(lastSeen)
-        count = items.filter((item) => new Date(item.createdAt) > lastSeenDate).length
-      } else {
-        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-        count = items.filter((item) => new Date(item.createdAt) > oneDayAgo).length
-      }
-      setUnreadCount(count)
-
-      if (onCountsUpdate) {
-        onCountsUpdate({
-          unreadCount: count,
-          totalNewQuotes: res.totalNewQuotes || 0,
-          totalReviews: res.totalReviews || 0,
-        })
-      }
-
-      // Yeni aksiyon tespit edildiğinde Toast ve Ses tetikle!
+      // Yeni bir aksiyon tespit edildiğinde Toast ve Ses tetikle
       if (items.length > 0) {
         const newest = items[0]
         if (!isInitialMount.current && lastKnownIdRef.current && lastKnownIdRef.current !== newest.id) {
-          // Yeni bir aksiyon var!
           triggerToast(newest)
           playNotificationSound()
         }
@@ -105,6 +109,14 @@ export default function NotificationCenter({ onCountsUpdate }) {
   useEffect(() => {
     loadNotifications(false)
 
+    // Başka bir sayfada (örneğin talep detayında veya yorumlar sayfasında) bir öğe okundu olduğunda
+    const unsubscribe = subscribeToNotificationUpdates(() => {
+      setNotifications((currentItems) => {
+        computeAndBroadcastCounts(currentItems)
+        return [...currentItems]
+      })
+    })
+
     // 18 saniyede bir otomatik bildirim polling'i
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
@@ -121,6 +133,7 @@ export default function NotificationCenter({ onCountsUpdate }) {
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
+      unsubscribe()
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
@@ -144,12 +157,8 @@ export default function NotificationCenter({ onCountsUpdate }) {
   }, [isOpen])
 
   const handleMarkAllRead = () => {
-    const nowIso = new Date().toISOString()
-    localStorage.setItem('zecution_last_seen_activity', nowIso)
-    setUnreadCount(0)
-    if (onCountsUpdate) {
-      onCountsUpdate((prev) => ({ ...prev, unreadCount: 0 }))
-    }
+    markAllNotificationsAsRead(notifications)
+    computeAndBroadcastCounts(notifications)
   }
 
   const handleToggleSound = () => {
@@ -159,10 +168,8 @@ export default function NotificationCenter({ onCountsUpdate }) {
 
   const handleItemClick = (item) => {
     setIsOpen(false)
-    // Öğeyi okundu kabul etmek için tarih güncelle
-    const nowIso = new Date().toISOString()
-    localStorage.setItem('zecution_last_seen_activity', nowIso)
-    setUnreadCount((prev) => Math.max(0, prev - 1))
+    markNotificationAsRead(item.id)
+    computeAndBroadcastCounts(notifications)
     navigate(item.link)
   }
 
@@ -171,12 +178,6 @@ export default function NotificationCenter({ onCountsUpdate }) {
     if (filter === 'QUOTE') return item.type === 'QUOTE'
     return true
   })
-
-  const lastSeen = localStorage.getItem('zecution_last_seen_activity')
-  const isItemUnread = (item) => {
-    if (!lastSeen) return true
-    return new Date(item.createdAt) > new Date(lastSeen)
-  }
 
   return (
     <div className="notification-center" ref={dropdownRef}>
@@ -223,7 +224,7 @@ export default function NotificationCenter({ onCountsUpdate }) {
                   title="Tümünü Okundu İşaretle"
                 >
                   <CheckCheck size={13} style={{ marginRight: '0.2rem', verticalAlign: 'middle' }} />
-                  Okundu Say
+                  Tümünü Okundu Say
                 </button>
               )}
             </div>
@@ -263,7 +264,7 @@ export default function NotificationCenter({ onCountsUpdate }) {
               </div>
             ) : (
               filteredNotifications.map((item) => {
-                const unread = isItemUnread(item)
+                const unread = !isNotificationRead(item.id)
                 return (
                   <div
                     key={item.id}
@@ -304,7 +305,7 @@ export default function NotificationCenter({ onCountsUpdate }) {
                         <span
                           style={{
                             fontSize: '0.7rem',
-                            color: '#a855f7',
+                            color: unread ? '#c084fc' : '#94a3b8',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '0.2rem',
@@ -312,7 +313,7 @@ export default function NotificationCenter({ onCountsUpdate }) {
                             fontWeight: 600,
                           }}
                         >
-                          Görüntüle →
+                          {unread ? 'Yeni · İncele →' : 'Görüntüle →'}
                         </span>
                       </div>
                     </div>
