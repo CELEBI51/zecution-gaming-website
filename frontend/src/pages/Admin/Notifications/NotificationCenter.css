@@ -68,7 +68,8 @@
 .notification-dropdown {
   position: absolute;
   top: calc(100% + 0.65rem);
-  right: 0;
+  left: 0;
+  right: auto;
   width: 24rem;
   max-width: 90vw;
   background: #111114;
@@ -81,6 +82,15 @@
   flex-direction: column;
   overflow: hidden;
   animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 900px) {
+  .notification-dropdown {
+    left: auto;
+    right: 0;
+    width: 21.5rem;
+    max-width: 92vw;
+  }
 }
 
 @keyframes dropdownFadeIn {
@@ -191,6 +201,25 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.35) transparent;
+}
+
+.notification-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.35);
+  border-radius: 999px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.65);
 }
 
 .notification-item {
