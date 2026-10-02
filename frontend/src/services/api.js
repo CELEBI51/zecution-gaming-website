@@ -106,6 +106,9 @@ export const api = {
     const res = await request(`/admin/quotes/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
     return res.data
   },
+  async deleteQuote(id) {
+    return request(`/admin/quotes/${id}`, { method: 'DELETE' })
+  },
   // ----------------- GENEL / KAMU API -----------------
   async getGames() {
     const res = await request('/games')

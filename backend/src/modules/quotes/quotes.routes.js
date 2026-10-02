@@ -8,12 +8,33 @@ import { uploadQuotePhotos } from './quotes.photos.js'
 import { z } from 'zod'
 
 export const quotesPublicRoutes = Router()
-quotesPublicRoutes.post('/', rateLimit({
-  windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false,
-  message: { success: false, error: { message: 'Talep gönderim sınırına ulaştınız. Lütfen bir saat sonra tekrar deneyiniz.' } },
-}), uploadQuotePhotos, validate({ body: createQuoteSchema }), async (req, res, next) => {
-  try { res.status(201).json({ success: true, data: await service.createQuote(req.body, req.files) }) } catch (error) { next(error) }
-})
+quotesPublicRoutes.post(
+  '/',
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 2,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { message: 'Çok sık talep gönderiyorsunuz. Lütfen biraz bekleyip tekrar deneyiniz.' } },
+  }),
+  rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { message: 'Talep gönderim sınırına ulaştınız. Lütfen bir saat sonra tekrar deneyiniz.' } },
+  }),
+  uploadQuotePhotos,
+  validate({ body: createQuoteSchema }),
+  async (req, res, next) => {
+    try {
+      const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
+      res.status(201).json({ success: true, data: await service.createQuote(req.body, req.files, clientIp) })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 export const quotesAdminRoutes = Router()
 quotesAdminRoutes.use(requireAdmin)
@@ -32,4 +53,12 @@ quotesAdminRoutes.get('/:id', validate({ params: quoteIdSchema }), async (req, r
 })
 quotesAdminRoutes.patch('/:id', validate({ params: quoteIdSchema, body: updateQuoteSchema }), async (req, res, next) => {
   try { res.json({ success: true, data: await service.updateQuote(req.params.id, req.body) }) } catch (error) { next(error) }
+})
+quotesAdminRoutes.delete('/:id', validate({ params: quoteIdSchema }), async (req, res, next) => {
+  try {
+    await service.deleteQuote(req.params.id)
+    res.json({ success: true, message: 'Mod talebi silindi' })
+  } catch (error) {
+    next(error)
+  }
 })
