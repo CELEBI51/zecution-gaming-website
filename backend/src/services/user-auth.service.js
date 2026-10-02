@@ -6,6 +6,7 @@ import { prisma } from '../config/database.js'
 import { generateRandomToken, hashToken } from '../utils/crypto.js'
 import { BadRequestError, ForbiddenError, UnauthorizedError, NotFoundError } from '../utils/api-error.js'
 import { UPLOAD_ROOT, deleteFileSafe } from './storage.service.js'
+import { isCloudinaryConfigured, uploadBufferToCloudinary } from './cloudinary.service.js'
 
 const ARGON2_OPTIONS = {
   type: argon2.argon2id,
@@ -315,12 +316,6 @@ export async function saveUserAvatar(userId, fileBuffer) {
     throw new NotFoundError('Kullanıcı bulunamadı.')
   }
 
-  const avatarsDir = path.join(UPLOAD_ROOT, 'avatars')
-  await fs.mkdir(avatarsDir, { recursive: true })
-
-  const filename = `${userId}-${Date.now()}.webp`
-  const filePath = path.join(avatarsDir, filename)
-
   try {
     const optimizedBuffer = await sharp(fileBuffer, { limitInputPixels: 40000000, failOn: 'warning' })
       .rotate()
@@ -328,14 +323,28 @@ export async function saveUserAvatar(userId, fileBuffer) {
       .webp({ quality: 85 })
       .toBuffer()
 
-    await fs.writeFile(filePath, optimizedBuffer)
+    let newAvatarUrl
+
+    if (isCloudinaryConfigured()) {
+      const uploadResult = await uploadBufferToCloudinary(optimizedBuffer, {
+        folder: 'zecution/avatars',
+        resourceType: 'image',
+      })
+      newAvatarUrl = uploadResult.filePath
+    } else {
+      const avatarsDir = path.join(UPLOAD_ROOT, 'avatars')
+      await fs.mkdir(avatarsDir, { recursive: true })
+      const filename = `${userId}-${Date.now()}.webp`
+      const filePath = path.join(avatarsDir, filename)
+      await fs.writeFile(filePath, optimizedBuffer)
+      newAvatarUrl = `/uploads/avatars/${filename}`
+    }
 
     // Eski yerel avatar varsa güvenle sil
     if (user.avatarUrl && user.avatarUrl.startsWith('/uploads/avatars/')) {
       await deleteFileSafe(user.avatarUrl)
     }
 
-    const newAvatarUrl = `/uploads/avatars/${filename}`
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { avatarUrl: newAvatarUrl },

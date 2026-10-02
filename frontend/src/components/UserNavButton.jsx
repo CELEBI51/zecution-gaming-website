@@ -62,7 +62,16 @@ export default function UserNavButton() {
         >
           <div className="user-nav-avatar">
             {user.avatarUrl ? (
-              <img src={getMediaUrl(user.avatarUrl)} alt={user.username} />
+              <img
+                src={getMediaUrl(user.avatarUrl)}
+                alt=""
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  if (e.currentTarget.parentElement) {
+                    e.currentTarget.parentElement.innerText = user.username.charAt(0).toUpperCase()
+                  }
+                }}
+              />
             ) : (
               user.username.charAt(0).toUpperCase()
             )}
@@ -76,7 +85,16 @@ export default function UserNavButton() {
             <div className="user-nav-menu-header">
               <div className="user-nav-menu-avatar">
                 {user.avatarUrl ? (
-                  <img src={getMediaUrl(user.avatarUrl)} alt={user.username} />
+                  <img
+                    src={getMediaUrl(user.avatarUrl)}
+                    alt=""
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                      if (e.currentTarget.parentElement) {
+                        e.currentTarget.parentElement.innerText = user.username.charAt(0).toUpperCase()
+                      }
+                    }}
+                  />
                 ) : (
                   user.username.charAt(0).toUpperCase()
                 )}

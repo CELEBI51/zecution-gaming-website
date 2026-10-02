@@ -397,9 +397,12 @@ export default function ReviewList() {
                         {userAvatar ? (
                           <img
                             src={userAvatar}
-                            alt={review.authorName}
+                            alt=""
                             onError={(e) => {
                               e.currentTarget.style.display = 'none'
+                              if (e.currentTarget.parentElement) {
+                                e.currentTarget.parentElement.innerText = review.authorName?.charAt(0)?.toUpperCase() || 'U'
+                              }
                             }}
                           />
                         ) : (

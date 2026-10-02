@@ -261,7 +261,16 @@ export default function ContentReviews({ slug, contentTitle = 'İçerik' }) {
               <div className="review-user-badge-row">
                 <div className="review-user-avatar">
                   {user.avatarUrl ? (
-                    <img src={getMediaUrl(user.avatarUrl)} alt={user.username} />
+                    <img
+                      src={getMediaUrl(user.avatarUrl)}
+                      alt=""
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        if (e.currentTarget.parentElement) {
+                          e.currentTarget.parentElement.innerText = user.username.charAt(0).toUpperCase()
+                        }
+                      }}
+                    />
                   ) : (
                     user.username.charAt(0).toUpperCase()
                   )}
@@ -377,7 +386,16 @@ export default function ContentReviews({ slug, contentTitle = 'İçerik' }) {
                     <div className="review-author-info">
                       <div className="review-avatar">
                         {avatarUrl ? (
-                          <img src={getMediaUrl(avatarUrl)} alt={displayName} />
+                          <img
+                            src={getMediaUrl(avatarUrl)}
+                            alt=""
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                              if (e.currentTarget.parentElement) {
+                                e.currentTarget.parentElement.innerText = displayName[0].toUpperCase()
+                              }
+                            }}
+                          />
                         ) : (
                           displayName[0].toUpperCase()
                         )}
