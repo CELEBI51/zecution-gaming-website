@@ -13,10 +13,12 @@ import {
   RotateCw,
   Search,
   Shield,
+  ShieldCheck,
   Star,
   Trash2,
   User,
   X,
+  Gamepad2,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
 import { isReviewRead, markReviewAsRead, subscribeToNotificationUpdates } from '../../../utils/notifications.js'
@@ -369,15 +371,17 @@ export default function ReviewList() {
         ) : (
           <div className="review-list-wrap">
             {reviews.map((review) => {
-              const coverUrl = getMediaUrl(
-                review.content?.coverImage?.filePath || review.content?.coverImage?.thumbnailPath
-              )
+              const coverMedia = review.content?.media?.[0]
+              const rawCover = coverMedia?.thumbnailPath || coverMedia?.filePath || review.content?.coverImage?.filePath
+              const coverUrl = rawCover ? getMediaUrl(rawCover) : null
               const contentPath =
                 review.content?.section === 'STORE'
                   ? `/magaza/${review.content.slug}`
                   : `/modlar/${review.content?.slug}`
 
               const isUnread = !isReviewRead(review.id)
+              const userAvatar = review.user?.avatarUrl ? getMediaUrl(review.user.avatarUrl) : null
+
               return (
                 <div
                   key={review.id}
@@ -390,7 +394,17 @@ export default function ReviewList() {
                   <div className="review-card__header">
                     <div className="review-author-box">
                       <div className="review-author-avatar">
-                        {review.authorName?.charAt(0)?.toUpperCase() || 'U'}
+                        {userAvatar ? (
+                          <img
+                            src={userAvatar}
+                            alt={review.authorName}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                            }}
+                          />
+                        ) : (
+                          review.authorName?.charAt(0)?.toUpperCase() || 'U'
+                        )}
                       </div>
                       <div>
                         <div className="review-author-name">
@@ -404,19 +418,39 @@ export default function ReviewList() {
                               YENİ
                             </span>
                           )}
-                          <span
-                            style={{
-                              fontSize: '0.65rem',
-                              fontWeight: 700,
-                              padding: '0.1rem 0.4rem',
-                              borderRadius: '999px',
-                              background: 'rgba(168, 85, 247, 0.15)',
-                              color: '#d8b4fe',
-                              border: '1px solid rgba(168, 85, 247, 0.3)',
-                            }}
-                          >
-                            Ziyaretçi
-                          </span>
+                          {review.user ? (
+                            <span
+                              style={{
+                                fontSize: '0.65rem',
+                                fontWeight: 700,
+                                padding: '0.1rem 0.45rem',
+                                borderRadius: '999px',
+                                background: 'rgba(34, 197, 94, 0.18)',
+                                color: '#86efac',
+                                border: '1px solid rgba(34, 197, 94, 0.35)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                              }}
+                              title="Kayıtlı Üye Değerlendirmesi"
+                            >
+                              <ShieldCheck size={11} /> Üye
+                            </span>
+                          ) : (
+                            <span
+                              style={{
+                                fontSize: '0.65rem',
+                                fontWeight: 700,
+                                padding: '0.1rem 0.45rem',
+                                borderRadius: '999px',
+                                background: 'rgba(168, 85, 247, 0.15)',
+                                color: '#d8b4fe',
+                                border: '1px solid rgba(168, 85, 247, 0.3)',
+                              }}
+                            >
+                              Ziyaretçi
+                            </span>
+                          )}
                         </div>
                         <div className="review-author-meta">
                           <span>{formatDate(review.createdAt)}</span>
@@ -440,7 +474,20 @@ export default function ReviewList() {
                   {/* İlişkili İçerik Kutusu */}
                   {review.content && (
                     <div className="review-content-ref">
-                      <img src={coverUrl} alt="" className="review-content-thumb" />
+                      {coverUrl ? (
+                        <img
+                          src={coverUrl}
+                          alt=""
+                          className="review-content-thumb"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                          }}
+                        />
+                      ) : (
+                        <div className="review-content-thumb-placeholder">
+                          <Gamepad2 size={16} />
+                        </div>
+                      )}
                       <div className="review-content-details">
                         <div className="review-content-title">
                           {review.content.title}

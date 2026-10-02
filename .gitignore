@@ -19,6 +19,8 @@ backend/src/generated/
 siteframes.zip
 # uploads/
 # backend/uploads/
+backend/uploads/avatars/*
+!backend/uploads/avatars/.gitkeep
 
 # Environment & local files
 .env
