@@ -10,7 +10,6 @@ import {
   FileText,
   User,
   Layers,
-  Image as ImageIcon,
   ShieldCheck,
 } from 'lucide-react'
 import { api } from '../../services/api.js'
@@ -49,33 +48,6 @@ export default function ModSubmissionForm() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [receipt, setReceipt] = useState(null)
-  const [photos, setPhotos] = useState([])
-  const [previews, setPreviews] = useState([])
-  const [photoError, setPhotoError] = useState('')
-
-  useEffect(() => {
-    const urls = photos.map((file) => URL.createObjectURL(file))
-    setPreviews(urls)
-    return () => urls.forEach((url) => URL.revokeObjectURL(url))
-  }, [photos])
-
-  function handlePhotoAdd(event) {
-    const files = Array.from(event.target.files || [])
-    event.target.value = ''
-    setPhotoError('')
-
-    if (photos.length + files.length > 5) {
-      return setPhotoError('En fazla 5 fotoğraf ekleyebilirsiniz.')
-    }
-    if (files.some((file) => file.size > 5 * 1024 * 1024)) {
-      return setPhotoError('Her fotoğraf en fazla 5 MB olabilir.')
-    }
-    if (files.some((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type))) {
-      return setPhotoError('Yalnızca JPG, PNG ve WebP fotoğrafları kabul edilir.')
-    }
-
-    setPhotos((prev) => [...prev, ...files])
-  }
 
   const submissionId = useRef(null)
   const inFlight = useRef(false)
@@ -115,9 +87,8 @@ export default function ModSubmissionForm() {
         hasPermission: String(form.hasPermission),
       }
 
-      const result = await api.createModSubmission(payload, photos)
+      const result = await api.createModSubmission(payload, [])
       setReceipt(result)
-      setPhotos([])
       requestAnimationFrame(() => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       })
@@ -446,51 +417,7 @@ export default function ModSubmissionForm() {
                 <small>En az 20 karakter. Ne kadar detay verirseniz modunuz o kadar öne çıkar.</small>
               </label>
 
-              {/* 3. EKRAN GÖRÜNTÜLERİ */}
-              <div className="modsub-section-title">
-                <ImageIcon size={16} /> Önizleme Görselleri
-              </div>
-
-              <div className="modsub-photo-field">
-                <label htmlFor="sub-photos" style={{ marginBottom: '0.5rem' }}>
-                  Ekran Görüntüleri (İsteğe Bağlı) · {photos.length}/5
-                </label>
-                <input
-                  id="sub-photos"
-                  type="file"
-                  multiple
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handlePhotoAdd}
-                  disabled={photos.length >= 5 || saving}
-                />
-                <p className="modsub-hint" style={{ marginTop: '0.45rem' }}>
-                  En fazla 5 adet ekran görüntüsü ekleyebilirsiniz. JPG, PNG veya WebP; dosya başı en çok 5 MB.
-                </p>
-
-                {photoError && <p className="modsub-error" style={{ marginTop: '0.75rem' }}>{photoError}</p>}
-
-                {photos.length > 0 && (
-                  <div className="modsub-photo-grid">
-                    {photos.map((file, idx) => (
-                      <div className="modsub-photo-preview" key={idx}>
-                        {previews[idx] && <img src={previews[idx]} alt={file.name} />}
-                        <small title={file.name}>{file.name}</small>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPhotos((prev) => prev.filter((_, i) => i !== idx))
-                            setPhotoError('')
-                          }}
-                        >
-                          Kaldır
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 4. TELİF VE ONAY KUTUSU */}
+              {/* 3. TELİF VE ONAY KUTUSU */}
               <label className="modsub-checkbox-label">
                 <input
                   type="checkbox"
