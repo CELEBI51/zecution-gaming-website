@@ -495,4 +495,22 @@ export const api = {
       return null
     }
   },
+
+  async updateUserProfile({ username, avatarUrl }) {
+    const res = await request('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ username, avatarUrl }),
+    })
+    return res
+  },
+
+  async uploadUserAvatar(file) {
+    const body = new FormData()
+    body.append('avatar', file)
+    const res = await request('/auth/avatar', {
+      method: 'POST',
+      body,
+    })
+    return res
+  },
 }

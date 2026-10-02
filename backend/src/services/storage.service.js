@@ -4,7 +4,7 @@ import { env } from '../config/env.js'
 
 export const UPLOAD_ROOT = path.resolve(process.cwd(), env.UPLOAD_DIR)
 
-const SUB_DIRS = ['original', 'large', 'thumbnail', 'videos']
+const SUB_DIRS = ['original', 'large', 'thumbnail', 'videos', 'avatars']
 
 /**
  * Yükleme dizinlerinin varlığını garanti eder.

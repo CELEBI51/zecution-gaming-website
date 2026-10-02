@@ -1,7 +1,11 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import sharp from 'sharp'
 import argon2 from 'argon2'
 import { prisma } from '../config/database.js'
 import { generateRandomToken, hashToken } from '../utils/crypto.js'
-import { BadRequestError, ForbiddenError, UnauthorizedError } from '../utils/api-error.js'
+import { BadRequestError, ForbiddenError, UnauthorizedError, NotFoundError } from '../utils/api-error.js'
+import { UPLOAD_ROOT, deleteFileSafe } from './storage.service.js'
 
 const ARGON2_OPTIONS = {
   type: argon2.argon2id,
@@ -237,5 +241,109 @@ export async function getUserFromToken(sessionToken) {
   return {
     user: sanitizeUser(session.user),
     session,
+  }
+}
+
+/**
+ * Kullanıcı profilini (kullanıcı adı ve/veya avatar URL) günceller.
+ */
+export async function updateUserProfile(userId, { username, avatarUrl }) {
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    throw new NotFoundError('Kullanıcı bulunamadı.')
+  }
+
+  const dataToUpdate = {}
+
+  if (username !== undefined) {
+    const cleanUsername = String(username || '').trim()
+    if (!cleanUsername || cleanUsername.length < 3 || cleanUsername.length > 30) {
+      throw new BadRequestError('Kullanıcı adı 3 ile 30 karakter arasında olmalıdır.')
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_.-]+$/
+    if (!usernameRegex.test(cleanUsername)) {
+      throw new BadRequestError('Kullanıcı adı yalnızca harf, rakam, nokta, tire ve alt çizgi içerebilir.')
+    }
+
+    if (RESERVED_USERNAMES.includes(cleanUsername.toLowerCase())) {
+      throw new BadRequestError('Bu kullanıcı adı sistem tarafından ayrılmıştır, kullanılamaz.')
+    }
+
+    // Başka bir üye bu kullanıcı adını almış mı?
+    if (cleanUsername.toLowerCase() !== user.username.toLowerCase()) {
+      const taken = await prisma.user.findFirst({
+        where: {
+          id: { not: userId },
+          username: { equals: cleanUsername, mode: 'insensitive' },
+        },
+      })
+      if (taken) {
+        throw new BadRequestError('Bu kullanıcı adı başka bir üye tarafından kullanılıyor.')
+      }
+    }
+
+    dataToUpdate.username = cleanUsername
+  }
+
+  if (avatarUrl !== undefined) {
+    dataToUpdate.avatarUrl = avatarUrl ? String(avatarUrl).trim() : null
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: dataToUpdate,
+  })
+
+  // Kullanıcı adı değiştiyse, varsa geçmiş yorumlarındaki yazar ismini de senkronize et
+  if (dataToUpdate.username && dataToUpdate.username !== user.username) {
+    await prisma.contentReview.updateMany({
+      where: { userId },
+      data: { authorName: dataToUpdate.username },
+    })
+  }
+
+  return sanitizeUser(updated)
+}
+
+/**
+ * Kullanıcının yüklediği profil fotoğrafını işler ve kaydeder.
+ */
+export async function saveUserAvatar(userId, fileBuffer) {
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    throw new NotFoundError('Kullanıcı bulunamadı.')
+  }
+
+  const avatarsDir = path.join(UPLOAD_ROOT, 'avatars')
+  await fs.mkdir(avatarsDir, { recursive: true })
+
+  const filename = `${userId}-${Date.now()}.webp`
+  const filePath = path.join(avatarsDir, filename)
+
+  try {
+    const optimizedBuffer = await sharp(fileBuffer, { limitInputPixels: 40000000, failOn: 'warning' })
+      .rotate()
+      .resize(256, 256, { fit: 'cover', position: 'center' })
+      .webp({ quality: 85 })
+      .toBuffer()
+
+    await fs.writeFile(filePath, optimizedBuffer)
+
+    // Eski yerel avatar varsa güvenle sil
+    if (user.avatarUrl && user.avatarUrl.startsWith('/uploads/avatars/')) {
+      await deleteFileSafe(user.avatarUrl)
+    }
+
+    const newAvatarUrl = `/uploads/avatars/${filename}`
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: newAvatarUrl },
+    })
+
+    return sanitizeUser(updated)
+  } catch (err) {
+    if (err instanceof BadRequestError) throw err
+    throw new BadRequestError('Profil fotoğrafı işlenemedi. Lütfen geçerli bir resim dosyası seçin.')
   }
 }

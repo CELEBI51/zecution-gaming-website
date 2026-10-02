@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   UserCheck,
 } from 'lucide-react'
-import { api } from '../services/api.js'
+import { api, getMediaUrl } from '../services/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import './ContentReviews.css'
 
@@ -261,7 +261,7 @@ export default function ContentReviews({ slug, contentTitle = 'İçerik' }) {
               <div className="review-user-badge-row">
                 <div className="review-user-avatar">
                   {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.username} />
+                    <img src={getMediaUrl(user.avatarUrl)} alt={user.username} />
                   ) : (
                     user.username.charAt(0).toUpperCase()
                   )}
@@ -377,7 +377,7 @@ export default function ContentReviews({ slug, contentTitle = 'İçerik' }) {
                     <div className="review-author-info">
                       <div className="review-avatar">
                         {avatarUrl ? (
-                          <img src={avatarUrl} alt={displayName} />
+                          <img src={getMediaUrl(avatarUrl)} alt={displayName} />
                         ) : (
                           displayName[0].toUpperCase()
                         )}

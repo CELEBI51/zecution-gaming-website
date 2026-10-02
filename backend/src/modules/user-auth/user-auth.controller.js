@@ -3,7 +3,10 @@ import {
   registerUser,
   loginUser,
   logoutUser,
+  updateUserProfile,
+  saveUserAvatar,
 } from '../../services/user-auth.service.js'
+import { BadRequestError } from '../../utils/api-error.js'
 
 const COOKIE_NAME = 'usid'
 
@@ -104,4 +107,36 @@ export async function getMe(req, res) {
       user: req.user,
     },
   })
+}
+
+export async function updateProfile(req, res, next) {
+  try {
+    const { username, avatarUrl } = req.body
+    const updatedUser = await updateUserProfile(req.user.id, { username, avatarUrl })
+    res.json({
+      success: true,
+      data: {
+        user: updatedUser,
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function uploadAvatar(req, res, next) {
+  try {
+    if (!req.file) {
+      throw new BadRequestError('Lütfen yüklenecek bir fotoğraf seçiniz.')
+    }
+    const updatedUser = await saveUserAvatar(req.user.id, req.file.buffer)
+    res.json({
+      success: true,
+      data: {
+        user: updatedUser,
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
 }

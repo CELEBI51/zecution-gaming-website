@@ -71,6 +71,22 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const updateProfile = async ({ username, avatarUrl }) => {
+    const res = await api.updateUserProfile({ username, avatarUrl })
+    if (res?.data?.user) {
+      setUser(res.data.user)
+    }
+    return res?.data?.user
+  }
+
+  const uploadAvatar = async (file) => {
+    const res = await api.uploadUserAvatar(file)
+    if (res?.data?.user) {
+      setUser(res.data.user)
+    }
+    return res?.data?.user
+  }
+
   const openAuthModal = (mode = 'login') => {
     setModalMode(mode)
     setIsModalOpen(true)
@@ -91,6 +107,8 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
+        updateProfile,
+        uploadAvatar,
         openAuthModal,
         closeAuthModal,
       }}
