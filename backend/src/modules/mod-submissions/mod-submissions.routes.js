@@ -38,15 +38,20 @@ modSubmissionsPublicRoutes.post(
       },
     },
   }),
-  optionalUser,
+  requireUser,
   uploadSubmissionPhotos,
   validate({ body: createModSubmissionSchema }),
   async (req, res, next) => {
     try {
       const clientIp =
         req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
-      const userId = req.user?.id || null
-      const result = await service.createModSubmission(req.body, req.files, clientIp, userId)
+      const userId = req.user.id
+      const submissionData = {
+        ...req.body,
+        email: req.user.email,
+        producerName: req.body.producerName?.trim() || req.user.username,
+      }
+      const result = await service.createModSubmission(submissionData, req.files, clientIp, userId)
       res.status(201).json({ success: true, data: result })
     } catch (error) {
       next(error)

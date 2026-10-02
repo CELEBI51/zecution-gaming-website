@@ -14,12 +14,14 @@ export const createModSubmissionSchema = z.object({
     .string()
     .trim()
     .min(2, 'Yapımcı / ekip adı en az 2 karakter olmalıdır')
-    .max(120, 'Yapımcı adı en fazla 120 karakter olabilir'),
+    .max(120, 'Yapımcı adı en fazla 120 karakter olabilir')
+    .optional(),
   email: z
     .string()
     .trim()
     .email('Geçerli bir e-posta adresi giriniz')
-    .max(254, 'E-posta çok uzun'),
+    .max(254, 'E-posta çok uzun')
+    .optional(),
   discord: z
     .string()
     .trim()

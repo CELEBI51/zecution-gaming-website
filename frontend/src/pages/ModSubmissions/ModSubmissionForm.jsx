@@ -11,17 +11,17 @@ import {
   User,
   Layers,
   Image as ImageIcon,
+  ShieldCheck,
 } from 'lucide-react'
 import { api } from '../../services/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import './ModSubmissionForm.css'
 
 export default function ModSubmissionForm() {
-  const { user } = useAuth()
+  const { user, openAuthModal } = useAuth()
 
   const [form, setForm] = useState({
-    producerName: '',
-    email: '',
+    producerName: user?.username || '',
     discord: '',
     title: '',
     game: 'Assetto Corsa',
@@ -38,14 +38,13 @@ export default function ModSubmissionForm() {
 
   // Kullanıcı oturum açtıysa otomatik doldur
   useEffect(() => {
-    if (user) {
+    if (user && !form.producerName) {
       setForm((prev) => ({
         ...prev,
-        producerName: prev.producerName || user.username || '',
-        email: prev.email || user.email || '',
+        producerName: user.username || '',
       }))
     }
-  }, [user])
+  }, [user, form.producerName])
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -93,6 +92,11 @@ export default function ModSubmissionForm() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (inFlight.current) return
+
+    if (!user) {
+      openAuthModal('login')
+      return
+    }
 
     if (!form.hasPermission) {
       setError('Lütfen modun telif/dağıtım izinlerine sahip olduğunuzu onaylayınız.')
@@ -232,45 +236,84 @@ export default function ModSubmissionForm() {
                 <User size={16} /> Yapımcı & İletişim Bilgileri
               </div>
 
-              <div className="modsub-grid">
-                <label>
-                  Yapımcı / Ekip Adı *
-                  <input
-                    name="producerName"
-                    required
-                    minLength={2}
-                    maxLength={120}
-                    placeholder="Adınız veya modding ekibiniz"
-                    value={form.producerName}
-                    onChange={handleChange}
-                  />
-                </label>
+              {!user ? (
+                <div className="modsub-auth-notice">
+                  <div className="modsub-auth-notice-content">
+                    <div className="modsub-auth-notice-icon">
+                      <User size={22} />
+                    </div>
+                    <div className="modsub-auth-notice-body">
+                      <h4>Üye Girişi Gereklidir</h4>
+                      <p>
+                        Mod yayınlama başvurusu göndermek için üye girişi yapmalısınız. İletişim e-postanız ve başvuru takibiniz üyelik hesabınızla eşleştirilecektir.
+                      </p>
+                      <div className="modsub-auth-notice-actions">
+                        <button
+                          type="button"
+                          className="modsub-auth-btn modsub-auth-btn--primary"
+                          onClick={() => openAuthModal('login')}
+                        >
+                          Giriş Yap
+                        </button>
+                        <button
+                          type="button"
+                          className="modsub-auth-btn modsub-auth-btn--secondary"
+                          onClick={() => openAuthModal('register')}
+                        >
+                          Kayıt Ol
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="modsub-user-card">
+                    <div className="modsub-user-card-icon">
+                      <ShieldCheck size={24} />
+                    </div>
+                    <div className="modsub-user-card-body">
+                      <div className="modsub-user-card-title">
+                        <strong>Giriş Yapılan Üye Hesabı</strong>
+                        <span className="modsub-user-badge">Doğrulanmış Üyelik</span>
+                      </div>
+                      <div className="modsub-user-card-email">
+                        <span>Kullanıcı Adı: <strong>@{user.username}</strong></span>
+                        <span style={{ opacity: 0.4 }}>•</span>
+                        <span>İletişim E-postası: <strong>{user.email}</strong></span>
+                      </div>
+                    </div>
+                  </div>
 
-                <label>
-                  E-posta Adresi *
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    maxLength={254}
-                    placeholder="İletişim e-postanız"
-                    value={form.email}
-                    onChange={handleChange}
-                  />
-                </label>
-              </div>
+                  <div className="modsub-grid">
+                    <label>
+                      Yapımcı / Ekip Adı *
+                      <input
+                        name="producerName"
+                        required
+                        minLength={2}
+                        maxLength={120}
+                        placeholder={user.username || 'Adınız veya modding ekibiniz'}
+                        value={form.producerName}
+                        onChange={handleChange}
+                      />
+                      <small>Sitede modun yapımcısı olarak bu isim görünecektir.</small>
+                    </label>
 
-              <label>
-                Discord Kullanıcı Adı / Sunucu Linki <span>(isteğe bağlı)</span>
-                <input
-                  name="discord"
-                  maxLength={100}
-                  placeholder="Örn: zecution_creator veya discord.gg/..."
-                  value={form.discord}
-                  onChange={handleChange}
-                />
-                <small>Hızlı iletişim ve destek için ekleyebilirsiniz.</small>
-              </label>
+                    <label>
+                      Discord Kullanıcı Adı / Sunucu Linki <span>(isteğe bağlı)</span>
+                      <input
+                        name="discord"
+                        maxLength={100}
+                        placeholder=""
+                        value={form.discord}
+                        onChange={handleChange}
+                      />
+                      <small>Hızlı iletişim ve destek için ekleyebilirsiniz.</small>
+                    </label>
+                  </div>
+                </>
+              )}
 
               {/* 2. MOD DETAYLARI */}
               <div className="modsub-section-title">
@@ -462,19 +505,30 @@ export default function ModSubmissionForm() {
               </label>
 
               {/* GÖNDER BUTONU */}
-              <button type="submit" className="modsub-button" disabled={saving}>
-                {saving ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Başvuru Gönderiliyor...</span>
-                  </>
-                ) : (
-                  <>
-                    <UploadCloud size={19} />
-                    <span>Mod Yayınlama Başvurusunu Gönder</span>
-                  </>
-                )}
-              </button>
+              {!user ? (
+                <button
+                  type="button"
+                  className="modsub-button"
+                  onClick={() => openAuthModal('login')}
+                >
+                  <User size={19} />
+                  <span>Başvuru Yapmak İçin Giriş Yapın</span>
+                </button>
+              ) : (
+                <button type="submit" className="modsub-button" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>Başvuru Gönderiliyor...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud size={19} />
+                      <span>Mod Yayınlama Başvurusunu Gönder</span>
+                    </>
+                  )}
+                </button>
+              )}
             </fieldset>
           </form>
         )}
