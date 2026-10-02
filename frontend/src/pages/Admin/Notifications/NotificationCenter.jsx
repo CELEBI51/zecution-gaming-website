@@ -6,6 +6,7 @@ import {
   MessageSquare,
   Sparkles,
   Star,
+  UploadCloud,
   Volume2,
   VolumeX,
   X,
@@ -59,7 +60,10 @@ export default function NotificationCenter({ onCountsUpdate }) {
     const unreadQuotes = items.filter(
       (n) => n.type === 'QUOTE' && !isNotificationRead(n.id)
     )
-    const totalUnread = unreadReviews.length + unreadQuotes.length
+    const unreadSubmissions = items.filter(
+      (n) => n.type === 'MOD_SUBMISSION' && !isNotificationRead(n.id)
+    )
+    const totalUnread = unreadReviews.length + unreadQuotes.length + unreadSubmissions.length
 
     setUnreadCount(totalUnread)
 
@@ -68,6 +72,7 @@ export default function NotificationCenter({ onCountsUpdate }) {
         unreadTotal: totalUnread,
         unreadQuotesCount: unreadQuotes.length,
         unreadReviewsCount: unreadReviews.length,
+        unreadSubmissionsCount: unreadSubmissions.length,
       })
     }
   }
@@ -176,6 +181,7 @@ export default function NotificationCenter({ onCountsUpdate }) {
   const filteredNotifications = notifications.filter((item) => {
     if (filter === 'REVIEW') return item.type === 'REVIEW'
     if (filter === 'QUOTE') return item.type === 'QUOTE'
+    if (filter === 'SUBMISSION') return item.type === 'MOD_SUBMISSION'
     return true
   })
 
@@ -253,6 +259,13 @@ export default function NotificationCenter({ onCountsUpdate }) {
             >
               Talepler ({notifications.filter((n) => n.type === 'QUOTE').length})
             </button>
+            <button
+              type="button"
+              className={`notification-tab ${filter === 'SUBMISSION' ? 'active' : ''}`}
+              onClick={() => setFilter('SUBMISSION')}
+            >
+              Başvurular ({notifications.filter((n) => n.type === 'MOD_SUBMISSION').length})
+            </button>
           </div>
 
           {/* Liste */}
@@ -277,10 +290,18 @@ export default function NotificationCenter({ onCountsUpdate }) {
                       className={`notification-item__icon ${
                         item.type === 'REVIEW'
                           ? 'notification-item__icon--review'
+                          : item.type === 'MOD_SUBMISSION'
+                          ? 'notification-item__icon--submission'
                           : 'notification-item__icon--quote'
                       }`}
                     >
-                      {item.type === 'REVIEW' ? <Star size={16} /> : <MessageSquare size={16} />}
+                      {item.type === 'REVIEW' ? (
+                        <Star size={16} />
+                      ) : item.type === 'MOD_SUBMISSION' ? (
+                        <UploadCloud size={16} />
+                      ) : (
+                        <MessageSquare size={16} />
+                      )}
                     </div>
 
                     <div className="notification-item__content">
@@ -301,6 +322,11 @@ export default function NotificationCenter({ onCountsUpdate }) {
                         )}
                         {item.type === 'QUOTE' && item.game && (
                           <span className="notification-item__tag">{item.game}</span>
+                        )}
+                        {item.type === 'MOD_SUBMISSION' && item.game && (
+                          <span className="notification-item__tag" style={{ color: '#c084fc' }}>
+                            {item.game} {item.category ? `· ${item.category}` : ''}
+                          </span>
                         )}
                         <span
                           style={{
@@ -331,7 +357,13 @@ export default function NotificationCenter({ onCountsUpdate }) {
           <div className="notification-toast">
             <div className="notification-toast__progress" />
             <div className="notification-toast__icon">
-              {activeToast.type === 'REVIEW' ? <Star size={18} /> : <MessageSquare size={18} />}
+              {activeToast.type === 'REVIEW' ? (
+                <Star size={18} />
+              ) : activeToast.type === 'MOD_SUBMISSION' ? (
+                <UploadCloud size={18} />
+              ) : (
+                <MessageSquare size={18} />
+              )}
             </div>
             <div className="notification-toast__body">
               <div className="notification-toast__title">

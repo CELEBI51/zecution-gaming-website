@@ -31,6 +31,10 @@ import {
 } from './modules/settings/settings.routes.js'
 import { notificationsAdminRoutes } from './modules/notifications/notifications.routes.js'
 import { userAuthRouter } from './modules/user-auth/user-auth.routes.js'
+import {
+  modSubmissionsPublicRoutes,
+  modSubmissionsAdminRoutes,
+} from './modules/mod-submissions/mod-submissions.routes.js'
 
 const app = express()
 
@@ -121,12 +125,14 @@ app.use('/api/categories', categoriesPublicRoutes)
 app.use('/api/contents', contentsPublicRoutes)
 app.use('/api/settings', settingsPublicRoutes)
 app.use('/api/quotes', quotesPublicRoutes)
+app.use('/api/mod-submissions', modSubmissionsPublicRoutes)
 
 // Admin API
 app.use('/api/admin/auth', authRoutes)
 app.use('/api/admin/categories', categoriesAdminRoutes)
 app.use('/api/admin/contents', contentsAdminRoutes)
 app.use('/api/admin/quotes', quotesAdminRoutes)
+app.use('/api/admin/mod-submissions', modSubmissionsAdminRoutes)
 app.use('/api/admin', mediaAdminRoutes)
 app.use('/api/admin', featuresAdminRoutes)
 app.use('/api/admin/settings', settingsAdminRoutes)

@@ -3,39 +3,56 @@ import { prisma } from '../../config/database.js'
 export async function getAdminNotifications({ since, limit = 25 } = {}) {
   const limitNum = Math.max(1, Math.min(50, Number(limit) || 25))
 
-  const [reviews, quotes, totalNewQuotes, totalReviews] = await Promise.all([
-    prisma.contentReview.findMany({
-      take: limitNum,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        content: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            section: true,
+  const [reviews, quotes, modSubmissions, totalNewQuotes, totalNewSubmissions, totalReviews] =
+    await Promise.all([
+      prisma.contentReview.findMany({
+        take: limitNum,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          content: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              section: true,
+            },
           },
         },
-      },
-    }),
-    prisma.quoteRequest.findMany({
-      take: limitNum,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        game: true,
-        type: true,
-        status: true,
-        createdAt: true,
-      },
-    }),
-    prisma.quoteRequest.count({
-      where: { status: 'NEW' },
-    }),
-    prisma.contentReview.count(),
-  ])
+      }),
+      prisma.quoteRequest.findMany({
+        take: limitNum,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          game: true,
+          type: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+      prisma.modSubmission.findMany({
+        take: limitNum,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          producerName: true,
+          title: true,
+          game: true,
+          category: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+      prisma.quoteRequest.count({
+        where: { status: 'NEW' },
+      }),
+      prisma.modSubmission.count({
+        where: { status: 'PENDING' },
+      }),
+      prisma.contentReview.count(),
+    ])
 
   const typeLabels = {
     VEHICLE: 'Araç',
@@ -75,8 +92,22 @@ export async function getAdminNotifications({ since, limit = 25 } = {}) {
     createdAt: q.createdAt.toISOString(),
   }))
 
+  const submissionItems = modSubmissions.map((s) => ({
+    id: `modsub_${s.id}`,
+    rawId: s.id,
+    type: 'MOD_SUBMISSION',
+    title: 'Yeni Mod Yayınlama Başvurusu',
+    message: `${s.producerName}, "${s.title}" (${s.game}) modunu yayınlamak için başvurdu.`,
+    author: s.producerName,
+    game: s.game,
+    category: s.category,
+    status: s.status,
+    link: `/admin/mod-basvurulari/${s.id}`,
+    createdAt: s.createdAt.toISOString(),
+  }))
+
   // Kronolojik olarak birleştir ve en yeniye göre sırala
-  const merged = [...reviewItems, ...quoteItems].sort(
+  const merged = [...reviewItems, ...quoteItems, ...submissionItems].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   )
 
@@ -98,6 +129,7 @@ export async function getAdminNotifications({ since, limit = 25 } = {}) {
     items,
     unreadCount,
     totalNewQuotes,
+    totalNewSubmissions,
     totalReviews,
     latestTimestamp,
   }

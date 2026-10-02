@@ -10,6 +10,9 @@ import ProductDetail from './pages/Store/ProductDetail.jsx'
 import QuoteForm from './pages/Quotes/QuoteForm.jsx'
 import QuoteList from './pages/Admin/Quotes/QuoteList.jsx'
 import QuoteDetail from './pages/Admin/Quotes/QuoteDetail.jsx'
+import ModSubmissionForm from './pages/ModSubmissions/ModSubmissionForm.jsx'
+import ModSubmissionList from './pages/Admin/ModSubmissions/ModSubmissionList.jsx'
+import ModSubmissionDetail from './pages/Admin/ModSubmissions/ModSubmissionDetail.jsx'
 
 // Admin Paneli Sayfaları
 import AdminLayout from './pages/Admin/AdminLayout.jsx'
@@ -34,6 +37,8 @@ createRoot(document.getElementById('root')).render(
           {/* Herkese Açık Sayfalar */}
           <Route path="/" element={<App />} />
           <Route path="/teklif-al" element={<QuoteForm />} />
+          <Route path="/mod-yayinla" element={<ModSubmissionForm />} />
+          <Route path="/mod-gonder" element={<ModSubmissionForm />} />
           <Route path="/modlar" element={<ModGallery />} />
           <Route path="/modlar/:slug" element={<ModDetail />} />
           <Route path="/magaza" element={<Store />} />
@@ -53,6 +58,8 @@ createRoot(document.getElementById('root')).render(
             <Route path="ayarlar" element={<SettingsManager />} />
             <Route path="talepler" element={<QuoteList />} />
             <Route path="talepler/:id" element={<QuoteDetail />} />
+            <Route path="mod-basvurulari" element={<ModSubmissionList />} />
+            <Route path="mod-basvurulari/:id" element={<ModSubmissionDetail />} />
           </Route>
         </Routes>
       </AuthProvider>

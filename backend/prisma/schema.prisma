@@ -199,6 +199,7 @@ model User {
   updatedAt    DateTime       @updatedAt @map("updated_at")
   sessions     UserSession[]
   reviews      ContentReview[]
+  modSubmissions ModSubmission[]
 
   @@map("users")
 }
@@ -296,4 +297,55 @@ model QuotePhoto {
 
   @@index([quoteId])
   @@map("quote_photos")
+}
+
+enum ModSubmissionStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
+model ModSubmission {
+  id              String               @id @default(uuid()) @db.Uuid
+  submissionId    String               @unique @map("submission_id") @db.Uuid
+  userId          String?              @db.Uuid @map("user_id")
+  producerName    String               @map("producer_name") @db.VarChar(120)
+  email           String               @db.VarChar(254)
+  discord         String?              @db.VarChar(100)
+  title           String               @db.VarChar(150)
+  game            String               @db.VarChar(120)
+  category        String               @default("Araç") @db.VarChar(80)
+  version         String?              @db.VarChar(50)
+  description     String               @db.VarChar(10000)
+  downloadUrl     String               @map("download_url") @db.VarChar(2000)
+  trailerUrl      String?              @map("trailer_url") @db.VarChar(2000)
+  saleType        String               @default("FREE") @map("sale_type") @db.VarChar(30)
+  suggestedPrice  String?              @map("suggested_price") @db.VarChar(100)
+  hasPermission   Boolean              @default(true) @map("has_permission")
+  status          ModSubmissionStatus  @default(PENDING)
+  adminNotes      String               @default("") @map("admin_notes") @db.VarChar(10000)
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+  photos          ModSubmissionPhoto[]
+  user            User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("mod_submissions")
+}
+
+model ModSubmissionPhoto {
+  id           String        @id @default(uuid()) @db.Uuid
+  submissionId String        @db.Uuid @map("submission_id")
+  name         String        @db.VarChar(200)
+  data         Bytes
+  sortOrder    Int           @map("sort_order")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  submission   ModSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("mod_submission_photos")
 }

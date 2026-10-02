@@ -118,6 +118,39 @@ export const api = {
   async deleteQuote(id) {
     return request(`/admin/quotes/${id}`, { method: 'DELETE' })
   },
+
+  // ----------------- MOD YAYINLAMA / MOD GÖNDERME BAŞVURULARI -----------------
+  async createModSubmission(data, photos = []) {
+    const body = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        body.append(key, value)
+      }
+    })
+    photos.forEach(file => body.append('photos', file))
+    const res = await request('/mod-submissions', { method: 'POST', body })
+    return res.data
+  },
+  async getModSubmissionPhoto(submissionId, photoId) {
+    return request(`/admin/mod-submissions/${submissionId}/photos/${photoId}`, { responseType: 'blob' })
+  },
+  async getModSubmissions(params = {}) {
+    return request(`/admin/mod-submissions?${new URLSearchParams(params)}`)
+  },
+  async getModSubmission(id) {
+    const res = await request(`/admin/mod-submissions/${id}`)
+    return res.data
+  },
+  async updateModSubmission(id, data) {
+    const res = await request(`/admin/mod-submissions/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+    return res.data
+  },
+  async deleteModSubmission(id) {
+    return request(`/admin/mod-submissions/${id}`, { method: 'DELETE' })
+  },
   // ----------------- GENEL / KAMU API -----------------
   async getGames() {
     const res = await request('/games')

@@ -52,6 +52,16 @@ export function markReviewAsRead(reviewId) {
   markNotificationAsRead(`review_${reviewId}`)
 }
 
+export function isModSubmissionRead(submissionId) {
+  if (!submissionId) return true
+  return isNotificationRead(`modsub_${submissionId}`)
+}
+
+export function markModSubmissionAsRead(submissionId) {
+  if (!submissionId) return
+  markNotificationAsRead(`modsub_${submissionId}`)
+}
+
 export function markAllNotificationsAsRead(items = []) {
   if (typeof window === 'undefined') return
   try {

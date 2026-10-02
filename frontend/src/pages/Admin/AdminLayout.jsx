@@ -10,6 +10,7 @@ import {
   Settings,
   MessageSquare,
   Star,
+  UploadCloud,
 } from 'lucide-react'
 import { api } from '../../services/api.js'
 import NotificationCenter from './Notifications/NotificationCenter.jsx'
@@ -22,6 +23,7 @@ export default function AdminLayout() {
     unreadTotal: 0,
     unreadQuotesCount: 0,
     unreadReviewsCount: 0,
+    unreadSubmissionsCount: 0,
   })
   const navigate = useNavigate()
 
@@ -92,6 +94,13 @@ export default function AdminLayout() {
               <span>Mod Talepleri</span>
               {counts.unreadQuotesCount > 0 && (
                 <span className="admin-nav__counter">{counts.unreadQuotesCount}</span>
+              )}
+            </NavLink>
+            <NavLink to="/admin/mod-basvurulari" className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
+              <UploadCloud size={19} />
+              <span>Mod Başvuruları</span>
+              {counts.unreadSubmissionsCount > 0 && (
+                <span className="admin-nav__counter admin-nav__counter--yellow">{counts.unreadSubmissionsCount}</span>
               )}
             </NavLink>
             <NavLink

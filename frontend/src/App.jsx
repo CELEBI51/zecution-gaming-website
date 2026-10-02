@@ -170,6 +170,7 @@ function App() {
         <Brand compact />
         <nav className="desktop-nav" aria-label="Ana menü">
           <a href="/teklif-al">Teklif Al</a>
+          <a href="/mod-yayinla">Modunu Yayınla</a>
           <a href="#mod-galerisi">Modlar</a>
           <a href="#rehberler">Rehberler</a>
           <a href="#hizmetler">Hizmetler</a>
@@ -195,6 +196,7 @@ function App() {
             <UserNavButton />
           </div>
           <a href="/teklif-al">Teklif Al</a>
+          <a href="/mod-yayinla" onClick={() => setMenuOpen(false)}>Modunu Yayınla</a>
           <a href="#mod-galerisi" onClick={() => setMenuOpen(false)}>Modlar</a>
           <a href="#rehberler" onClick={() => setMenuOpen(false)}>Rehberler</a>
           <a href="#hizmetler" onClick={() => setMenuOpen(false)}>Hizmetler</a>
@@ -385,7 +387,10 @@ function App() {
           <div className="contact-content">
             <span className="eyebrow">Bir proje mi var?</span>
             <h2>Konuşalım.</h2>
-            <div style={{ marginBottom: '1.5rem' }}><a href="/teklif-al">Mod talebi oluştur / Teklif al <ArrowUpRight /></a></div>
+            <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <a href="/teklif-al">Mod talebi oluştur / Teklif al <ArrowUpRight /></a>
+              <a href="/mod-yayinla">Mod üreticisi misin? Modunu yayınla <ArrowUpRight /></a>
+            </div>
             <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
               <MessageCircle /> @zecution_gaming <ArrowUpRight />
             </a>
@@ -402,6 +407,7 @@ function App() {
           <nav className="footer-nav" aria-label="Footer menüsü">
             <span>Keşfet</span>
             <a href="/teklif-al">Teklif Al</a>
+            <a href="/mod-yayinla">Modunu Yayınla</a>
             <a href="#mod-galerisi">Modlar</a>
             <a href="#rehberler">Rehberler</a>
             <a href="#hizmetler">Hizmetler</a>

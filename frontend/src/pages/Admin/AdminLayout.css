@@ -122,6 +122,12 @@
   border-color: rgba(168, 85, 247, 0.4);
 }
 
+.admin-nav__counter--yellow {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde047;
+  border-color: rgba(234, 179, 8, 0.4);
+}
+
 .admin-sidebar__footer {
   padding: 1.25rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);

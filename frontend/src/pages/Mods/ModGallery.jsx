@@ -16,6 +16,7 @@ import {
   Puzzle,
   Server,
   Truck,
+  UploadCloud,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
@@ -156,6 +157,17 @@ function ModGallery() {
           </span>
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <a
+            className="mods-back"
+            href="/mod-yayinla"
+            style={{
+              background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(168, 85, 247, 0.15))',
+              borderColor: 'rgba(168, 85, 247, 0.4)',
+              color: '#d8b4fe',
+            }}
+          >
+            <UploadCloud size={16} /> Modunu Yayınla
+          </a>
           <UserNavButton />
           <a className="mods-back" href="/">
             <ArrowLeft size={17} /> Ana sayfa
