@@ -8,6 +8,7 @@ import {
   X,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
+import UserNavButton from '../../components/UserNavButton.jsx'
 import './Store.css'
 import { categoryRows } from '../../utils/categories.js'
 
@@ -102,9 +103,12 @@ function Store() {
             <small>Assetto Corsa Mağazası</small>
           </span>
         </a>
-        <a className="store-back" href="/">
-          <ArrowLeft size={17} /> Ana sayfa
-        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <UserNavButton />
+          <a className="store-back" href="/">
+            <ArrowLeft size={17} /> Ana sayfa
+          </a>
+        </div>
       </header>
 
       <main>

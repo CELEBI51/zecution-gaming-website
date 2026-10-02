@@ -1,6 +1,6 @@
 import { prisma } from '../../config/database.js'
 import { slugify } from '../../utils/slug.js'
-import { BadRequestError, NotFoundError } from '../../utils/api-error.js'
+import { BadRequestError, NotFoundError, UnauthorizedError } from '../../utils/api-error.js'
 import { validateContentCategory } from '../categories/category-rules.js'
 
 /**
@@ -384,6 +384,13 @@ export async function getContentReviews(slugOrId, { page = 1, limit = 20 } = {})
         rating: true,
         comment: true,
         createdAt: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
       },
     }),
   ])
@@ -407,38 +414,94 @@ export async function getContentReviews(slugOrId, { page = 1, limit = 20 } = {})
 
 const recentReviews = new Map()
 
-export async function addContentReview(slugOrId, { authorName, rating, comment }, clientIp = 'client') {
+export async function addContentReview(slugOrId, { rating, comment }, user, clientIp = 'client') {
   const content = await resolveContent(slugOrId)
 
-  const cacheKey = `${clientIp}:${content.id}`
+  if (!user) {
+    throw new UnauthorizedError('Yorum ve değerlendirme yapabilmek için lütfen üye girişi yapın.')
+  }
+
+  const cleanRating = Math.max(1, Math.min(5, Math.round(Number(rating) || 5)))
+  const cleanComment = String(comment || '').trim()
+
+  if (cleanComment.length < 3) {
+    throw new BadRequestError('Lütfen en az 3 karakterlik bir yorum yazın.')
+  }
+
+  const cacheKey = `${user.id}:${content.id}`
   const now = Date.now()
   const lastTime = recentReviews.get(cacheKey)
-  if (lastTime && now - lastTime < 15000) {
-    throw new BadRequestError('Çok sık değerlendirme gönderiyorsunuz. Lütfen biraz bekleyin.')
+  if (lastTime && now - lastTime < 5000) {
+    throw new BadRequestError('Lütfen biraz bekleyip tekrar deneyin.')
   }
   recentReviews.set(cacheKey, now)
 
-  const review = await prisma.contentReview.create({
-    data: {
+  // Tekil yorum kontrolü: Bir kullanıcı aynı içeriğe yalnızca 1 kez yorum yapabilir.
+  // Varsa mevcut yorumunu günceller, böylece troll spam engellenir.
+  const existingReview = await prisma.contentReview.findFirst({
+    where: {
       contentId: content.id,
-      authorName: authorName.trim(),
-      rating: Math.max(1, Math.min(5, Math.round(rating))),
-      comment: comment.trim(),
-      clientIp,
-      isApproved: true,
-    },
-    select: {
-      id: true,
-      authorName: true,
-      rating: true,
-      comment: true,
-      createdAt: true,
+      userId: user.id,
     },
   })
 
+  let review
+  if (existingReview) {
+    review = await prisma.contentReview.update({
+      where: { id: existingReview.id },
+      data: {
+        rating: cleanRating,
+        comment: cleanComment,
+        authorName: user.username,
+        clientIp,
+        isApproved: true,
+      },
+      select: {
+        id: true,
+        authorName: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    })
+  } else {
+    review = await prisma.contentReview.create({
+      data: {
+        contentId: content.id,
+        userId: user.id,
+        authorName: user.username,
+        rating: cleanRating,
+        comment: cleanComment,
+        clientIp,
+        isApproved: true,
+      },
+      select: {
+        id: true,
+        authorName: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    })
+  }
+
   const { stats } = await getContentReviews(content.id)
 
-  return { review, stats }
+  return { review, stats, isUpdated: !!existingReview }
 }
 
 export async function deleteContentReview(reviewId) {
@@ -504,6 +567,14 @@ export async function listAdminReviews({
               take: 1,
               select: { filePath: true, thumbnailPath: true },
             },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            avatarUrl: true,
           },
         },
       },

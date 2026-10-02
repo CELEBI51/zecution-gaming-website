@@ -101,3 +101,56 @@ export function requireRole(...roles) {
     next()
   }
 }
+
+/**
+ * Normal kullanıcı (üye) kimlik doğrulama middleware'i.
+ */
+export async function requireUser(req, _res, next) {
+  try {
+    let rawToken = req.cookies?.usid
+    if (!rawToken && req.headers.authorization?.startsWith('Bearer ')) {
+      rawToken = req.headers.authorization.slice(7).trim()
+    }
+
+    if (!rawToken) {
+      throw new UnauthorizedError('Değerlendirme ve yorum yapabilmek için üye girişi yapmalısınız.')
+    }
+
+    const { getUserFromToken } = await import('../services/user-auth.service.js')
+    const authData = await getUserFromToken(rawToken)
+
+    if (!authData) {
+      throw new UnauthorizedError('Oturum süreniz dolmuş veya geçersiz. Lütfen tekrar giriş yapın.')
+    }
+
+    req.user = authData.user
+    req.userSession = authData.session
+    next()
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * İsteğe bağlı kullanıcı oturumu okuma middleware'i.
+ */
+export async function optionalUser(req, _res, next) {
+  try {
+    let rawToken = req.cookies?.usid
+    if (!rawToken && req.headers.authorization?.startsWith('Bearer ')) {
+      rawToken = req.headers.authorization.slice(7).trim()
+    }
+
+    if (rawToken) {
+      const { getUserFromToken } = await import('../services/user-auth.service.js')
+      const authData = await getUserFromToken(rawToken)
+      if (authData) {
+        req.user = authData.user
+        req.userSession = authData.session
+      }
+    }
+    next()
+  } catch {
+    next()
+  }
+}

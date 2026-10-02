@@ -70,7 +70,7 @@ export async function getContentReviews(req, res, next) {
 export async function addContentReview(req, res, next) {
   try {
     const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
-    const result = await contentsService.addContentReview(req.params.slugOrId, req.body, ipAddress)
+    const result = await contentsService.addContentReview(req.params.slugOrId, req.body, req.user, ipAddress)
     res.status(201).json({ success: true, ...result })
   } catch (error) {
     next(error)

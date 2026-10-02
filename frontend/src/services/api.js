@@ -43,9 +43,18 @@ async function request(endpoint, options = {}) {
   }
 
   // Cross-domain kimlik doğrulama için Bearer token başlığı ekle
-  const adminToken = typeof localStorage !== 'undefined' ? localStorage.getItem('zecution_admin_token') : null
-  if (adminToken && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${adminToken}`)
+  if (!headers.has('Authorization') && typeof localStorage !== 'undefined') {
+    const isAdminEndpoint = endpoint.startsWith('/admin')
+    const adminToken = localStorage.getItem('zecution_admin_token')
+    const userToken = localStorage.getItem('zecution_user_token')
+
+    if (isAdminEndpoint && adminToken) {
+      headers.set('Authorization', `Bearer ${adminToken}`)
+    } else if (!isAdminEndpoint && userToken) {
+      headers.set('Authorization', `Bearer ${userToken}`)
+    } else if (adminToken) {
+      headers.set('Authorization', `Bearer ${adminToken}`)
+    }
   }
 
   // FormData değilse ve Content-Type belirlenmediyse JSON olarak ayarla
@@ -410,5 +419,47 @@ export const api = {
       body: JSON.stringify(payload),
     })
     return res.data
+  },
+
+  // ----------------- KULLANICI / ÜYE İŞLEMLERİ -----------------
+  async registerUser({ username, email, password }) {
+    const res = await request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, email, password }),
+    })
+    if (res?.data?.token && typeof localStorage !== 'undefined') {
+      localStorage.setItem('zecution_user_token', res.data.token)
+    }
+    return res.data
+  },
+
+  async loginUser({ emailOrUsername, password }) {
+    const res = await request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ emailOrUsername, password }),
+    })
+    if (res?.data?.token && typeof localStorage !== 'undefined') {
+      localStorage.setItem('zecution_user_token', res.data.token)
+    }
+    return res.data
+  },
+
+  async logoutUser() {
+    try {
+      await request('/auth/logout', { method: 'POST' })
+    } finally {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('zecution_user_token')
+      }
+    }
+  },
+
+  async getMeUser() {
+    try {
+      const res = await request('/auth/me')
+      return res.data?.user || null
+    } catch {
+      return null
+    }
   },
 }

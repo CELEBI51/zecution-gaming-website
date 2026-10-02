@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
 import ContentReviews from '../../components/ContentReviews.jsx'
+import UserNavButton from '../../components/UserNavButton.jsx'
 import './ProductDetail.css'
 
 const DEFAULT_INSTAGRAM = 'https://www.instagram.com/zecution_gaming/'
@@ -91,7 +92,10 @@ function ProductDetail() {
           <img src="/media/images/logo.jpg" alt="Zecution Gaming" />
           <span>Zecution Gaming</span>
         </a>
-        <a className="product-detail-back" href="/magaza">← Mağazaya dön</a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <UserNavButton />
+          <a className="product-detail-back" href="/magaza">← Mağazaya dön</a>
+        </div>
       </header>
 
       <main className="product-detail-content">

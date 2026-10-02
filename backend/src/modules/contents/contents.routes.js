@@ -28,7 +28,7 @@ import {
   createReviewSchema,
 } from './contents.validation.js'
 import { validate } from '../../middleware/validate.middleware.js'
-import { requireAdmin } from '../../middleware/auth.middleware.js'
+import { requireAdmin, requireUser } from '../../middleware/auth.middleware.js'
 
 // Herkese açık rotalar
 const publicRouter = Router()
@@ -39,7 +39,7 @@ publicRouter.post('/:slugOrId/download', trackContentDownload)
 publicRouter.get('/:slugOrId/reactions', getContentReactions)
 publicRouter.post('/:slugOrId/reactions', validate({ body: toggleReactionSchema }), toggleContentReaction)
 publicRouter.get('/:slugOrId/reviews', getContentReviews)
-publicRouter.post('/:slugOrId/reviews', validate({ body: createReviewSchema }), addContentReview)
+publicRouter.post('/:slugOrId/reviews', requireUser, validate({ body: createReviewSchema }), addContentReview)
 publicRouter.get('/:slug', getPublicContent)
 
 // Admin rotaları

@@ -21,32 +21,41 @@ import CategoryManager from './pages/Admin/Categories/CategoryManager.jsx'
 import SettingsManager from './pages/Admin/Settings/SettingsManager.jsx'
 import ReviewList from './pages/Admin/Reviews/ReviewList.jsx'
 
+import { AuthProvider } from './context/AuthContext.jsx'
+import AuthModal from './components/AuthModal.jsx'
+import AuthPage from './pages/Auth/AuthPage.jsx'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        {/* Herkese Açık Sayfalar */}
-        <Route path="/" element={<App />} />
-        <Route path="/teklif-al" element={<QuoteForm />} />
-        <Route path="/modlar" element={<ModGallery />} />
-        <Route path="/modlar/:slug" element={<ModDetail />} />
-        <Route path="/magaza" element={<Store />} />
-        <Route path="/magaza/:slug" element={<ProductDetail />} />
+      <AuthProvider>
+        <AuthModal />
+        <Routes>
+          {/* Herkese Açık Sayfalar */}
+          <Route path="/" element={<App />} />
+          <Route path="/teklif-al" element={<QuoteForm />} />
+          <Route path="/modlar" element={<ModGallery />} />
+          <Route path="/modlar/:slug" element={<ModDetail />} />
+          <Route path="/magaza" element={<Store />} />
+          <Route path="/magaza/:slug" element={<ProductDetail />} />
+          <Route path="/giris" element={<AuthPage initialMode="login" />} />
+          <Route path="/kayit-ol" element={<AuthPage initialMode="register" />} />
 
-        {/* Admin Paneli */}
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="icerikler" element={<ContentList />} />
-          <Route path="icerikler/yeni" element={<ContentForm />} />
-          <Route path="icerikler/:id/duzenle" element={<ContentForm />} />
-          <Route path="yorumlar" element={<ReviewList />} />
-          <Route path="kategoriler" element={<CategoryManager />} />
-          <Route path="ayarlar" element={<SettingsManager />} />
-          <Route path="talepler" element={<QuoteList />} />
-          <Route path="talepler/:id" element={<QuoteDetail />} />
-        </Route>
-      </Routes>
+          {/* Admin Paneli */}
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="icerikler" element={<ContentList />} />
+            <Route path="icerikler/yeni" element={<ContentForm />} />
+            <Route path="icerikler/:id/duzenle" element={<ContentForm />} />
+            <Route path="yorumlar" element={<ReviewList />} />
+            <Route path="kategoriler" element={<CategoryManager />} />
+            <Route path="ayarlar" element={<SettingsManager />} />
+            <Route path="talepler" element={<QuoteList />} />
+            <Route path="talepler/:id" element={<QuoteDetail />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )

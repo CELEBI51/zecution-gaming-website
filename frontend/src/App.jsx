@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import { FaDiscord, FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa6'
+import UserNavButton from './components/UserNavButton.jsx'
 import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/zecution_gaming/'
@@ -174,19 +175,25 @@ function App() {
           <a href="#hizmetler">Hizmetler</a>
           <a href="#hakkimizda">Hakkımızda</a>
         </nav>
-        <button
-          className="menu-button"
-          type="button"
-          aria-expanded={menuOpen}
-          aria-label={menuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          {menuOpen ? <X /> : <Menu />}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <UserNavButton />
+          <button
+            className="menu-button"
+            type="button"
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
       </header>
 
       {menuOpen && (
         <nav className="mobile-nav" aria-label="Mobil menü">
+          <div style={{ padding: '0.5rem 1rem 1rem', display: 'flex', justifyContent: 'center' }}>
+            <UserNavButton />
+          </div>
           <a href="/teklif-al">Teklif Al</a>
           <a href="#mod-galerisi" onClick={() => setMenuOpen(false)}>Modlar</a>
           <a href="#rehberler" onClick={() => setMenuOpen(false)}>Rehberler</a>

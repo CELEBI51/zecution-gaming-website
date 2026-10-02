@@ -30,6 +30,7 @@ import {
   settingsAdminRoutes,
 } from './modules/settings/settings.routes.js'
 import { notificationsAdminRoutes } from './modules/notifications/notifications.routes.js'
+import { userAuthRouter } from './modules/user-auth/user-auth.routes.js'
 
 const app = express()
 
@@ -114,6 +115,7 @@ app.get('/health', (_req, res) => {
 app.use('/api', globalLimiter)
 
 // Herkese Açık API
+app.use('/api/auth', userAuthRouter)
 app.use('/api/games', gamesRoutes)
 app.use('/api/categories', categoriesPublicRoutes)
 app.use('/api/contents', contentsPublicRoutes)

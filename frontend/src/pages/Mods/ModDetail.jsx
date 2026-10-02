@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
 import ContentReviews from '../../components/ContentReviews.jsx'
+import UserNavButton from '../../components/UserNavButton.jsx'
 import './ModDetail.css'
 
 const DEFAULT_INSTAGRAM = 'https://www.instagram.com/zecution_gaming/'
@@ -101,7 +102,10 @@ export default function ModDetail() {
     <div className="mod-detail-page">
       <header className="mod-detail-header">
         <Link className="mod-detail-brand" to="/"><img src="/media/images/logo.jpg" alt="Zecution Gaming" /><span>Zecution Gaming</span></Link>
-        <Link className="mod-detail-back" to="/modlar">← Mod galerisine dön</Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <UserNavButton />
+          <Link className="mod-detail-back" to="/modlar">← Mod galerisine dön</Link>
+        </div>
       </header>
 
       <main className="mod-detail-content">

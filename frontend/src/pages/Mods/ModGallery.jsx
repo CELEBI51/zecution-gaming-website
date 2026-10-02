@@ -18,6 +18,7 @@ import {
   Truck,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
+import UserNavButton from '../../components/UserNavButton.jsx'
 import './ModGallery.css'
 
 const GAME_META = {
@@ -154,9 +155,12 @@ function ModGallery() {
             <small>Mod Galerisi</small>
           </span>
         </a>
-        <a className="mods-back" href="/">
-          <ArrowLeft size={17} /> Ana sayfa
-        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <UserNavButton />
+          <a className="mods-back" href="/">
+            <ArrowLeft size={17} /> Ana sayfa
+          </a>
+        </div>
       </header>
 
       <main>

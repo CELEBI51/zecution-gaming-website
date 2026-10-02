@@ -66,7 +66,7 @@ export const toggleReactionSchema = z.object({
 })
 
 export const createReviewSchema = z.object({
-  authorName: z.string().min(2, 'Adınız en az 2 karakter olmalıdır').max(50, 'Adınız en fazla 50 karakter olabilir').trim(),
+  authorName: z.string().max(50).trim().optional(),
   rating: z.coerce.number().int().min(1, 'Puan en az 1 olmalıdır').max(5, 'Puan en fazla 5 olabilir').default(5),
   comment: z.string().min(3, 'Yorum en az 3 karakter olmalıdır').max(1000, 'Yorum en fazla 1000 karakter olabilir').trim(),
 })
