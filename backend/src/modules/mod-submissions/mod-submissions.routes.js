@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import rateLimit from 'express-rate-limit'
-import { requireAdmin, optionalUser } from '../../middleware/auth.middleware.js'
+import { requireAdmin, requireUser, optionalUser } from '../../middleware/auth.middleware.js'
 import { validate } from '../../middleware/validate.middleware.js'
 import {
   createModSubmissionSchema,
