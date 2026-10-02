@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { AlertCircle, Trash2, X } from 'lucide-react'
+import { AlertCircle, Check, Trash2, X } from 'lucide-react'
 import { api } from '../../../services/api.js'
 import { quoteTypes, quoteStatuses, formatQuoteDate } from '../../Quotes/quoteLabels.js'
-import { markQuoteAsRead } from '../../../utils/notifications.js'
+import { isQuoteRead, markQuoteAsRead, subscribeToNotificationUpdates } from '../../../utils/notifications.js'
 import './QuoteAdmin.css'
 
 export default function QuoteList() {
@@ -17,10 +17,18 @@ export default function QuoteList() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [reload, setReload] = useState(0)
+  const [, setReadVersion] = useState(0)
 
   // Silme Modalı Durumları
   const [deleteModalItem, setDeleteModalItem] = useState(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Bildirimler okunduğunda listeyi otomatik güncelle
+  useEffect(() => {
+    return subscribeToNotificationUpdates(() => {
+      setReadVersion((v) => v + 1)
+    })
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -151,43 +159,77 @@ export default function QuoteList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {result.items.map((item) => (
-                      <tr key={item.id}>
-                        <td>
-                          <strong>{item.name}</strong>
-                          <small>{item.email}</small>
-                        </td>
-                        <td>
-                          {item.game}
-                          <small>{quoteTypes[item.type]}</small>
-                        </td>
-                        <td>
-                          <span className={`quote-status quote-status--${item.status.toLowerCase()}`}>
-                            {quoteStatuses[item.status]}
-                          </span>
-                        </td>
-                        <td>{formatQuoteDate(item.createdAt)}</td>
-                        <td>
-                          <div className="quote-admin-actions-cell">
-                            <Link
-                              className="quote-admin-button"
-                              to={`/admin/talepler/${item.id}`}
-                              onClick={() => markQuoteAsRead(item.id)}
+                    {result.items.map((item) => {
+                      const isUnread = item.status === 'NEW' && !isQuoteRead(item.id)
+                      return (
+                        <tr
+                          key={item.id}
+                          className={`quote-row ${isUnread ? 'quote-row--unread' : ''}`}
+                        >
+                          <td>
+                            <div className="quote-author-cell">
+                              <div className="quote-author-name-row">
+                                <strong>{item.name}</strong>
+                                {isUnread && (
+                                  <span className="quote-unread-badge" title="Yeni okunmamış talep">
+                                    <span className="quote-ping-wrapper">
+                                      <span className="quote-ping-dot" />
+                                      <span className="quote-ping-ring" />
+                                    </span>
+                                    YENİ
+                                  </span>
+                                )}
+                              </div>
+                              <small>{item.email}</small>
+                            </div>
+                          </td>
+                          <td>
+                            {item.game}
+                            <small>{quoteTypes[item.type]}</small>
+                          </td>
+                          <td>
+                            <span
+                              className={`quote-status quote-status--${item.status.toLowerCase()} ${
+                                isUnread ? 'quote-status--pulse' : ''
+                              }`}
                             >
-                              İncele
-                            </Link>
-                            <button
-                              type="button"
-                              className="quote-admin-button quote-admin-button--danger"
-                              onClick={() => setDeleteModalItem(item)}
-                              title="Talebi Sil"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              {isUnread && <span className="quote-status-pulse-dot" />}
+                              {quoteStatuses[item.status]}
+                            </span>
+                          </td>
+                          <td>{formatQuoteDate(item.createdAt)}</td>
+                          <td>
+                            <div className="quote-admin-actions-cell">
+                              {isUnread && (
+                                <button
+                                  type="button"
+                                  className="quote-admin-button quote-admin-button--mark-read"
+                                  onClick={() => markQuoteAsRead(item.id)}
+                                  title="Okundu olarak işaretle"
+                                >
+                                  <Check size={14} /> Okundu
+                                </button>
+                              )}
+                              <Link
+                                className="quote-admin-button"
+                                to={`/admin/talepler/${item.id}`}
+                                onClick={() => markQuoteAsRead(item.id)}
+                              >
+                                İncele
+                              </Link>
+                              <button
+                                type="button"
+                                className="quote-admin-button quote-admin-button--danger"
+                                onClick={() => setDeleteModalItem(item)}
+                                title="Talebi Sil"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>

@@ -17,6 +17,16 @@ export function isNotificationRead(id) {
   return readIds.includes(String(id))
 }
 
+export function isQuoteRead(quoteId) {
+  if (!quoteId) return true
+  return isNotificationRead(`quote_${quoteId}`)
+}
+
+export function isReviewRead(reviewId) {
+  if (!reviewId) return true
+  return isNotificationRead(`review_${reviewId}`)
+}
+
 export function markNotificationAsRead(id) {
   if (!id || typeof window === 'undefined') return
   try {

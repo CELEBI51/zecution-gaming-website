@@ -17,9 +17,11 @@ import {
   Star,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
+import { isReviewRead, markReviewAsRead, subscribeToNotificationUpdates } from '../../../utils/notifications.js'
 
 export default function Dashboard() {
   const { admin } = useOutletContext()
+  const [, setReadVersion] = useState(0)
   const [stats, setStats] = useState({
     total: 0,
     published: 0,
@@ -79,8 +81,13 @@ export default function Dashboard() {
 
     loadDashboard()
 
+    const unsubscribe = subscribeToNotificationUpdates(() => {
+      setReadVersion((v) => v + 1)
+    })
+
     return () => {
       isMounted = false
+      unsubscribe()
     }
   }, [])
 
@@ -527,40 +534,67 @@ export default function Dashboard() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {recentReviews.map((rev) => (
-                  <Link
-                    key={rev.id}
-                    to="/admin/yorumlar"
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.35rem',
-                      padding: '0.75rem 0.9rem',
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
-                      borderRadius: '0.65rem',
-                      textDecoration: 'none',
-                      color: '#fff',
-                      transition: 'background 0.2s ease',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.86rem', color: '#fff' }}>
-                        {rev.authorName}
-                      </span>
-                      <span style={{ color: '#fbbf24', fontSize: '0.82rem', fontWeight: 700 }}>
-                        {'★'.repeat(rev.rating)} {rev.rating}/5
-                      </span>
-                    </div>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      "{rev.comment}"
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#a855f7', fontWeight: 600 }}>
-                      <span>{rev.content?.title || 'İçerik'}</span>
-                      <span style={{ color: '#64748b' }}>Yorumu Gör →</span>
-                    </div>
-                  </Link>
-                ))}
+                {recentReviews.map((rev) => {
+                  const isUnread = !isReviewRead(rev.id)
+                  return (
+                    <Link
+                      key={rev.id}
+                      to="/admin/yorumlar"
+                      onClick={() => markReviewAsRead(rev.id)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.35rem',
+                        padding: '0.75rem 0.9rem',
+                        background: isUnread
+                          ? 'linear-gradient(90deg, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0.03) 100%)'
+                          : 'rgba(255, 255, 255, 0.03)',
+                        border: isUnread
+                          ? '1px solid rgba(168, 85, 247, 0.35)'
+                          : '1px solid rgba(255, 255, 255, 0.06)',
+                        borderLeft: isUnread ? '3px solid #a855f7' : undefined,
+                        borderRadius: '0.65rem',
+                        textDecoration: 'none',
+                        color: '#fff',
+                        transition: 'background 0.2s ease, border-color 0.2s ease',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.86rem', color: '#fff' }}>
+                            {rev.authorName}
+                          </span>
+                          {isUnread && (
+                            <span
+                              style={{
+                                fontSize: '0.62rem',
+                                fontWeight: 800,
+                                background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                                color: '#fff',
+                                padding: '0.15rem 0.45rem',
+                                borderRadius: '999px',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.03em',
+                              }}
+                            >
+                              Yeni
+                            </span>
+                          )}
+                        </div>
+                        <span style={{ color: '#fbbf24', fontSize: '0.82rem', fontWeight: 700 }}>
+                          {'★'.repeat(rev.rating)} {rev.rating}/5
+                        </span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        "{rev.comment}"
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#a855f7', fontWeight: 600 }}>
+                        <span>{rev.content?.title || 'İçerik'}</span>
+                        <span style={{ color: '#64748b' }}>Yorumu Gör →</span>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </div>

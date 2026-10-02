@@ -19,7 +19,7 @@ import {
   X,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
-import { markReviewAsRead } from '../../../utils/notifications.js'
+import { isReviewRead, markReviewAsRead, subscribeToNotificationUpdates } from '../../../utils/notifications.js'
 import './ReviewList.css'
 
 function formatDate(dateString) {
@@ -54,10 +54,18 @@ export default function ReviewList() {
   const [selectedSection, setSelectedSection] = useState('')
   const [selectedApproval, setSelectedApproval] = useState('')
   const [notice, setNotice] = useState('')
+  const [, setReadVersion] = useState(0)
 
   // Silme Onay Modalı
   const [deleteModalItem, setDeleteModalItem] = useState(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Bildirimler okunduğunda veya güncellendiğinde listeyi senkronize et
+  useEffect(() => {
+    return subscribeToNotificationUpdates(() => {
+      setReadVersion((v) => v + 1)
+    })
+  }, [])
 
   const loadReviews = async (page = 1) => {
     try {
@@ -73,9 +81,6 @@ export default function ReviewList() {
 
       const items = res.items || []
       setReviews(items)
-      if (items.length > 0) {
-        items.forEach((r) => markReviewAsRead(r.id))
-      }
       if (res.stats) {
         setStats(res.stats)
       }
@@ -102,6 +107,7 @@ export default function ReviewList() {
   const handleToggleApproval = async (review) => {
     const nextState = !review.isApproved
     try {
+      markReviewAsRead(review.id)
       await api.updateAdminReview(review.id, { isApproved: nextState })
       setReviews((prev) =>
         prev.map((r) => (r.id === review.id ? { ...r, isApproved: nextState } : r))
@@ -371,10 +377,15 @@ export default function ReviewList() {
                   ? `/magaza/${review.content.slug}`
                   : `/modlar/${review.content?.slug}`
 
+              const isUnread = !isReviewRead(review.id)
               return (
                 <div
                   key={review.id}
-                  className={`review-card ${!review.isApproved ? 'is-hidden' : ''}`}
+                  className={`review-card ${!review.isApproved ? 'is-hidden' : ''} ${isUnread ? 'review-card--unread' : ''}`}
+                  onClick={() => {
+                    if (isUnread) markReviewAsRead(review.id)
+                  }}
+                  style={{ cursor: isUnread ? 'pointer' : 'default' }}
                 >
                   <div className="review-card__header">
                     <div className="review-author-box">
@@ -384,6 +395,15 @@ export default function ReviewList() {
                       <div>
                         <div className="review-author-name">
                           <span>{review.authorName}</span>
+                          {isUnread && (
+                            <span className="review-unread-badge" title="Yeni okunmamış değerlendirme">
+                              <span className="quote-ping-wrapper">
+                                <span className="quote-ping-dot" />
+                                <span className="quote-ping-ring" />
+                              </span>
+                              YENİ
+                            </span>
+                          )}
                           <span
                             style={{
                               fontSize: '0.65rem',
@@ -477,10 +497,26 @@ export default function ReviewList() {
                     </div>
 
                     <div className="review-card-actions">
+                      {isUnread && (
+                        <button
+                          type="button"
+                          className="review-btn review-btn--mark-read"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            markReviewAsRead(review.id)
+                          }}
+                          title="Okundu olarak işaretle"
+                        >
+                          <Check size={14} /> Okundu
+                        </button>
+                      )}
                       <button
                         type="button"
                         className="review-btn review-btn--toggle"
-                        onClick={() => handleToggleApproval(review)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleToggleApproval(review)
+                        }}
                         title={review.isApproved ? 'Yorumu sitede gizle' : 'Yorumu sitede yayınla'}
                       >
                         {review.isApproved ? (

@@ -450,3 +450,48 @@
   justify-content: flex-end;
   gap: 0.75rem;
 }
+
+/* Okunmamış / Yeni Yorum Kartı Vurgusu */
+.review-card--unread {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(17, 17, 20, 0.98) 100%) !important;
+  border-color: rgba(168, 85, 247, 0.45) !important;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.18), inset 4px 0 0 #a855f7;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.review-card--unread:hover {
+  border-color: rgba(168, 85, 247, 0.7) !important;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.25), inset 4px 0 0 #c084fc;
+}
+
+.review-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.5);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.review-btn--mark-read {
+  background: rgba(168, 85, 247, 0.18);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #d8b4fe;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.review-btn--mark-read:hover {
+  background: rgba(168, 85, 247, 0.35);
+  color: #fff;
+  border-color: rgba(168, 85, 247, 0.7);
+}
