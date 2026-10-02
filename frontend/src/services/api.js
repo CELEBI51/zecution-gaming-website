@@ -216,6 +216,23 @@ export const api = {
     return request(`/admin/contents/reviews/${reviewId}`, { method: 'DELETE' })
   },
 
+  async getAdminReviews(params = {}) {
+    const search = new URLSearchParams(params).toString()
+    return request(`/admin/contents/reviews${search ? `?${search}` : ''}`)
+  },
+
+  async updateAdminReview(reviewId, data) {
+    return request(`/admin/contents/reviews/${reviewId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async getAdminNotifications(params = {}) {
+    const search = new URLSearchParams(params).toString()
+    return request(`/admin/notifications${search ? `?${search}` : ''}`)
+  },
+
   async getSettings() {
     const res = await request('/settings')
     return res.data || {}

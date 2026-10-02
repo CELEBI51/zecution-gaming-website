@@ -86,6 +86,27 @@ export async function deleteContentReview(req, res, next) {
   }
 }
 
+export async function getAdminReviews(req, res, next) {
+  try {
+    const result = await contentsService.listAdminReviews(req.query)
+    res.json({ success: true, ...result })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function updateContentReview(req, res, next) {
+  try {
+    const result = await contentsService.updateContentReviewApproval(
+      req.params.reviewId,
+      req.body.isApproved
+    )
+    res.json({ success: true, data: result })
+  } catch (error) {
+    next(error)
+  }
+}
+
 // Admin controllers
 export async function getAdminContents(req, res, next) {
   try {

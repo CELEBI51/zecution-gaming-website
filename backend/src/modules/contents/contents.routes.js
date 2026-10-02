@@ -9,6 +9,8 @@ import {
   getContentReviews,
   addContentReview,
   deleteContentReview,
+  getAdminReviews,
+  updateContentReview,
   getAdminContents,
   getAdminContent,
   createContent,
@@ -43,6 +45,9 @@ publicRouter.get('/:slug', getPublicContent)
 // Admin rotaları
 const adminRouter = Router()
 adminRouter.use(requireAdmin)
+adminRouter.get('/reviews', getAdminReviews)
+adminRouter.patch('/reviews/:reviewId', updateContentReview)
+adminRouter.delete('/reviews/:reviewId', deleteContentReview)
 adminRouter.get('/', validate({ query: listContentsQuerySchema }), getAdminContents)
 adminRouter.post('/', validate({ body: createContentSchema }), createContent)
 adminRouter.get('/:id', getAdminContent)
@@ -51,7 +56,6 @@ adminRouter.delete('/:id', deleteContent)
 adminRouter.post('/:id/publish', publishContent)
 adminRouter.post('/:id/archive', archiveContent)
 adminRouter.post('/:id/restore', restoreContent)
-adminRouter.delete('/reviews/:reviewId', deleteContentReview)
 
 export const contentsPublicRoutes = publicRouter
 export const contentsAdminRoutes = adminRouter

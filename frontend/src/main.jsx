@@ -19,6 +19,7 @@ import ContentList from './pages/Admin/Contents/ContentList.jsx'
 import ContentForm from './pages/Admin/Contents/ContentForm.jsx'
 import CategoryManager from './pages/Admin/Categories/CategoryManager.jsx'
 import SettingsManager from './pages/Admin/Settings/SettingsManager.jsx'
+import ReviewList from './pages/Admin/Reviews/ReviewList.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -39,6 +40,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="icerikler" element={<ContentList />} />
           <Route path="icerikler/yeni" element={<ContentForm />} />
           <Route path="icerikler/:id/duzenle" element={<ContentForm />} />
+          <Route path="yorumlar" element={<ReviewList />} />
           <Route path="kategoriler" element={<CategoryManager />} />
           <Route path="ayarlar" element={<SettingsManager />} />
           <Route path="talepler" element={<QuoteList />} />

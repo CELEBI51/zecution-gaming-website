@@ -9,13 +9,20 @@ import {
   Package,
   Settings,
   MessageSquare,
+  Star,
 } from 'lucide-react'
 import { api } from '../../services/api.js'
+import NotificationCenter from './Notifications/NotificationCenter.jsx'
 import './AdminLayout.css'
 
 export default function AdminLayout() {
   const [admin, setAdmin] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [counts, setCounts] = useState({
+    unreadCount: 0,
+    totalNewQuotes: 0,
+    totalReviews: 0,
+  })
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -72,15 +79,20 @@ export default function AdminLayout() {
         <div>
           <div className="admin-sidebar__header">
             <img src="/media/images/logo.jpg" alt="Logo" className="admin-sidebar__logo" />
-            <div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div className="admin-sidebar__brand-title">Zecution Gaming</div>
               <span className="admin-sidebar__badge">Yönetim Paneli</span>
             </div>
+            <NotificationCenter onCountsUpdate={setCounts} />
           </div>
 
           <nav className="admin-nav" aria-label="Admin ana menü">
             <NavLink to="/admin/talepler" className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
-              <MessageSquare size={19} /><span>Mod Talepleri</span>
+              <MessageSquare size={19} />
+              <span>Mod Talepleri</span>
+              {counts.totalNewQuotes > 0 && (
+                <span className="admin-nav__counter">{counts.totalNewQuotes}</span>
+              )}
             </NavLink>
             <NavLink
               to="/admin"
@@ -97,6 +109,17 @@ export default function AdminLayout() {
             >
               <Package size={19} />
               <span>İçerikler</span>
+            </NavLink>
+
+            <NavLink
+              to="/admin/yorumlar"
+              className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}
+            >
+              <Star size={19} />
+              <span>Yorumlar & Puanlar</span>
+              {counts.totalReviews > 0 && (
+                <span className="admin-nav__counter admin-nav__counter--purple">{counts.totalReviews}</span>
+              )}
             </NavLink>
 
             <NavLink

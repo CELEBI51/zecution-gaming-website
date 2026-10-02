@@ -29,6 +29,7 @@ import {
   settingsPublicRoutes,
   settingsAdminRoutes,
 } from './modules/settings/settings.routes.js'
+import { notificationsAdminRoutes } from './modules/notifications/notifications.routes.js'
 
 const app = express()
 
@@ -127,6 +128,7 @@ app.use('/api/admin/quotes', quotesAdminRoutes)
 app.use('/api/admin', mediaAdminRoutes)
 app.use('/api/admin', featuresAdminRoutes)
 app.use('/api/admin/settings', settingsAdminRoutes)
+app.use('/api/admin/notifications', notificationsAdminRoutes)
 
 // 8. Bilinmeyen Rota (404)
 app.use((_req, _res, next) => {

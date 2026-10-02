@@ -10,9 +10,11 @@ import {
   FileText,
   FolderTree,
   Loader2,
+  MessageSquare,
   Package,
   Plus,
   Settings,
+  Star,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
 
@@ -26,8 +28,11 @@ export default function Dashboard() {
     totalViews: 0,
     totalDownloads: 0,
     categories: 0,
+    totalReviews: 0,
+    averageRating: 5.0,
   })
   const [recentContents, setRecentContents] = useState([])
+  const [recentReviews, setRecentReviews] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -36,9 +41,10 @@ export default function Dashboard() {
     async function loadDashboard() {
       try {
         setLoading(true)
-        const [contentsRes, categoriesRes] = await Promise.all([
+        const [contentsRes, categoriesRes, reviewsRes] = await Promise.all([
           api.getAdminContents({ limit: 10 }),
           api.getAdminCategories(),
+          api.getAdminReviews({ limit: 5 }),
         ])
 
         if (!isMounted) return
@@ -59,8 +65,11 @@ export default function Dashboard() {
           totalViews,
           totalDownloads,
           categories: categoriesRes.length,
+          totalReviews: reviewsRes?.stats?.totalAll || 0,
+          averageRating: reviewsRes?.stats?.averageRating || 5.0,
         })
         setRecentContents(items.slice(0, 5))
+        setRecentReviews(reviewsRes?.items || [])
       } catch (err) {
         console.error('Dashboard yüklenemedi:', err)
       } finally {
@@ -325,6 +334,46 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          <div
+            style={{
+              background: '#121212',
+              border: '1px solid rgba(250, 204, 21, 0.25)',
+              borderRadius: '1rem',
+              padding: '1.4rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              boxShadow: '0 4px 20px rgba(234, 179, 8, 0.08)',
+            }}
+          >
+            <div
+              style={{
+                width: '3rem',
+                height: '3rem',
+                borderRadius: '0.75rem',
+                background: 'rgba(234, 179, 8, 0.18)',
+                color: '#facc15',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              <Star size={22} />
+            </div>
+            <div>
+              <span style={{ fontSize: '0.78rem', color: '#ffffff73', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Yorum & Puan
+              </span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem' }}>
+                <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fff' }}>
+                  {loading ? '-' : stats.totalReviews}
+                </span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#facc15' }}>
+                  ★ {loading ? '-' : Number(stats.averageRating).toFixed(1)}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Hızlı İşlemler & Son İçerikler */}
@@ -449,6 +498,73 @@ export default function Dashboard() {
             )}
           </div>
 
+          {/* Son Yapılan Değerlendirmeler */}
+          <div
+            style={{
+              background: '#121212',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '1rem',
+              padding: '1.5rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Star size={18} style={{ color: '#fbbf24' }} /> Son Değerlendirmeler
+              </h3>
+              <Link to="/admin/yorumlar" style={{ fontSize: '0.8rem', color: '#d880ff', textDecoration: 'none', fontWeight: 600 }}>
+                Tümünü Gör →
+              </Link>
+            </div>
+
+            {loading ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#ffffff73' }}>
+                <Loader2 className="animate-spin" size={24} style={{ margin: '0 auto 0.5rem' }} />
+                <span>Yükleniyor...</span>
+              </div>
+            ) : recentReviews.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#ffffff73' }}>
+                Henüz değerlendirme bulunmuyor.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {recentReviews.map((rev) => (
+                  <Link
+                    key={rev.id}
+                    to="/admin/yorumlar"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.35rem',
+                      padding: '0.75rem 0.9rem',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      borderRadius: '0.65rem',
+                      textDecoration: 'none',
+                      color: '#fff',
+                      transition: 'background 0.2s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.86rem', color: '#fff' }}>
+                        {rev.authorName}
+                      </span>
+                      <span style={{ color: '#fbbf24', fontSize: '0.82rem', fontWeight: 700 }}>
+                        {'★'.repeat(rev.rating)} {rev.rating}/5
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      "{rev.comment}"
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#a855f7', fontWeight: 600 }}>
+                      <span>{rev.content?.title || 'İçerik'}</span>
+                      <span style={{ color: '#64748b' }}>Yorumu Gör →</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Hızlı Kısayollar */}
           <div
             style={{
@@ -484,6 +600,26 @@ export default function Dashboard() {
                 >
                   <Plus size={18} style={{ color: '#d880ff' }} />
                   <span>Yeni Ürün veya Mod Ekle</span>
+                </Link>
+
+                <Link
+                  to="/admin/yorumlar"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.85rem 1rem',
+                    borderRadius: '0.65rem',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    color: '#fff',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.88rem',
+                  }}
+                >
+                  <Star size={18} style={{ color: '#fbbf24' }} />
+                  <span>Yorumları & Puanları Yönet</span>
                 </Link>
 
                 <Link

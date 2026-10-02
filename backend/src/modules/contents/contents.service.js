@@ -450,6 +450,130 @@ export async function deleteContentReview(reviewId) {
   }
 }
 
+export async function listAdminReviews({
+  page = 1,
+  limit = 25,
+  search = '',
+  rating,
+  section,
+  isApproved,
+} = {}) {
+  const pageNum = Math.max(1, Number(page) || 1)
+  const limitNum = Math.max(1, Math.min(100, Number(limit) || 25))
+  const skip = (pageNum - 1) * limitNum
+
+  const where = {}
+
+  if (rating !== undefined && rating !== '' && rating !== null) {
+    where.rating = Number(rating)
+  }
+
+  if (isApproved !== undefined && isApproved !== '' && isApproved !== null) {
+    where.isApproved = String(isApproved) === 'true'
+  }
+
+  if (section) {
+    where.content = { section }
+  }
+
+  if (search && search.trim()) {
+    const s = search.trim()
+    where.OR = [
+      { authorName: { contains: s, mode: 'insensitive' } },
+      { comment: { contains: s, mode: 'insensitive' } },
+      { content: { title: { contains: s, mode: 'insensitive' } } },
+    ]
+  }
+
+  const [total, reviews, agg, ratingGroup] = await Promise.all([
+    prisma.contentReview.count({ where }),
+    prisma.contentReview.findMany({
+      where,
+      skip,
+      take: limitNum,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        content: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            section: true,
+            media: {
+              where: { isCover: true },
+              take: 1,
+              select: { filePath: true, thumbnailPath: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.contentReview.aggregate({
+      _avg: { rating: true },
+      _count: { id: true },
+    }),
+    prisma.contentReview.groupBy({
+      by: ['rating'],
+      _count: { id: true },
+    }),
+  ])
+
+  const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+  ratingGroup.forEach((g) => {
+    ratingCounts[g.rating] = g._count.id
+  })
+
+  const formattedItems = reviews.map((r) => ({
+    id: r.id,
+    authorName: r.authorName,
+    rating: r.rating,
+    comment: r.comment,
+    clientIp: r.clientIp,
+    isApproved: r.isApproved,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+    content: r.content
+      ? {
+          id: r.content.id,
+          title: r.content.title,
+          slug: r.content.slug,
+          section: r.content.section,
+          coverImage: r.content.media?.[0] || null,
+        }
+      : null,
+  }))
+
+  const totalAll = agg._count.id || 0
+  const avgRating = agg._avg.rating ? Number(agg._avg.rating.toFixed(1)) : 5.0
+
+  return {
+    items: formattedItems,
+    stats: {
+      totalAll,
+      averageRating: avgRating,
+      ratingCounts,
+    },
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      totalPages: Math.ceil(total / limitNum) || 1,
+    },
+  }
+}
+
+export async function updateContentReviewApproval(reviewId, isApproved) {
+  try {
+    return await prisma.contentReview.update({
+      where: { id: reviewId },
+      data: { isApproved: Boolean(isApproved) },
+    })
+  } catch (err) {
+    if (err?.code === 'P2025') throw new NotFoundError('Değerlendirme bulunamadı')
+    throw err
+  }
+}
+
 // ------------------- ADMIN SERVİSLERİ -------------------
 
 export async function listAdminContents({
