@@ -5,6 +5,9 @@ import { env } from '../config/env.js'
  * Cloudinary yapılandırmasının eksiksiz olup olmadığını kontrol eder.
  */
 export function isCloudinaryConfigured() {
+  if (process.env.STORAGE_DRIVER === 'local' || process.env.USE_CLOUDINARY === 'false') {
+    return false
+  }
   return Boolean(
     env.CLOUDINARY_URL ||
     (env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET)

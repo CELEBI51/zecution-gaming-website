@@ -22,6 +22,7 @@
     "db:deploy:pg": "node scripts/deploy-migrations-pg.js",
     "db:seed": "prisma db seed",
     "admin:create": "node scripts/create-admin.js",
+    "storage:migrate": "node scripts/migrate-cloudinary-to-local.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {

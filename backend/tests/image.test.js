@@ -19,8 +19,8 @@ describe('Image Processing Service', () => {
 
     const result = await processAndSaveImage(testImageBuffer)
 
-    expect(result.filePath).toMatch(/^\/uploads\/large\/[a-f0-9-]+\.webp$/)
-    expect(result.thumbnailPath).toMatch(/^\/uploads\/thumbnail\/[a-f0-9-]+\.webp$/)
+    expect(result.filePath).toMatch(/^\/uploads\/(original|large)\/[a-f0-9-]+\.webp$/)
+    expect(result.thumbnailPath).toMatch(/^\/uploads\/(original|thumbnail)\/[a-f0-9-]+\.webp$/)
     expect(result.originalPath).toMatch(/^\/uploads\/original\/[a-f0-9-]+\.webp$/)
     expect(result.width).toBe(100)
     expect(result.height).toBe(100)

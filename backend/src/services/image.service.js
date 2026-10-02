@@ -38,31 +38,32 @@ export async function processAndSaveImage(buffer) {
   const largeDiskPath = path.join(UPLOAD_ROOT, 'large', largeFileName)
   const thumbDiskPath = path.join(UPLOAD_ROOT, 'thumbnail', thumbFileName)
 
-  // 1. Original (EXIF temizlenmiş, WebP q90)
-  await sharp(buffer)
-    .rotate() // Otomatik EXIF yönlendirmesini uygula ve EXIF'i at
-    .webp({ quality: 90 })
+  // 1. Original (EXIF temizlenmiş, yüksek kaliteli WebP q95, tam çözünürlük)
+  const originalResult = await sharp(buffer)
+    .rotate()
+    .resize({ width: 3840, withoutEnlargement: true })
+    .webp({ quality: 95 })
     .toFile(originalDiskPath)
 
-  // 2. Large (Maksimum 1920px genişlik, WebP q82)
+  // 2. Large (Maksimum 2560px genişlik, WebP q90)
   const largeResult = await sharp(buffer)
     .rotate()
-    .resize({ width: 1920, withoutEnlargement: true })
-    .webp({ quality: 82 })
+    .resize({ width: 2560, withoutEnlargement: true })
+    .webp({ quality: 90 })
     .toFile(largeDiskPath)
 
-  // 3. Thumbnail (Maksimum 480px genişlik, WebP q80)
+  // 3. Thumbnail (Maksimum 800px genişlik, WebP q85)
   await sharp(buffer)
     .rotate()
-    .resize({ width: 480, withoutEnlargement: true })
-    .webp({ quality: 80 })
+    .resize({ width: 800, withoutEnlargement: true })
+    .webp({ quality: 85 })
     .toFile(thumbDiskPath)
 
   return {
-    filePath: `/uploads/large/${largeFileName}`,
-    thumbnailPath: `/uploads/thumbnail/${thumbFileName}`,
+    filePath: `/uploads/original/${originalFileName}`,
+    thumbnailPath: `/uploads/original/${originalFileName}`,
     originalPath: `/uploads/original/${originalFileName}`,
-    width: largeResult.width || metadata.width,
-    height: largeResult.height || metadata.height,
+    width: originalResult.width || metadata.width,
+    height: originalResult.height || metadata.height,
   }
 }
