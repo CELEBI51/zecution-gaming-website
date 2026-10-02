@@ -122,7 +122,22 @@ function ModGallery() {
     setSelectedGame(gameId)
     setSelectedCategory(null)
     window.requestAnimationFrame(() => {
-      document.querySelector('#mod-secimi')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setTimeout(() => {
+        if (gameId === 'assetto-corsa') {
+          document.querySelector('#mod-secimi')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        } else {
+          document.querySelector('#mod-sonuclari')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 60)
+    })
+  }
+
+  const chooseCategory = (catId) => {
+    setSelectedCategory(catId)
+    window.requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.querySelector('#mod-sonuclari')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 60)
     })
   }
 
@@ -215,7 +230,7 @@ function ModGallery() {
                       className={`type-card ${image ? 'has-image' : ''} ${isSelected ? 'is-selected' : ''}`}
                       type="button"
                       aria-pressed={isSelected}
-                      onClick={() => setSelectedCategory(id)}
+                      onClick={() => chooseCategory(id)}
                       style={{
                         '--card-delay': `${index * 55}ms`,
                         ...(image ? { '--card-image': `url("${image}")` } : {}),
@@ -233,7 +248,7 @@ function ModGallery() {
             </div>
           )}
 
-          <div className="results-panel" aria-live="polite">
+          <div id="mod-sonuclari" className="results-panel" aria-live="polite">
             <div className="results-heading">
               <div>
                 <span className="step-label">Sonuçlar</span>

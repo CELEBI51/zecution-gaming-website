@@ -472,8 +472,9 @@
   box-shadow: 0 1rem 3rem rgba(54, 25, 117, 0.22);
 }
 
+#mod-sonuclari,
 .results-panel {
-  scroll-margin-top: 2rem;
+  scroll-margin-top: 2.5rem;
 }
 
 .results-heading {
