@@ -247,7 +247,7 @@ function ModGallery() {
                 <p>Sonuçları görmek için yukarıdan bir mod türü seçin.</p>
               </div>
             ) : filteredMods.length > 0 ? (
-              <div className="mod-grid">
+              <div className="mod-grid mods-grid">
                 {filteredMods.map((mod) => (
                   <article className="mod-card" key={mod.id}>
                     <Link

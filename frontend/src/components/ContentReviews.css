@@ -489,9 +489,34 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1.25rem;
+    padding: 1.2rem;
   }
   .btn-write-review-hero {
     width: 100%;
     text-align: center;
+    justify-content: center;
+  }
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .btn-cancel,
+  .btn-submit-review {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .review-card {
+    padding: 1rem;
+  }
+  .review-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .summary-big-score {
+    font-size: 2.25rem;
   }
 }

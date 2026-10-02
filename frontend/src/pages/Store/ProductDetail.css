@@ -404,6 +404,11 @@
   .product-detail-footer { flex-direction: column; }
 }
 
+@media (max-width: 420px) {
+  .product-features dl > div { grid-template-columns: 1fr; gap: 0.25rem; }
+  .product-heading h1 { font-size: clamp(1.8rem, 8vw, 2.35rem); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gallery-stage > img,
   .product-detail-spinner { animation: none; }

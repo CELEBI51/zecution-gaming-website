@@ -2,3 +2,7 @@
 
 .mod-detail-information > *, .mod-features-block dl > div > * { min-width: 0; }
 .mod-detail-breadcrumb { flex-wrap: wrap; overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .mod-features-block dl > div { grid-template-columns: 1fr !important; gap: 0.25rem !important; }
+  .mod-detail-heading h1 { font-size: clamp(1.8rem, 8vw, 2.5rem) !important; }
+}
