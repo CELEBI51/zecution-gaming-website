@@ -90,7 +90,7 @@ function ModGallery() {
           description: item.shortDescription || item.description || '',
           game: item.game?.slug || '',
           category: item.category?.slug || '',
-          image: getMediaUrl(item.coverImage?.thumbnailPath || item.coverImage?.filePath),
+          image: getMediaUrl(item.coverImage?.filePath || item.coverImage?.thumbnailPath),
           downloadUrl: item.downloadUrl,
         }))
         setMods(mappedMods)
@@ -250,7 +250,11 @@ function ModGallery() {
               <div className="mod-grid">
                 {filteredMods.map((mod) => (
                   <article className="mod-card" key={mod.id}>
-                    <Link to={`/modlar/${mod.slug}`} className="mod-card__media">
+                    <Link
+                      to={`/modlar/${mod.slug}`}
+                      className="mod-card__media"
+                      onClick={() => api.trackContentClick(mod.slug)}
+                    >
                       <img src={mod.image} alt={mod.name} loading="lazy" />
                       <span className="mod-card__hover-overlay">
                         <Eye size={20} /> Detayları İncele
@@ -259,7 +263,11 @@ function ModGallery() {
                     <div className="mod-card__body">
                       <span className="mod-card__producer">{mod.producer}</span>
                       <h3>
-                        <Link to={`/modlar/${mod.slug}`} className="mod-card__title-link">
+                        <Link
+                          to={`/modlar/${mod.slug}`}
+                          className="mod-card__title-link"
+                          onClick={() => api.trackContentClick(mod.slug)}
+                        >
                           {mod.name}
                         </Link>
                       </h3>
@@ -268,6 +276,7 @@ function ModGallery() {
                         <Link
                           to={`/modlar/${mod.slug}`}
                           className="mod-card__btn mod-card__btn--detail"
+                          onClick={() => api.trackContentClick(mod.slug)}
                         >
                           İncele <ArrowRight size={15} />
                         </Link>
@@ -278,6 +287,7 @@ function ModGallery() {
                             target="_blank"
                             rel="noreferrer"
                             title="Doğrudan İndir"
+                            onClick={() => api.trackContentDownload(mod.slug)}
                           >
                             <Download size={15} />
                           </a>
@@ -288,6 +298,7 @@ function ModGallery() {
                             target="_blank"
                             rel="noreferrer"
                             title="Özel Talep / İletişim"
+                            onClick={() => api.trackContentClick(mod.slug)}
                           >
                             <ArrowUpRight size={15} />
                           </a>

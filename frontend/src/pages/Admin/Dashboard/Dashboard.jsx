@@ -5,6 +5,8 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Clock,
+  Download,
+  Eye,
   FileText,
   FolderTree,
   Loader2,
@@ -21,6 +23,8 @@ export default function Dashboard() {
     published: 0,
     drafts: 0,
     archived: 0,
+    totalViews: 0,
+    totalDownloads: 0,
     categories: 0,
   })
   const [recentContents, setRecentContents] = useState([])
@@ -44,12 +48,16 @@ export default function Dashboard() {
         const published = items.filter((i) => i.status === 'PUBLISHED').length
         const drafts = items.filter((i) => i.status === 'DRAFT').length
         const archived = items.filter((i) => i.status === 'ARCHIVED').length
+        const totalViews = contentsRes.totalViews ?? items.reduce((sum, c) => sum + (c.viewCount || 0), 0)
+        const totalDownloads = contentsRes.totalDownloads ?? items.reduce((sum, c) => sum + (c.downloadCount || 0), 0)
 
         setStats({
           total,
           published,
           drafts,
           archived,
+          totalViews,
+          totalDownloads,
           categories: categoriesRes.length,
         })
         setRecentContents(items.slice(0, 5))
@@ -247,6 +255,76 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          <div
+            style={{
+              background: '#121212',
+              border: '1px solid rgba(168, 85, 247, 0.28)',
+              borderRadius: '1rem',
+              padding: '1.4rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              boxShadow: '0 4px 20px rgba(127, 34, 201, 0.1)',
+            }}
+          >
+            <div
+              style={{
+                width: '3rem',
+                height: '3rem',
+                borderRadius: '0.75rem',
+                background: 'rgba(168, 85, 247, 0.18)',
+                color: '#c084fc',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              <Eye size={22} />
+            </div>
+            <div>
+              <span style={{ fontSize: '0.78rem', color: '#ffffff73', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Toplam Tıklanma
+              </span>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#c084fc' }}>
+                {loading ? '-' : (stats.totalViews || 0).toLocaleString('tr-TR')}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: '#121212',
+              border: '1px solid rgba(16, 185, 129, 0.28)',
+              borderRadius: '1rem',
+              padding: '1.4rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              boxShadow: '0 4px 20px rgba(16, 185, 129, 0.1)',
+            }}
+          >
+            <div
+              style={{
+                width: '3rem',
+                height: '3rem',
+                borderRadius: '0.75rem',
+                background: 'rgba(16, 185, 129, 0.18)',
+                color: '#34d399',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              <Download size={22} />
+            </div>
+            <div>
+              <span style={{ fontSize: '0.78rem', color: '#ffffff73', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Toplam İndirme
+              </span>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#34d399' }}>
+                {loading ? '-' : (stats.totalDownloads || 0).toLocaleString('tr-TR')}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Hızlı İşlemler & Son İçerikler */}
@@ -299,7 +377,7 @@ export default function Dashboard() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
                       <img
-                        src={getMediaUrl(content.coverImage?.thumbnailPath || content.coverImage?.filePath)}
+                        src={getMediaUrl(content.coverImage?.filePath || content.coverImage?.thumbnailPath)}
                         alt=""
                         style={{ width: '2.5rem', height: '2.5rem', borderRadius: '0.4rem', objectFit: 'cover' }}
                       />
@@ -312,21 +390,59 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-                    <span
-                      style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '999px',
-                        background:
-                          content.status === 'PUBLISHED'
-                            ? 'rgba(34, 197, 94, 0.2)'
-                            : 'rgba(234, 179, 8, 0.2)',
-                        color: content.status === 'PUBLISHED' ? '#4ade80' : '#facc15',
-                      }}
-                    >
-                      {content.status === 'PUBLISHED' ? 'Yayında' : 'Taslak'}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.45rem',
+                          borderRadius: '999px',
+                          background: 'rgba(168, 85, 247, 0.12)',
+                          border: '1px solid rgba(168, 85, 247, 0.25)',
+                          color: '#d8b4fe',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                        }}
+                        title="Tıklanma / Görüntülenme"
+                      >
+                        <Eye size={11} />
+                        {(content.viewCount || 0).toLocaleString('tr-TR')}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.45rem',
+                          borderRadius: '999px',
+                          background: 'rgba(16, 185, 129, 0.12)',
+                          border: '1px solid rgba(16, 185, 129, 0.25)',
+                          color: '#6ee7b7',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                        }}
+                        title="İndirme Sayısı"
+                      >
+                        <Download size={11} />
+                        {(content.downloadCount || 0).toLocaleString('tr-TR')}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '999px',
+                          background:
+                            content.status === 'PUBLISHED'
+                              ? 'rgba(34, 197, 94, 0.2)'
+                              : 'rgba(234, 179, 8, 0.2)',
+                          color: content.status === 'PUBLISHED' ? '#4ade80' : '#facc15',
+                        }}
+                      >
+                        {content.status === 'PUBLISHED' ? 'Yayında' : 'Taslak'}
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>

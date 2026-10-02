@@ -53,7 +53,7 @@ function Store() {
           category: item.category?.slug || 'vehicles',
           parentCategory: item.category?.parent?.slug || null,
           gameName: item.game?.name || 'Assetto Corsa',
-          image: getMediaUrl(item.coverImage?.thumbnailPath || item.coverImage?.filePath),
+          image: getMediaUrl(item.coverImage?.filePath || item.coverImage?.thumbnailPath),
           description: item.shortDescription || item.description || '',
           priceLabel: item.priceLabel || (item.price ? `${item.price} ₺` : 'Fiyat için iletişime geç'),
           detailPath: `/magaza/${item.slug}`,
@@ -198,7 +198,10 @@ function Store() {
                       <p>{product.description}</p>
                       <div className="product-footer">
                         <strong>{product.priceLabel}</strong>
-                        <a href={product.detailPath || INSTAGRAM_URL}>
+                        <a
+                          href={product.detailPath || INSTAGRAM_URL}
+                          onClick={() => api.trackContentClick(product.slug)}
+                        >
                           Detaylar <ArrowUpRight size={17} />
                         </a>
                       </div>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
+import ContentReviews from '../../components/ContentReviews.jsx'
 import './ModDetail.css'
 
 const DEFAULT_INSTAGRAM = 'https://www.instagram.com/zecution_gaming/'
@@ -34,6 +35,7 @@ export default function ModDetail() {
         if (!mounted) return
         setMod(modData)
         setSettings(settingsData)
+        api.trackContentClick(slug)
 
         if (modData?.game?.slug) {
           try {
@@ -59,7 +61,7 @@ export default function ModDetail() {
     if (!mod?.media?.length) return [{ url: '/media/images/logo.jpg', thumbnail: '/media/images/logo.jpg', isVideo: false }]
     return mod.media.map((item) => {
       const url = getMediaUrl(item.filePath)
-      const thumbnail = getMediaUrl(item.thumbnailPath || item.filePath)
+      const thumbnail = getMediaUrl(item.filePath || item.thumbnailPath)
       const isVideo = item.mediaType === 'VIDEO' || /\.(mp4|webm|mov)(\?|$)/i.test(url)
       return { url, thumbnail, isVideo }
     })
@@ -148,10 +150,37 @@ export default function ModDetail() {
           </div>
 
           <aside className="mod-download-panel">
-            <span className="mod-panel-category">{categoryName}</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+              <span className="mod-panel-category">{categoryName}</span>
+              {(mod.publishedAt || mod.createdAt) && (
+                <span style={{ fontSize: '0.75rem', color: '#ffffff73', fontWeight: 500 }}>
+                  {new Date(mod.publishedAt || mod.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              )}
+            </div>
             <h2>{mod.title}</h2>
             <p>{mod.shortDescription || description}</p>
-            {mod.downloadUrl ? <a className="mod-primary-action" href={mod.downloadUrl} target="_blank" rel="noreferrer">Modu indir</a> : <a className="mod-primary-action" href={instagramUrl} target="_blank" rel="noreferrer">Instagram'dan iletişime geç</a>}
+            {mod.downloadUrl ? (
+              <a
+                className="mod-primary-action"
+                href={mod.downloadUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => api.trackContentDownload(mod.slug)}
+              >
+                Modu indir
+              </a>
+            ) : (
+              <a
+                className="mod-primary-action"
+                href={instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => api.trackContentClick(mod.slug)}
+              >
+                Instagram'dan iletişime geç
+              </a>
+            )}
             <a className="mod-secondary-action" href={discordUrl} target="_blank" rel="noreferrer">Discord sunucusu</a>
           </aside>
         </section>
@@ -170,13 +199,21 @@ export default function ModDetail() {
           </article>
         </section>
 
+        {/* Değerlendirme ve Yorum Yapma Kısmı */}
+        <ContentReviews slug={mod.slug} contentTitle={mod.title} />
+
         {relatedMods.length > 0 && (
           <section className="mod-related-section">
             <div className="mod-related-heading"><h2>Diğer modlar</h2></div>
             <div className="mod-related-grid">
               {relatedMods.map((item) => (
-                <Link key={item.id} to={`/modlar/${item.slug}`} className="mod-related-card">
-                  <img src={getMediaUrl(item.coverImage?.thumbnailPath || item.coverImage?.filePath)} alt={item.title} loading="lazy" />
+                <Link
+                  key={item.id}
+                  to={`/modlar/${item.slug}`}
+                  className="mod-related-card"
+                  onClick={() => api.trackContentClick(item.slug)}
+                >
+                  <img src={getMediaUrl(item.coverImage?.filePath || item.coverImage?.thumbnailPath)} alt={item.title} loading="lazy" />
                   <div><small>{item.game?.name || gameName}</small><h3>{item.title}</h3></div>
                 </Link>
               ))}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   Archive,
   CheckCircle2,
+  Download,
   Edit2,
   Eye,
   FileText,
@@ -247,6 +248,74 @@ export default function ContentList() {
           </form>
         </div>
 
+        {/* Toplam Tıklanma ve İndirme Özeti Barı */}
+        {!loading && contents.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              padding: '0.85rem 1.25rem',
+              marginBottom: '1rem',
+              background: 'rgba(127, 34, 201, 0.08)',
+              border: '1px solid rgba(127, 34, 201, 0.2)',
+              borderRadius: '0.65rem',
+            }}
+          >
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ded9e2', fontSize: '0.88rem' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    placeItems: 'center',
+                    width: '1.8rem',
+                    height: '1.8rem',
+                    borderRadius: '0.4rem',
+                    background: 'rgba(168, 85, 247, 0.2)',
+                    color: '#c084fc',
+                  }}
+                >
+                  <Eye size={15} />
+                </div>
+                <span>
+                  Toplam Tıklanma:{' '}
+                  <strong style={{ color: '#fff', fontSize: '1.05rem', marginLeft: '0.25rem' }}>
+                    {contents.reduce((sum, c) => sum + (c.viewCount || 0), 0).toLocaleString('tr-TR')}
+                  </strong>
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ded9e2', fontSize: '0.88rem' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    placeItems: 'center',
+                    width: '1.8rem',
+                    height: '1.8rem',
+                    borderRadius: '0.4rem',
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    color: '#34d399',
+                  }}
+                >
+                  <Download size={15} />
+                </div>
+                <span>
+                  Toplam İndirme:{' '}
+                  <strong style={{ color: '#34d399', fontSize: '1.05rem', marginLeft: '0.25rem' }}>
+                    {contents.reduce((sum, c) => sum + (c.downloadCount || 0), 0).toLocaleString('tr-TR')}
+                  </strong>
+                </span>
+              </div>
+            </div>
+
+            <span style={{ fontSize: '0.8rem', color: '#ffffff73' }}>
+              {contents.length} içerik gösteriliyor
+            </span>
+          </div>
+        )}
+
         {/* Tablo */}
         <div
           style={{
@@ -274,6 +343,16 @@ export default function ContentList() {
                   <th style={{ padding: '0.85rem 1rem' }}>Bölüm & Kategori</th>
                   <th style={{ padding: '0.85rem 1rem' }}>Oyun</th>
                   <th style={{ padding: '0.85rem 1rem' }}>Durum</th>
+                  <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#c084fc' }}>
+                      <Eye size={14} /> Tıklanma
+                    </div>
+                  </th>
+                  <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#34d399' }}>
+                      <Download size={14} /> İndirme
+                    </div>
+                  </th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>İşlemler</th>
                 </tr>
               </thead>
@@ -288,7 +367,7 @@ export default function ContentList() {
                   >
                     <td style={{ padding: '0.85rem 1rem' }}>
                       <img
-                        src={getMediaUrl(item.coverImage?.thumbnailPath || item.coverImage?.filePath)}
+                        src={getMediaUrl(item.coverImage?.filePath || item.coverImage?.thumbnailPath)}
                         alt=""
                         style={{ width: '3.2rem', height: '2.4rem', borderRadius: '0.35rem', objectFit: 'cover' }}
                       />
@@ -340,6 +419,63 @@ export default function ContentList() {
                         }}
                       >
                         {item.status === 'PUBLISHED' ? 'Yayında' : item.status === 'ARCHIVED' ? 'Arşiv' : 'Taslak'}
+                      </span>
+                      {(item.publishedAt || item.createdAt) && (
+                        <div
+                          style={{
+                            fontSize: '0.72rem',
+                            color: '#ffffff66',
+                            marginTop: '0.25rem',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title="Yapılış / Yayınlanma Tarihi"
+                        >
+                          {new Date(item.publishedAt || item.createdAt).toLocaleDateString('tr-TR', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '0.22rem 0.65rem',
+                          borderRadius: '999px',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          background: 'rgba(168, 85, 247, 0.12)',
+                          border: '1px solid rgba(168, 85, 247, 0.28)',
+                          color: '#d8b4fe',
+                        }}
+                        title={`${item.viewCount || 0} kez tıklandı / görüntülendi`}
+                      >
+                        <Eye size={13} />
+                        {(item.viewCount || 0).toLocaleString('tr-TR')}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '0.22rem 0.65rem',
+                          borderRadius: '999px',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          background: 'rgba(16, 185, 129, 0.12)',
+                          border: '1px solid rgba(16, 185, 129, 0.28)',
+                          color: '#6ee7b7',
+                        }}
+                        title={`${item.downloadCount || 0} kez doğrudan indirildi`}
+                      >
+                        <Download size={13} />
+                        {(item.downloadCount || 0).toLocaleString('tr-TR')}
                       </span>
                     </td>
                     <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>

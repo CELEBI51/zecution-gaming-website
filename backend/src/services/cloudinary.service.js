@@ -55,23 +55,17 @@ export async function uploadBufferToCloudinary(buffer, options = {}) {
         // Otomatik thumbnail URL'i üret
         let thumbnailPath
         if (isVideo) {
-          // Cloudinary video thumbnail'ini .jpg olarak üretir
           thumbnailPath = cloudinary.url(result.public_id, {
             resource_type: 'video',
             format: 'jpg',
-            width: 480,
+            width: 1280,
             crop: 'scale',
+            quality: 'auto:best',
             secure: true,
           })
         } else {
-          thumbnailPath = cloudinary.url(result.public_id, {
-            resource_type: 'image',
-            format: 'webp',
-            width: 480,
-            crop: 'scale',
-            quality: 'auto',
-            secure: true,
-          })
+          // Orijinal yüksek çözünürlüklü ve kayıpsız görseli koru
+          thumbnailPath = result.secure_url
         }
 
         resolve({

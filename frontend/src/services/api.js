@@ -4,14 +4,12 @@ const isLocalhost =
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 const localHost = isBrowser && window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost'
 
-const RENDER_BACKEND_URL = 'https://zecution-gaming-website.onrender.com'
-
 const API_BASE =
   import.meta.env.VITE_API_URL ||
-  (isLocalhost ? `http://${localHost}:4000/api` : `${RENDER_BACKEND_URL}/api`)
+  (isLocalhost ? `http://${localHost}:4000/api` : '/api')
 export const UPLOAD_BASE =
   import.meta.env.VITE_UPLOAD_URL ||
-  (isLocalhost ? `http://${localHost}:4000` : RENDER_BACKEND_URL)
+  (isLocalhost ? `http://${localHost}:4000` : '')
 
 export function getMediaUrl(path) {
   if (!path) return '/media/images/logo.jpg'
@@ -129,6 +127,93 @@ export const api = {
   async getContentBySlug(slug) {
     const res = await request(`/contents/${slug}`)
     return res.data
+  },
+
+  async trackContentClick(slugOrId) {
+    if (!slugOrId) return null
+    const key = String(slugOrId).toLowerCase().trim()
+    const now = Date.now()
+    
+    // Tarayıcı oturumunda/belleğinde 10 saniye içinde mükerrer istekleri engelle
+    if (this._trackedClicks && this._trackedClicks[key] && now - this._trackedClicks[key] < 10000) {
+      return null
+    }
+    if (!this._trackedClicks) this._trackedClicks = {}
+    this._trackedClicks[key] = now
+
+    try {
+      const res = await request(`/contents/${encodeURIComponent(slugOrId)}/click`, {
+        method: 'POST',
+      })
+      return res.data
+    } catch {
+      return null
+    }
+  },
+
+  async trackContentDownload(slugOrId) {
+    if (!slugOrId) return null
+    const key = String(slugOrId).toLowerCase().trim()
+    const now = Date.now()
+
+    // 8 saniye içinde mükerrer indirme isteklerini engelle
+    if (this._trackedDownloads && this._trackedDownloads[key] && now - this._trackedDownloads[key] < 8000) {
+      return null
+    }
+    if (!this._trackedDownloads) this._trackedDownloads = {}
+    this._trackedDownloads[key] = now
+
+    try {
+      const res = await request(`/contents/${encodeURIComponent(slugOrId)}/download`, {
+        method: 'POST',
+      })
+      return res.data
+    } catch {
+      return null
+    }
+  },
+
+  // ----------------- TEPKİLER (REACTIONS / EMOJİLER) -----------------
+  async getContentReactions(slugOrId) {
+    if (!slugOrId) return { reactions: {}, userReactions: [] }
+    try {
+      const res = await request(`/contents/${encodeURIComponent(slugOrId)}/reactions`)
+      return res
+    } catch {
+      return { reactions: {}, userReactions: [] }
+    }
+  },
+
+  async toggleContentReaction(slugOrId, emoji) {
+    if (!slugOrId || !emoji) return null
+    return request(`/contents/${encodeURIComponent(slugOrId)}/reactions`, {
+      method: 'POST',
+      body: JSON.stringify({ emoji }),
+    })
+  },
+
+  // ----------------- DEĞERLENDİRME & YORUMLAR (REVIEWS) -----------------
+  async getContentReviews(slugOrId, params = {}) {
+    if (!slugOrId) return { items: [], stats: { averageRating: 5, totalReviews: 0 } }
+    const search = new URLSearchParams(params).toString()
+    try {
+      const res = await request(`/contents/${encodeURIComponent(slugOrId)}/reviews${search ? `?${search}` : ''}`)
+      return res
+    } catch {
+      return { items: [], stats: { averageRating: 5, totalReviews: 0 } }
+    }
+  },
+
+  async addContentReview(slugOrId, reviewData) {
+    if (!slugOrId) return null
+    return request(`/contents/${encodeURIComponent(slugOrId)}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    })
+  },
+
+  async deleteContentReview(reviewId) {
+    return request(`/admin/contents/reviews/${reviewId}`, { method: 'DELETE' })
   },
 
   async getSettings() {

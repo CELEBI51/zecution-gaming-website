@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Check,
+  Download,
+  Eye,
   Loader2,
   Plus,
   Save,
@@ -13,6 +15,23 @@ import {
 import { api, getMediaUrl } from '../../../services/api.js'
 import './ContentForm.css'
 import { categoryRows } from '../../../utils/categories.js'
+
+function formatDateForInput(dateVal) {
+  if (!dateVal) return ''
+  try {
+    const d = new Date(dateVal)
+    if (isNaN(d.getTime())) return ''
+    const pad = (n) => String(n).padStart(2, '0')
+    const year = d.getFullYear()
+    const month = pad(d.getMonth() + 1)
+    const day = pad(d.getDate())
+    const hours = pad(d.getHours())
+    const minutes = pad(d.getMinutes())
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  } catch {
+    return ''
+  }
+}
 
 export default function ContentForm() {
   const { id } = useParams()
@@ -29,7 +48,7 @@ export default function ContentForm() {
   const [formData, setFormData] = useState({
     title: '',
     section: 'STORE',
-    status: 'DRAFT',
+    status: 'PUBLISHED',
     saleMethod: 'CONTACT',
     gameId: '',
     categoryId: '',
@@ -40,6 +59,10 @@ export default function ContentForm() {
     priceLabel: 'Fiyat için iletişime geç',
     downloadUrl: '',
     isFeatured: false,
+    viewCount: 0,
+    downloadCount: 0,
+    publishedAt: formatDateForInput(new Date()),
+    slug: '',
   })
 
   const [games, setGames] = useState([])
@@ -80,6 +103,10 @@ export default function ContentForm() {
             priceLabel: content.priceLabel || '',
             downloadUrl: content.downloadUrl || '',
             isFeatured: Boolean(content.isFeatured),
+            viewCount: content.viewCount || 0,
+            downloadCount: content.downloadCount || 0,
+            publishedAt: formatDateForInput(content.publishedAt || content.createdAt),
+            slug: content.slug || '',
           })
 
           setMediaList(content.media || [])
@@ -127,11 +154,12 @@ export default function ContentForm() {
       ...formData,
       gameId: formData.gameId || null,
       categoryId: formData.categoryId || null,
-      status: isEdit ? formData.status : 'DRAFT',
+      status: formData.status || 'PUBLISHED',
       saleMethod: formData.section === 'STORE' ? 'CONTACT' : 'FREE',
       price: formData.section === 'STORE' && formData.price ? Number(formData.price) : null,
       priceLabel: formData.section === 'STORE' ? formData.priceLabel : null,
       downloadUrl: formData.section === 'GALLERY' ? formData.downloadUrl : null,
+      publishedAt: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
     }
 
     try {
@@ -277,6 +305,46 @@ export default function ContentForm() {
             <ArrowLeft size={16} />
           </button>
           <h1>{isEdit ? `Düzenle: ${formData.title}` : 'Yeni İçerik Ekle'}</h1>
+          {isEdit && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '999px',
+                  background: 'rgba(168, 85, 247, 0.15)',
+                  border: '1px solid rgba(168, 85, 247, 0.3)',
+                  color: '#d8b4fe',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                }}
+                title="Toplam Tıklanma / Görüntülenme"
+              >
+                <Eye size={13} />
+                {(formData.viewCount || 0).toLocaleString('tr-TR')} tıklanma
+              </span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '999px',
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  color: '#6ee7b7',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                }}
+                title="Toplam Doğrudan İndirme"
+              >
+                <Download size={13} />
+                {(formData.downloadCount || 0).toLocaleString('tr-TR')} indirme
+              </span>
+            </div>
+          )}
         </div>
         <button
           type="button"
@@ -311,6 +379,98 @@ export default function ContentForm() {
         {error && (
           <div style={{ padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '0.5rem', color: '#f87171', marginBottom: '1.25rem', fontSize: '0.85rem' }}>
             {error}
+          </div>
+        )}
+
+        {isEdit && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              padding: '0.9rem 1.25rem',
+              marginBottom: '1.25rem',
+              background: 'rgba(168, 85, 247, 0.08)',
+              border: '1px solid rgba(168, 85, 247, 0.25)',
+              borderRadius: '0.75rem',
+            }}
+          >
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    placeItems: 'center',
+                    width: '2.4rem',
+                    height: '2.4rem',
+                    borderRadius: '0.5rem',
+                    background: 'rgba(168, 85, 247, 0.2)',
+                    color: '#c084fc',
+                  }}
+                >
+                  <Eye size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.74rem', color: '#ffffff73', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Tıklanma / Görüntülenme
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
+                    {(formData.viewCount || 0).toLocaleString('tr-TR')}{' '}
+                    <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#c084fc' }}>kez</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    placeItems: 'center',
+                    width: '2.4rem',
+                    height: '2.4rem',
+                    borderRadius: '0.5rem',
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    color: '#34d399',
+                  }}
+                >
+                  <Download size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.74rem', color: '#ffffff73', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    İndirme Sayısı
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
+                    {(formData.downloadCount || 0).toLocaleString('tr-TR')}{' '}
+                    <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#34d399' }}>kez</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {formData.slug && (
+              <a
+                href={formData.section === 'STORE' ? `/magaza/${formData.slug}` : `/modlar/${formData.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: '#d8b4fe',
+                  textDecoration: 'none',
+                  padding: '0.45rem 0.85rem',
+                  borderRadius: '0.45rem',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  transition: 'background 0.2s',
+                }}
+              >
+                Sitede Görüntüle ↗
+              </a>
+            )}
           </div>
         )}
 
@@ -378,16 +538,14 @@ export default function ContentForm() {
                 </select>
               </div>
 
-              {isEdit && (
               <div className="form-field">
                 <label htmlFor="status">Yayın Durumu *</label>
                 <select id="status" name="status" value={formData.status} onChange={handleChange}>
-                  <option value="DRAFT">Taslak (Yalnızca Admin)</option>
                   <option value="PUBLISHED">Yayında (Sitede Görünür)</option>
+                  <option value="DRAFT">Taslak (Yalnızca Admin)</option>
                   <option value="ARCHIVED">Arşiv (Gizli)</option>
                 </select>
               </div>
-              )}
             </div>
 
             <div className="form-grid-2">
@@ -419,9 +577,25 @@ export default function ContentForm() {
             </div>
 
             <div className="form-grid-2">
+              <div className="form-field">
+                <label htmlFor="publishedAt">
+                  Yayınlanma / Yapılış Tarihi *
+                </label>
+                <input
+                  id="publishedAt"
+                  name="publishedAt"
+                  type="datetime-local"
+                  value={formData.publishedAt}
+                  onChange={handleChange}
+                  style={{ colorScheme: 'dark' }}
+                />
+                <small style={{ color: '#aaa', fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                  Modun yapılış veya yayınlanma tarihi. Modları daha sonradan sisteme yükleseniz bile buraya girdiğiniz tarihe göre sıralanır.
+                </small>
+              </div>
 
               <div className="form-field" style={{ justifyContent: 'center' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', marginTop: '1.2rem' }}>
                   <input
                     name="isFeatured"
                     type="checkbox"
@@ -550,11 +724,11 @@ export default function ContentForm() {
                         <div className="media-card" key={media.id}>
                           {isVideo ? (
                             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                              <img src={getMediaUrl(media.thumbnailPath || media.filePath)} alt="" />
+                              <img src={getMediaUrl(media.filePath || media.thumbnailPath)} alt="" />
                               <span style={{ position: 'absolute', bottom: '6px', left: '6px', background: 'rgba(0,0,0,0.7)', color: '#d880ff', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>VIDEO</span>
                             </div>
                           ) : (
-                            <img src={getMediaUrl(media.thumbnailPath || media.filePath)} alt="" />
+                            <img src={getMediaUrl(media.filePath || media.thumbnailPath)} alt="" />
                           )}
                           {media.isCover && <span className="media-card-badge">Kapak</span>}
                           <div className="media-card-actions">

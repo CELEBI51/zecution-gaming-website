@@ -100,6 +100,8 @@ export async function listPublicContents({
         priceLabel: true,
         downloadUrl: true,
         isFeatured: true,
+        viewCount: true,
+        downloadCount: true,
         publishedAt: true,
         game: {
           select: { id: true, name: true, slug: true },
@@ -190,7 +192,262 @@ export async function getPublicContentBySlug(slug) {
     throw new NotFoundError('İçerik bulunamadı')
   }
 
+  return {
+    ...content,
+    viewCount: content.viewCount || 0,
+  }
+}
+
+// Kısa süreli mükerrer tıklama / spam koruması (IP + İçerik ID bazlı cooldown)
+const recentClicks = new Map()
+const recentDownloads = new Map()
+
+if (typeof setInterval !== 'undefined') {
+  const timer = setInterval(() => {
+    const now = Date.now()
+    for (const [key, timestamp] of recentClicks.entries()) {
+      if (now - timestamp > 60000) {
+        recentClicks.delete(key)
+      }
+    }
+    for (const [key, timestamp] of recentDownloads.entries()) {
+      if (now - timestamp > 60000) {
+        recentDownloads.delete(key)
+      }
+    }
+  }, 300000)
+  timer.unref?.()
+}
+
+/**
+ * İçeriğin tıklanma / görüntülenme sayısını doğrudan artırır.
+ */
+export async function incrementContentView(slugOrId, { ipAddress = 'client' } = {}) {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)
+  const where = isUuid ? { id: slugOrId } : { slug: slugOrId }
+
+  const content = await prisma.content.findFirst({
+    where: { ...where, deletedAt: null },
+    select: { id: true, slug: true, viewCount: true },
+  })
+
+  if (!content) {
+    throw new NotFoundError('İçerik bulunamadı')
+  }
+
+  const cacheKey = `${ipAddress}:${content.id}`
+  const now = Date.now()
+  const lastClickTime = recentClicks.get(cacheKey)
+
+  // 10 saniye içinde aynı kaynaktan gelen mükerrer istekleri sayma
+  if (lastClickTime && now - lastClickTime < 10000) {
+    return content
+  }
+
+  recentClicks.set(cacheKey, now)
+
+  const updated = await prisma.content.update({
+    where: { id: content.id },
+    data: { viewCount: { increment: 1 } },
+    select: { id: true, slug: true, viewCount: true },
+  })
+
+  return updated
+}
+
+/**
+ * İçeriğin indirilme sayısını doğrudan artırır.
+ */
+export async function incrementContentDownload(slugOrId, { ipAddress = 'client' } = {}) {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)
+  const where = isUuid ? { id: slugOrId } : { slug: slugOrId }
+
+  const content = await prisma.content.findFirst({
+    where: { ...where, deletedAt: null },
+    select: { id: true, slug: true, downloadCount: true, viewCount: true },
+  })
+
+  if (!content) {
+    throw new NotFoundError('İçerik bulunamadı')
+  }
+
+  const cacheKey = `${ipAddress}:${content.id}`
+  const now = Date.now()
+  const lastDownloadTime = recentDownloads.get(cacheKey)
+
+  // 8 saniye içinde aynı kaynaktan gelen mükerrer indirme isteklerini sayma
+  if (lastDownloadTime && now - lastDownloadTime < 8000) {
+    return content
+  }
+
+  recentDownloads.set(cacheKey, now)
+
+  const updated = await prisma.content.update({
+    where: { id: content.id },
+    data: { downloadCount: { increment: 1 } },
+    select: { id: true, slug: true, downloadCount: true, viewCount: true },
+  })
+
+  return updated
+}
+
+// ------------------- REACTION (EMOJİ) VE DEĞERLENDİRME / YORUM SERVİSLERİ -------------------
+
+async function resolveContent(slugOrId) {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)
+  const where = isUuid ? { id: slugOrId } : { slug: slugOrId }
+  const content = await prisma.content.findFirst({
+    where: { ...where, deletedAt: null },
+    select: { id: true, slug: true, title: true },
+  })
+  if (!content) throw new NotFoundError('İçerik bulunamadı')
   return content
+}
+
+export const ALLOWED_EMOJIS = ['🔥', '❤️', '👍', '🚀', '🚗', '⭐']
+
+export async function getContentReactions(slugOrId, clientIp = 'client') {
+  const content = await resolveContent(slugOrId)
+
+  const grouped = await prisma.contentReaction.groupBy({
+    by: ['emoji'],
+    where: { contentId: content.id },
+    _count: { emoji: true },
+  })
+
+  const reactions = {}
+  for (const e of ALLOWED_EMOJIS) {
+    reactions[e] = 0
+  }
+  for (const g of grouped) {
+    reactions[g.emoji] = g._count.emoji
+  }
+
+  const userReactionsList = await prisma.contentReaction.findMany({
+    where: { contentId: content.id, clientIp },
+    select: { emoji: true },
+  })
+  const userReactions = userReactionsList.map((r) => r.emoji)
+
+  return { reactions, userReactions }
+}
+
+export async function toggleContentReaction(slugOrId, emoji, clientIp = 'client') {
+  const content = await resolveContent(slugOrId)
+
+  const existing = await prisma.contentReaction.findUnique({
+    where: {
+      contentId_emoji_clientIp: {
+        contentId: content.id,
+        emoji,
+        clientIp,
+      },
+    },
+  })
+
+  if (existing) {
+    await prisma.contentReaction.delete({ where: { id: existing.id } })
+  } else {
+    await prisma.contentReaction.create({
+      data: {
+        contentId: content.id,
+        emoji,
+        clientIp,
+      },
+    })
+  }
+
+  return getContentReactions(content.id, clientIp)
+}
+
+export async function getContentReviews(slugOrId, { page = 1, limit = 20 } = {}) {
+  const content = await resolveContent(slugOrId)
+  const skip = (page - 1) * limit
+
+  const [total, agg, reviews] = await Promise.all([
+    prisma.contentReview.count({
+      where: { contentId: content.id, isApproved: true },
+    }),
+    prisma.contentReview.aggregate({
+      where: { contentId: content.id, isApproved: true },
+      _avg: { rating: true },
+      _count: { id: true },
+    }),
+    prisma.contentReview.findMany({
+      where: { contentId: content.id, isApproved: true },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        authorName: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+      },
+    }),
+  ])
+
+  const avgRating = agg._avg.rating ? Number(agg._avg.rating.toFixed(1)) : 5.0
+
+  return {
+    items: reviews,
+    stats: {
+      averageRating: avgRating,
+      totalReviews: total,
+    },
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit) || 1,
+    },
+  }
+}
+
+const recentReviews = new Map()
+
+export async function addContentReview(slugOrId, { authorName, rating, comment }, clientIp = 'client') {
+  const content = await resolveContent(slugOrId)
+
+  const cacheKey = `${clientIp}:${content.id}`
+  const now = Date.now()
+  const lastTime = recentReviews.get(cacheKey)
+  if (lastTime && now - lastTime < 15000) {
+    throw new BadRequestError('Çok sık değerlendirme gönderiyorsunuz. Lütfen biraz bekleyin.')
+  }
+  recentReviews.set(cacheKey, now)
+
+  const review = await prisma.contentReview.create({
+    data: {
+      contentId: content.id,
+      authorName: authorName.trim(),
+      rating: Math.max(1, Math.min(5, Math.round(rating))),
+      comment: comment.trim(),
+      clientIp,
+      isApproved: true,
+    },
+    select: {
+      id: true,
+      authorName: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+    },
+  })
+
+  const { stats } = await getContentReviews(content.id)
+
+  return { review, stats }
+}
+
+export async function deleteContentReview(reviewId) {
+  try {
+    return await prisma.contentReview.delete({ where: { id: reviewId } })
+  } catch (err) {
+    if (err?.code === 'P2025') throw new NotFoundError('Değerlendirme bulunamadı')
+    throw err
+  }
 }
 
 // ------------------- ADMIN SERVİSLERİ -------------------
@@ -216,8 +473,14 @@ export async function listAdminContents({
 
   const skip = (page - 1) * limit
 
-  const [total, items] = await Promise.all([
+  const [total, totalsAgg, items] = await Promise.all([
     prisma.content.count({ where }),
+    prisma.content.aggregate
+      ? prisma.content.aggregate({
+          _sum: { viewCount: true, downloadCount: true },
+          where: { deletedAt: null },
+        })
+      : Promise.resolve({ _sum: { viewCount: 0, downloadCount: 0 } }),
     prisma.content.findMany({
       where,
       skip,
@@ -241,6 +504,8 @@ export async function listAdminContents({
       coverImage: item.media[0] || null,
       media: undefined,
     })),
+    totalViews: totalsAgg?._sum?.viewCount || 0,
+    totalDownloads: totalsAgg?._sum?.downloadCount || 0,
     pagination: {
       page,
       limit,
@@ -280,13 +545,24 @@ export async function createContent(data) {
     ? await generateUniqueSlug(data.slug)
     : await generateUniqueSlug(data.title)
 
+  // Kullanıcı tarafından girilen yapılış/yayınlanma tarihi
+  const customDate = data.publishedAt || data.createdAt
+  const publishedAt = customDate || (data.status === 'PUBLISHED' ? new Date() : null)
+
+  const createData = {
+    ...data,
+    slug,
+    downloadUrl: data.downloadUrl || null,
+    publishedAt,
+  }
+
+  // Özel tarih girildiyse kronolojik sıralama (createdAt) için de bu tarihi kullan
+  if (customDate) {
+    createData.createdAt = customDate
+  }
+
   return prisma.content.create({
-    data: {
-      ...data,
-      slug,
-      downloadUrl: data.downloadUrl || null,
-      publishedAt: data.status === 'PUBLISHED' ? new Date() : null,
-    },
+    data: createData,
     include: {
       game: true,
       category: true,
@@ -307,7 +583,18 @@ export async function updateContent(id, data) {
     updateData.slug = await generateUniqueSlug(data.slug, id)
   }
 
-  if (data.status === 'PUBLISHED' && existing.status !== 'PUBLISHED' && !existing.publishedAt) {
+  // Tarih güncellemesi (yapılış / yayınlanma tarihi)
+  if (data.publishedAt !== undefined) {
+    updateData.publishedAt = data.publishedAt
+    if (data.publishedAt) {
+      updateData.createdAt = data.publishedAt
+    }
+  } else if (data.createdAt !== undefined && data.createdAt) {
+    updateData.createdAt = data.createdAt
+    if (existing.status === 'PUBLISHED' && !existing.publishedAt) {
+      updateData.publishedAt = data.createdAt
+    }
+  } else if (data.status === 'PUBLISHED' && existing.status !== 'PUBLISHED' && !existing.publishedAt) {
     updateData.publishedAt = new Date()
   }
 

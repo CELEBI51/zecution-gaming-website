@@ -39,6 +39,34 @@ export const createContentSchema = z.object({
   downloadUrl: z.string().url('Geçerli bir URL giriniz').nullable().optional().or(z.literal('')),
   isFeatured: z.boolean().default(false),
   sortOrder: z.coerce.number().int().default(0),
+  publishedAt: z
+    .union([z.string(), z.date()])
+    .nullable()
+    .optional()
+    .transform((val) => {
+      if (!val || val === '') return null
+      const d = new Date(val)
+      return isNaN(d.getTime()) ? null : d
+    }),
+  createdAt: z
+    .union([z.string(), z.date()])
+    .nullable()
+    .optional()
+    .transform((val) => {
+      if (!val || val === '') return null
+      const d = new Date(val)
+      return isNaN(d.getTime()) ? null : d
+    }),
 })
 
 export const updateContentSchema = createContentSchema.partial()
+
+export const toggleReactionSchema = z.object({
+  emoji: z.string().min(1, 'Emoji zorunludur').max(16, 'Geçersiz emoji').trim(),
+})
+
+export const createReviewSchema = z.object({
+  authorName: z.string().min(2, 'Adınız en az 2 karakter olmalıdır').max(50, 'Adınız en fazla 50 karakter olabilir').trim(),
+  rating: z.coerce.number().int().min(1, 'Puan en az 1 olmalıdır').max(5, 'Puan en fazla 5 olabilir').default(5),
+  comment: z.string().min(3, 'Yorum en az 3 karakter olmalıdır').max(1000, 'Yorum en fazla 1000 karakter olabilir').trim(),
+})

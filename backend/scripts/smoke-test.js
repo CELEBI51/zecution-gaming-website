@@ -11,21 +11,21 @@ const assertResponse = (response, label) => {
 try {
   const health = await request(app).get('/health')
   const games = await request(app).get('/api/games')
-  const store = await request(app).get('/api/contents').query({ section: 'STORE' })
-  const polo = await request(app).get('/api/contents/vw-polo-1-4-tdi')
+  const gallery = await request(app).get('/api/contents').query({ section: 'GALLERY' })
+  const activeSlug = gallery.body.items?.[0]?.slug || 'bmw-e36-320i-convertible-1997'
+  const detail = await request(app).get(`/api/contents/${activeSlug}`)
 
   assertResponse(health, 'Health')
   assertResponse(games, 'Games')
-  assertResponse(store, 'Store')
-  assertResponse(polo, 'Polo detail')
+  assertResponse(detail, 'Content detail')
 
   const result = {
     health: health.body.status,
     games: games.body.data.length,
-    storeItems: store.body.items.length,
-    poloTitle: polo.body.data.title,
-    poloMedia: polo.body.data.media.length,
-    poloFeatures: polo.body.data.features.length,
+    galleryItems: gallery.body.items.length,
+    detailTitle: detail.body.data.title,
+    detailMedia: detail.body.data.media.length,
+    detailViewCount: detail.body.data.viewCount,
   }
 
   console.log(JSON.stringify(result, null, 2))

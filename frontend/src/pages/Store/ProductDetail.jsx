@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
+import ContentReviews from '../../components/ContentReviews.jsx'
 import './ProductDetail.css'
 
 const DEFAULT_INSTAGRAM = 'https://www.instagram.com/zecution_gaming/'
@@ -30,6 +31,7 @@ function ProductDetail() {
         if (!mounted) return
         setProduct(content)
         setSettings(siteSettings)
+        api.trackContentClick(slug)
       } catch (loadError) {
         if (mounted) setError(loadError.message || 'Ürün detayları yüklenemedi.')
       } finally {
@@ -63,7 +65,7 @@ function ProductDetail() {
   const mediaItems = product.media?.length
     ? product.media.map((media) => {
         const url = getMediaUrl(media.filePath)
-        const thumbnail = getMediaUrl(media.thumbnailPath || media.filePath)
+        const thumbnail = getMediaUrl(media.filePath || media.thumbnailPath)
         const isVideo = media.mediaType === 'VIDEO' || /\.(mp4|webm|mov)(\?|$)/i.test(url)
         return { url, thumbnail, isVideo }
       })
@@ -181,6 +183,9 @@ function ProductDetail() {
             ) : <p>Bu ürün için özellik bilgisi henüz eklenmedi.</p>}
           </article>
         </section>
+
+        {/* Değerlendirme ve Yorum Yapma Kısmı */}
+        <ContentReviews slug={product.slug} contentTitle={product.title} />
       </main>
 
       <footer className="product-detail-footer">

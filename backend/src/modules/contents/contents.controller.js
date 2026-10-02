@@ -18,6 +18,74 @@ export async function getPublicContent(req, res, next) {
   }
 }
 
+export async function trackContentView(req, res, next) {
+  try {
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
+    const result = await contentsService.incrementContentView(req.params.slugOrId, { ipAddress })
+    res.json({ success: true, data: result })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function trackContentDownload(req, res, next) {
+  try {
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
+    const result = await contentsService.incrementContentDownload(req.params.slugOrId, { ipAddress })
+    res.json({ success: true, data: result })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function getContentReactions(req, res, next) {
+  try {
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
+    const result = await contentsService.getContentReactions(req.params.slugOrId, ipAddress)
+    res.json({ success: true, ...result })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function toggleContentReaction(req, res, next) {
+  try {
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
+    const result = await contentsService.toggleContentReaction(req.params.slugOrId, req.body.emoji, ipAddress)
+    res.json({ success: true, ...result })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function getContentReviews(req, res, next) {
+  try {
+    const result = await contentsService.getContentReviews(req.params.slugOrId, req.query)
+    res.json({ success: true, ...result })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function addContentReview(req, res, next) {
+  try {
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'client'
+    const result = await contentsService.addContentReview(req.params.slugOrId, req.body, ipAddress)
+    res.status(201).json({ success: true, ...result })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function deleteContentReview(req, res, next) {
+  try {
+    await contentsService.deleteContentReview(req.params.reviewId)
+    res.json({ success: true, message: 'Değerlendirme silindi' })
+  } catch (error) {
+    next(error)
+  }
+}
+
 // Admin controllers
 export async function getAdminContents(req, res, next) {
   try {

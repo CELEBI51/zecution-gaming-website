@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const content = vi.hoisted(() => ({
-  count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(),
+  count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), aggregate: vi.fn(),
 }))
 vi.mock('../src/config/database.js', () => ({ prisma: { content } }))
 import { createContent, listAdminContents, listPublicContents } from '../src/modules/contents/contents.service.js'
@@ -11,6 +11,7 @@ describe('Content creation and listing', () => {
     vi.resetAllMocks()
     content.count.mockResolvedValue(0)
     content.findMany.mockResolvedValue([])
+    content.aggregate.mockResolvedValue({ _sum: { viewCount: 0, downloadCount: 0 } })
   })
 
   it.each([listAdminContents, listPublicContents])('lists newest creations first, regardless of manual priority or edits', async (list) => {
