@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AlertCircle, Check, Trash2, X, UploadCloud, Search, ExternalLink } from 'lucide-react'
 import { api } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 import {
   modSubmissionStatuses,
   modSubmissionSaleTypes,
@@ -250,7 +251,7 @@ export default function ModSubmissionList() {
                             )}
                             <div>
                               <Link
-                                to={`/admin/mod-basvurulari/${item.id}`}
+                                to={adminPath(`mod-basvurulari/${item.id}`)}
                                 style={{
                                   fontWeight: 700,
                                   color: '#fff',
@@ -311,7 +312,7 @@ export default function ModSubmissionList() {
                         </td>
                         <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                           <Link
-                            to={`/admin/mod-basvurulari/${item.id}`}
+                            to={adminPath(`mod-basvurulari/${item.id}`)}
                             className="quote-admin-button"
                             style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', marginRight: '0.4rem', textDecoration: 'none' }}
                           >

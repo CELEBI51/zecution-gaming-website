@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AlertCircle, Check, Trash2, X } from 'lucide-react'
 import { api } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 import { quoteTypes, quoteStatuses, formatQuoteDate } from '../../Quotes/quoteLabels.js'
 import { isQuoteRead, markQuoteAsRead, subscribeToNotificationUpdates } from '../../../utils/notifications.js'
 import './QuoteAdmin.css'
@@ -212,7 +213,7 @@ export default function QuoteList() {
                               )}
                               <Link
                                 className="quote-admin-button"
-                                to={`/admin/talepler/${item.id}`}
+                                to={adminPath(`talepler/${item.id}`)}
                                 onClick={() => markQuoteAsRead(item.id)}
                               >
                                 İncele

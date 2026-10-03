@@ -392,9 +392,17 @@
   transition: color 220ms ease, background-color 220ms ease, border-color 220ms ease, transform 260ms ease;
 }
 
-.type-card:nth-child(2) { animation-delay: 60ms; }
-.type-card:nth-child(3) { animation-delay: 120ms; }
-.type-card:nth-child(4) { animation-delay: 180ms; }
+.type-card:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.type-card:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.type-card:nth-child(4) {
+  animation-delay: 180ms;
+}
 
 .type-card__icon {
   width: 3.5rem;
@@ -458,7 +466,7 @@
   color: #fff;
 }
 
-.type-card.has-image > span:not(.type-card__icon, .type-card__check) {
+.type-card.has-image>span:not(.type-card__icon, .type-card__check) {
   color: rgba(255, 255, 255, 0.66);
 }
 
@@ -775,17 +783,20 @@
 }
 
 @media (max-width: 1120px) {
+
   .mods-grid,
   .mod-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem;
   }
+
   .type-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 920px) {
+
   .picker-heading,
   .results-heading {
     grid-template-columns: 1fr;
@@ -922,6 +933,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .mods-hero::before,
   .game-card,
   .type-card,
@@ -953,13 +965,377 @@
 }
 
 @keyframes gallery-section-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes gallery-orbit {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.mods-header { gap: 1rem; flex-wrap: wrap; }
-.mods-hero__content, .mods-intro > * { min-width: 0; }
+.mods-header {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mods-hero__content,
+.mods-intro>* {
+  min-width: 0;
+}
+
+/* ==========================================================================
+   MOD GALERİSİ KATEGORİ ARAMA PANELİ
+   ========================================================================== */
+
+.mods-header-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.22), rgba(168, 85, 247, 0.12));
+  color: #e9d5ff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+}
+
+.mods-header-search-btn:hover {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.38), rgba(168, 85, 247, 0.25));
+  border-color: rgba(168, 85, 247, 0.65);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.35);
+}
+
+.mods-header-search-btn svg {
+  color: #c084fc;
+}
+
+/* Arama Bölümü Kapsayıcısı */
+.mod-search-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.2rem;
+  padding: 1.25rem 1.4rem;
+  border-radius: 1.15rem;
+  background: rgba(18, 14, 26, 0.65);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+}
+
+/* Arama Formu Çubuğu */
+.mod-search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.mod-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 260px;
+  background: rgba(8, 6, 12, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  padding: 0.2rem 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.mod-search-input-wrap:focus-within {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+  background: rgba(12, 9, 18, 0.9);
+}
+
+.mod-search-icon {
+  color: #a855f7;
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
+.mod-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.2rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f8f7fb;
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.mod-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.88rem;
+}
+
+.mod-search-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #c4b5fd;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.mod-search-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* Sadece Bu Kategoride Ara Butonu */
+.mod-category-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1.15rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.mod-category-filter-btn:hover {
+  border-color: rgba(168, 85, 247, 0.45);
+  color: #ffffff;
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.mod-category-filter-btn.is-active {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(168, 85, 247, 0.18));
+  border-color: #a855f7;
+  color: #e9d5ff;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.22);
+}
+
+.mod-category-filter-indicator {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.mod-category-filter-btn.is-active .mod-category-filter-indicator {
+  background: #a855f7;
+  box-shadow: 0 0 8px #c084fc;
+}
+
+/* Ara Butonu */
+.mod-search-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 0.75rem;
+  border: 1px solid #a855f7;
+  background: linear-gradient(135deg, #7e22ce, #9333ea);
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(147, 51, 234, 0.35);
+}
+
+.mod-search-submit-btn:hover {
+  background: linear-gradient(135deg, #9333ea, #a855f7);
+  box-shadow: 0 6px 24px rgba(147, 51, 234, 0.5);
+  transform: translateY(-1px);
+}
+
+.mod-search-submit-btn:active {
+  transform: translateY(0);
+}
+
+/* Hızlı Kategori Seçim Hapları */
+.mod-search-quick-categories {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mod-quick-cat-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 0.2rem;
+}
+
+.mod-quick-cat-pill {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mod-quick-cat-pill:hover {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #fff;
+}
+
+.mod-quick-cat-pill.is-active {
+  background: rgba(147, 51, 234, 0.3);
+  border-color: #a855f7;
+  color: #e9d5ff;
+  box-shadow: 0 0 12px rgba(147, 51, 234, 0.25);
+}
+
+/* Arama Durum Bilgisi Çubuğu */
+.mod-search-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.65rem;
+  background: rgba(147, 51, 234, 0.08);
+  border: 1px solid rgba(147, 51, 234, 0.2);
+  flex-wrap: wrap;
+}
+
+.mod-search-status-info {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mod-search-category-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.35rem;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #d8b4fe;
+  font-size: 0.75rem;
+}
+
+.mod-search-count-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.35rem;
+  background: rgba(34, 197, 94, 0.18);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #86efac;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.mod-search-reset-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: #c4b5fd;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.mod-search-reset-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.mod-search-expand-btn,
+.mod-search-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(168, 85, 247, 0.2));
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mod-search-expand-btn:hover,
+.mod-search-reset-btn:hover {
+  background: linear-gradient(135deg, #7e22ce, #9333ea);
+  border-color: #a855f7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 18px rgba(147, 51, 234, 0.35);
+}
+
+@media (max-width: 768px) {
+  .mod-search-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mod-search-input-wrap {
+    min-width: 100%;
+  }
+
+  .mod-category-filter-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .mod-search-submit-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}

@@ -21,6 +21,7 @@ import {
   Gamepad2,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 import { isReviewRead, markReviewAsRead, subscribeToNotificationUpdates } from '../../../utils/notifications.js'
 import './ReviewList.css'
 
@@ -517,7 +518,7 @@ export default function ReviewList() {
                           </a>
                           <span>·</span>
                           <Link
-                            to={`/admin/icerikler/${review.content.id}/duzenle`}
+                            to={adminPath(`icerikler/${review.content.id}/duzenle`)}
                             className="review-content-link"
                           >
                             İçeriği Düzenle

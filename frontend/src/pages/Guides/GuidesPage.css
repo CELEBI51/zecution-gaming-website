@@ -1,0 +1,710 @@
+.guides-page {
+  min-height: 100vh;
+  background-color: #08060c;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(127, 34, 201, 0.18), transparent 45%),
+    radial-gradient(circle at 100% 40%, rgba(177, 60, 255, 0.08), transparent 40%);
+  color: #f1edfa;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.guides-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(8, 6, 12, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.guides-header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.guides-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.guides-brand img {
+  height: 2.3rem;
+  width: auto;
+  border-radius: 6px;
+}
+
+.guides-brand-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(177, 60, 255, 0.18);
+  border: 1px solid rgba(177, 60, 255, 0.4);
+  color: #e9d5ff;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.guides-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.guides-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.guides-nav-link:hover {
+  color: #ffffff;
+}
+
+.guides-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Main */
+.guides-main {
+  flex: 1;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+}
+
+/* Hero */
+.guides-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.guides-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c084fc;
+  background: rgba(177, 60, 255, 0.14);
+  border: 1px solid rgba(177, 60, 255, 0.35);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.25rem;
+}
+
+.guides-hero-title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.guides-hero-desc {
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0 0 2.25rem;
+  max-width: 44rem;
+}
+
+/* Search Container */
+.guides-search-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.guides-search-bar {
+  position: relative;
+  width: 100%;
+  max-width: 38rem;
+  display: flex;
+  align-items: center;
+}
+
+.guides-search-icon {
+  position: absolute;
+  left: 1.15rem;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.guides-search-input {
+  width: 100%;
+  background: rgba(20, 16, 30, 0.85);
+  border: 1px solid rgba(177, 60, 255, 0.3);
+  border-radius: 999px;
+  padding: 0.95rem 3rem 0.95rem 3rem;
+  font-size: 0.95rem;
+  color: #ffffff;
+  outline: none;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.guides-search-input:focus {
+  border-color: #b13cff;
+  box-shadow: 0 8px 35px rgba(177, 60, 255, 0.28);
+  background: rgba(25, 20, 38, 0.95);
+}
+
+.guides-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.guides-search-clear {
+  position: absolute;
+  right: 1.1rem;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.guides-search-clear:hover {
+  color: #ffffff;
+}
+
+/* Category Pills */
+.guides-category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.guides-category-pill {
+  padding: 0.5rem 1.1rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.guides-category-pill:hover {
+  background: rgba(177, 60, 255, 0.18);
+  border-color: rgba(177, 60, 255, 0.4);
+  color: #ffffff;
+}
+
+.guides-category-pill.is-active {
+  background: linear-gradient(135deg, #7f22c9, #b13cff);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 18px rgba(177, 60, 255, 0.35);
+}
+
+/* Grid Section */
+.guides-grid-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.guides-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.guides-grid-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.guides-results-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Empty State */
+.guides-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+}
+
+.guides-empty-icon {
+  color: rgba(177, 60, 255, 0.6);
+  margin-bottom: 1rem;
+}
+
+.guides-empty-state h3 {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+}
+
+.guides-empty-state p {
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 24rem;
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+}
+
+.guides-empty-btn {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 999px;
+  background: rgba(177, 60, 255, 0.25);
+  border: 1px solid rgba(177, 60, 255, 0.5);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.guides-empty-btn:hover {
+  background: #b13cff;
+}
+
+/* Guides Grid */
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.guide-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0d0a16;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s ease,
+              box-shadow 0.35s ease;
+  isolation: isolate;
+}
+
+.guide-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(177, 60, 255, 0.65);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 35px rgba(177, 60, 255, 0.28);
+}
+
+/* Background Media & Overlay */
+.guide-card-bg-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.guide-card-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  transform: scale(1);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+  filter: brightness(0.68) saturate(1.15);
+}
+
+.guide-card:hover .guide-card-bg-img {
+  transform: scale(1.08);
+  filter: brightness(0.82) saturate(1.25);
+}
+
+.guide-card-bg-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 9, 20, 0.65) 0%,
+    rgba(12, 9, 20, 0.5) 28%,
+    rgba(10, 7, 18, 0.88) 65%,
+    rgba(9, 6, 16, 0.98) 100%
+  );
+  transition: background 0.3s ease;
+}
+
+.guide-card:hover .guide-card-bg-gradient {
+  background: linear-gradient(
+    180deg,
+    rgba(12, 9, 20, 0.55) 0%,
+    rgba(12, 9, 20, 0.4) 28%,
+    rgba(10, 7, 18, 0.84) 65%,
+    rgba(9, 6, 16, 0.96) 100%
+  );
+}
+
+.guide-card-ambient-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 100%, rgba(177, 60, 255, 0.22), transparent 70%);
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+}
+
+.guide-card:hover .guide-card-ambient-glow {
+  opacity: 0.85;
+}
+
+/* Card Content Layer */
+.guide-card-content {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex: 1;
+  height: 100%;
+}
+
+.guide-card-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.guide-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.guide-card-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+  transition: color 0.18s ease;
+}
+
+.guide-card:hover .guide-card-title {
+  color: #e5bfff;
+}
+
+.guide-card-summary {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.guide-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+
+.guide-card-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(14, 10, 22, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.22rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.2s ease;
+}
+
+.guide-card:hover .guide-card-tag {
+  background: rgba(25, 18, 42, 0.85);
+  border-color: rgba(177, 60, 255, 0.35);
+  color: #ffffff;
+}
+
+.guide-card-tag--more {
+  color: #d18dff;
+  border-color: rgba(177, 60, 255, 0.4);
+}
+
+.guide-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.95rem;
+  background: rgba(12, 9, 20, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0.4rem;
+}
+
+.guide-card-steps-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.guide-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #d18dff;
+  transition: all 0.2s ease;
+}
+
+.guide-card:hover .guide-card-action {
+  color: #ffffff;
+  transform: translateX(2px);
+  text-shadow: 0 0 10px rgba(177, 60, 255, 0.8);
+}
+
+/* Skeleton Loading State */
+.guide-card--skeleton {
+  min-height: 380px;
+  background: rgba(20, 16, 32, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+.guide-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(177, 60, 255, 0.08) 50%,
+    transparent 100%
+  );
+  animation: guideShimmer 1.8s infinite;
+}
+
+@keyframes guideShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Need Help CTA */
+.guides-cta-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, rgba(25, 12, 40, 0.95), rgba(12, 9, 20, 0.98));
+  border: 1px solid rgba(177, 60, 255, 0.4);
+  border-radius: 1.25rem;
+  padding: clamp(1.75rem, 3vw, 2.5rem);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(127, 34, 201, 0.15);
+}
+
+.guides-cta-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 48rem;
+}
+
+.guides-cta-icon-wrapper {
+  display: grid;
+  place-items: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 1rem;
+  background: rgba(177, 60, 255, 0.2);
+  border: 1px solid rgba(177, 60, 255, 0.45);
+  color: #dfb2ff;
+  flex-shrink: 0;
+}
+
+.guides-cta-content h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.4rem;
+}
+
+.guides-cta-content p {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+}
+
+.guides-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.75rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7f22c9, #b13cff);
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(177, 60, 255, 0.4);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.guides-cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(177, 60, 255, 0.6);
+  filter: brightness(1.1);
+}
+
+/* Footer */
+.guides-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #060509;
+}
+
+.guides-footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.guides-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.guides-footer-brand img {
+  height: 2.2rem;
+  width: auto;
+}
+
+.guides-footer-brand p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.guides-footer-social {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.guides-social-link {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+}
+
+.guides-social-link:hover {
+  background: rgba(177, 60, 255, 0.25);
+  border-color: #b13cff;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.guides-footer-bottom {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .guides-nav {
+    display: none;
+  }
+  .guides-grid {
+    grid-template-columns: 1fr;
+  }
+  .guides-cta-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .guides-cta-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .guides-cta-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

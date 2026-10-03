@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -14,9 +14,11 @@ import {
   Mountain,
   PackageOpen,
   Puzzle,
+  Search,
   Server,
   Truck,
   UploadCloud,
+  X,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
@@ -42,6 +44,13 @@ function ModGallery() {
   const [categories, setCategories] = useState([])
   const [mods, setMods] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // Arama Durumları
+  const [searchQuery, setSearchQuery] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
+  const [onlyInCategory, setOnlyInCategory] = useState(true)
+  const searchInputRef = useRef(null)
+  const searchSectionRef = useRef(null)
 
   useEffect(() => {
     let isMounted = true
@@ -110,19 +119,78 @@ function ModGallery() {
     }
   }, [])
 
+  const selectedCategoryObj = categories.find((c) => c.id === selectedCategory)
+
   const filteredMods = useMemo(() => {
     if (!selectedGame) return []
+    const q = appliedSearch.trim().toLowerCase()
+
     return mods.filter((mod) => {
       const gameMatches = mod.game === selectedGame
+
+      // Eğer seçili kategori varsa ve 'sadece bu kategoride ara' aktifse o kategoriye filtrele
       const categoryMatches =
-        selectedGame !== 'assetto-corsa' || !selectedCategory || mod.category === selectedCategory
-      return gameMatches && categoryMatches
+        selectedGame !== 'assetto-corsa' ||
+        !selectedCategory ||
+        !onlyInCategory ||
+        mod.category === selectedCategory
+
+      let searchMatches = true
+      if (q) {
+        const titleMatch = (mod.name || '').toLowerCase().includes(q)
+        const descMatch = (mod.description || '').toLowerCase().includes(q)
+        const producerMatch = (mod.producer || '').toLowerCase().includes(q)
+        searchMatches = titleMatch || descMatch || producerMatch
+      }
+
+      return gameMatches && categoryMatches && searchMatches
     })
-  }, [mods, selectedGame, selectedCategory])
+  }, [mods, selectedGame, selectedCategory, onlyInCategory, appliedSearch])
+
+  // Seçili kategoride arama yapıldığında 0 sonuç çıkarsa, diğer kategorilerde eşleşme var mı kontrolü
+  const otherCategoryMatches = useMemo(() => {
+    if (!appliedSearch.trim() || !selectedCategory || !selectedGame) return []
+    const q = appliedSearch.trim().toLowerCase()
+    return mods.filter(
+      (m) =>
+        m.game === selectedGame &&
+        m.category !== selectedCategory &&
+        ((m.name || '').toLowerCase().includes(q) ||
+          (m.description || '').toLowerCase().includes(q) ||
+          (m.producer || '').toLowerCase().includes(q))
+    )
+  }, [mods, appliedSearch, selectedGame, selectedCategory])
+
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault()
+    setAppliedSearch(searchQuery.trim())
+    window.requestAnimationFrame(() => {
+      document.querySelector('#mod-sonuclari')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
+  const handleClearSearch = () => {
+    setSearchQuery('')
+    setAppliedSearch('')
+    searchInputRef.current?.focus()
+  }
+
+  const handleHeaderSearchClick = () => {
+    if (!selectedGame) {
+      setSelectedGame('assetto-corsa')
+    }
+    window.requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.querySelector('#mod-sonuclari')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        searchInputRef.current?.focus()
+      }, 90)
+    })
+  }
 
   const chooseGame = (gameId) => {
     setSelectedGame(gameId)
     setSelectedCategory(null)
+    setOnlyInCategory(false)
     window.requestAnimationFrame(() => {
       setTimeout(() => {
         if (gameId === 'assetto-corsa') {
@@ -136,6 +204,7 @@ function ModGallery() {
 
   const chooseCategory = (catId) => {
     setSelectedCategory(catId)
+    setOnlyInCategory(true)
     window.requestAnimationFrame(() => {
       setTimeout(() => {
         document.querySelector('#mod-sonuclari')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -144,7 +213,8 @@ function ModGallery() {
   }
 
   const activeGame = games.find((game) => game.id === selectedGame)
-  const isWaitingForAssettoType = selectedGame === 'assetto-corsa' && !selectedCategory
+  const isWaitingForAssettoType =
+    selectedGame === 'assetto-corsa' && !selectedCategory && !appliedSearch.trim()
 
   return (
     <div className="mods-page">
@@ -157,6 +227,15 @@ function ModGallery() {
           </span>
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <button
+            type="button"
+            className="mods-header-search-btn"
+            onClick={handleHeaderSearchClick}
+            title="Mod Galerisinde Ara"
+          >
+            <Search size={15} />
+            <span>Mod Ara</span>
+          </button>
           <a
             className="mods-back"
             href="/mod-yayinla"
@@ -273,9 +352,126 @@ function ModGallery() {
               <span>{filteredMods.length} mod listeleniyor</span>
             </div>
 
+            {/* MOD GALERİSİ KATEGORİ ARAMA PANELİ */}
+            <div className="mod-search-wrapper" ref={searchSectionRef}>
+              <form className="mod-search-form" onSubmit={handleSearchSubmit}>
+                <div className="mod-search-input-wrap">
+                  <Search size={18} className="mod-search-icon" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    className="mod-search-input"
+                    placeholder={
+                      selectedCategoryObj && onlyInCategory
+                        ? `"${selectedCategoryObj.name}" kategorisinde mod ara...`
+                        : activeGame
+                        ? `${activeGame.name} modları arasında ara...`
+                        : 'Mod galerisinde ara (araç, harita, sunucu...)'
+                    }
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value)
+                      setAppliedSearch(e.target.value)
+                    }}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      className="mod-search-clear-btn"
+                      onClick={handleClearSearch}
+                      title="Aramayı Temizle"
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+                </div>
+
+                {/* SADECE SEÇİLİ KATEGORİDE ARA BUTONU */}
+                {selectedCategoryObj && (
+                  <button
+                    type="button"
+                    className={`mod-category-filter-btn ${onlyInCategory ? 'is-active' : ''}`}
+                    onClick={() => setOnlyInCategory((prev) => !prev)}
+                    title={
+                      onlyInCategory
+                        ? 'Şu anda yalnızca bu kategoride arama yapılıyor'
+                        : 'Şu anda tüm kategorilerde arama yapılıyor'
+                    }
+                  >
+                    <span className="mod-category-filter-indicator" />
+                    <span>
+                      {onlyInCategory
+                        ? `Sadece "${selectedCategoryObj.name}" Kategorisinde Ara`
+                        : `Tüm ${activeGame?.name || 'Oyun'} Kategorilerinde Ara`}
+                    </span>
+                  </button>
+                )}
+
+                {/* ARAMA BUTONU */}
+                <button type="submit" className="mod-search-submit-btn">
+                  <Search size={16} />
+                  <span>Ara</span>
+                </button>
+              </form>
+
+              {/* Hızlı Kategori Filtresi */}
+              {selectedGame === 'assetto-corsa' && categories.length > 0 && (
+                <div className="mod-search-quick-categories">
+                  <span className="mod-quick-cat-label">Kategori:</span>
+                  <button
+                    type="button"
+                    className={`mod-quick-cat-pill ${!selectedCategory ? 'is-active' : ''}`}
+                    onClick={() => {
+                      setSelectedCategory(null)
+                      setOnlyInCategory(false)
+                    }}
+                  >
+                    Tüm Kategoriler
+                  </button>
+                  {categories.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      className={`mod-quick-cat-pill ${selectedCategory === c.id ? 'is-active' : ''}`}
+                      onClick={() => {
+                        setSelectedCategory(c.id)
+                        setOnlyInCategory(true)
+                      }}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Aktif Arama Bilgi Çubuğu */}
+              {appliedSearch.trim() && (
+                <div className="mod-search-status-bar">
+                  <div className="mod-search-status-info">
+                    <span>Arama: <strong>"{appliedSearch}"</strong></span>
+                    {selectedCategoryObj && onlyInCategory && (
+                      <span className="mod-search-category-tag">
+                        Kategori: <strong>{selectedCategoryObj.name}</strong>
+                      </span>
+                    )}
+                    <span className="mod-search-count-tag">
+                      {filteredMods.length} mod bulundu
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="mod-search-reset-link"
+                    onClick={handleClearSearch}
+                  >
+                    Aramayı Temizle <X size={13} />
+                  </button>
+                </div>
+              )}
+            </div>
+
             {isWaitingForAssettoType ? (
               <div className="results-empty">
-                <p>Sonuçları görmek için yukarıdan bir mod türü seçin.</p>
+                <p>Sonuçları görmek için yukarıdan bir mod türü seçin veya arama yapın.</p>
               </div>
             ) : filteredMods.length > 0 ? (
               <div className="mod-grid mods-grid">
@@ -339,11 +535,42 @@ function ModGallery() {
                   </article>
                 ))}
               </div>
+            ) : appliedSearch.trim() && otherCategoryMatches.length > 0 ? (
+              <div className="results-empty">
+                <PackageOpen size={36} />
+                <h3>"{selectedCategoryObj?.name || 'Seçili kategori'}" kategorisinde sonuç bulunamadı</h3>
+                <p>
+                  Ancak diğer kategorilerde <strong>"{appliedSearch}"</strong> ile eşleşen {otherCategoryMatches.length} mod bulundu!
+                </p>
+                <button
+                  type="button"
+                  className="mod-search-expand-btn"
+                  onClick={() => {
+                    setOnlyInCategory(false)
+                    setSelectedCategory(null)
+                  }}
+                >
+                  Tüm kategorilerdeki sonuçları göster ({otherCategoryMatches.length})
+                </button>
+              </div>
             ) : (
               <div className="results-empty">
                 <PackageOpen size={36} />
-                <h3>Bu kategoride henüz yayınlanan mod yok.</h3>
-                <p>Yeni modlar eklendiğinde burada görüntülenecektir.</p>
+                <h3>Bu kriterde mod bulunamadı.</h3>
+                <p>
+                  {appliedSearch.trim()
+                    ? `"${appliedSearch}" araması için mod bulunamadı.`
+                    : 'Bu kategoride henüz yayınlanan mod yok. Yeni modlar eklendiğinde burada görüntülenecektir.'}
+                </p>
+                {appliedSearch.trim() && (
+                  <button
+                    type="button"
+                    className="mod-search-reset-btn"
+                    onClick={handleClearSearch}
+                  >
+                    Aramayı Sıfırla
+                  </button>
+                )}
               </div>
             )}
           </div>

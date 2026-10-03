@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { api } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 import { quoteTypes, quoteStatuses, formatQuoteDate } from '../../Quotes/quoteLabels.js'
 import { markQuoteAsRead } from '../../../utils/notifications.js'
 import './QuoteAdmin.css'
@@ -75,7 +76,7 @@ export default function QuoteDetail() {
     try {
       setDeleting(true)
       await api.deleteQuote(id)
-      navigate('/admin/talepler', { replace: true })
+      navigate(adminPath('talepler'), { replace: true })
     } catch (err) {
       alert(`Silme işlemi başarısız: ${err.message}`)
       setDeleting(false)
@@ -99,7 +100,7 @@ export default function QuoteDetail() {
               Talebi Sil
             </button>
           )}
-          <Link to="/admin/talepler" className="quote-admin-button">
+          <Link to={adminPath('talepler')} className="quote-admin-button">
             ← Tüm talepler
           </Link>
         </div>

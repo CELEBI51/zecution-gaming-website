@@ -24,6 +24,18 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   CLOUDINARY_URL: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional().default(587),
+  SMTP_SECURE: z
+    .string()
+    .transform((val) => val === 'true' || val === '1')
+    .optional()
+    .default(false),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+  ADMIN_NOTIFICATION_EMAIL: z.string().optional(),
+  SITE_URL: z.string().optional(),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)

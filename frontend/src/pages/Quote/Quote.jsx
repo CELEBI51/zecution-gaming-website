@@ -56,8 +56,7 @@ export default function Quote() {
       <h1>Fikrin kayda geçti.</h1>
       <p><strong>{saved.title}</strong> için deneme talebin oluşturuldu. Gerçek bir başvuru veya e-posta gönderilmedi.</p>
       <div className="quote-receipt"><span>Deneme numarası</span><strong>DEMO-{saved.id.slice(0, 8).toUpperCase()}</strong><span>Başlangıç durumu</span><strong>Yeni</strong></div>
-      <Link className="quote-submit" to="/admin/mod-talepleri">Admin panelinde görüntüle <ArrowUpRight size={18} /></Link>
-      <p className="quote-caption">Admin oturumu gerekir. Bu bağlantıyı aynı sekmede açarak deneme kaydını görebilirsin.</p>
+      <Link className="quote-submit" to="/">Ana Sayfaya Dön <ArrowUpRight size={18} /></Link>
       <button className="quote-text-button" onClick={() => { setForm(initialForm); setSaved(null) }}>Yeni bir form dene</button>
     </main> : <main className="quote-layout">
       <aside className="quote-intro">

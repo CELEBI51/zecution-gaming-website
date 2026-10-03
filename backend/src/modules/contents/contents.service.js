@@ -2,6 +2,7 @@ import { prisma } from '../../config/database.js'
 import { slugify } from '../../utils/slug.js'
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../../utils/api-error.js'
 import { validateContentCategory } from '../categories/category-rules.js'
+import { sendNewReviewEmail } from '../../services/email.service.js'
 
 /**
  * Slug çakışmalarını önlemek için benzersiz slug üretir.

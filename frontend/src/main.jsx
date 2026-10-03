@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import ModGallery from './pages/Mods/ModGallery.jsx'
@@ -14,7 +14,8 @@ import ModSubmissionForm from './pages/ModSubmissions/ModSubmissionForm.jsx'
 import ModSubmissionList from './pages/Admin/ModSubmissions/ModSubmissionList.jsx'
 import ModSubmissionDetail from './pages/Admin/ModSubmissions/ModSubmissionDetail.jsx'
 
-// Admin Paneli Sayfaları
+// Admin Paneli Sayfaları & Rota Yapılandırması
+import { ADMIN_BASE_PATH, ADMIN_LOGIN_PATH } from './config/routes.js'
 import AdminLayout from './pages/Admin/AdminLayout.jsx'
 import Login from './pages/Admin/Login/Login.jsx'
 import Dashboard from './pages/Admin/Dashboard/Dashboard.jsx'
@@ -23,10 +24,14 @@ import ContentForm from './pages/Admin/Contents/ContentForm.jsx'
 import CategoryManager from './pages/Admin/Categories/CategoryManager.jsx'
 import SettingsManager from './pages/Admin/Settings/SettingsManager.jsx'
 import ReviewList from './pages/Admin/Reviews/ReviewList.jsx'
+import AdminGuideList from './pages/Admin/Guides/AdminGuideList.jsx'
+import AdminGuideForm from './pages/Admin/Guides/AdminGuideForm.jsx'
 
 import { AuthProvider } from './context/AuthContext.jsx'
 import AuthModal from './components/AuthModal.jsx'
 import AuthPage from './pages/Auth/AuthPage.jsx'
+import GuidesPage from './pages/Guides/GuidesPage.jsx'
+import GuideDetail from './pages/Guides/GuideDetail.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -43,16 +48,25 @@ createRoot(document.getElementById('root')).render(
           <Route path="/modlar/:slug" element={<ModDetail />} />
           <Route path="/magaza" element={<Store />} />
           <Route path="/magaza/:slug" element={<ProductDetail />} />
+          <Route path="/rehberler" element={<GuidesPage />} />
+          <Route path="/rehberler/:slug" element={<GuideDetail />} />
           <Route path="/giris" element={<AuthPage initialMode="login" />} />
           <Route path="/kayit-ol" element={<AuthPage initialMode="register" />} />
 
-          {/* Admin Paneli */}
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin" element={<AdminLayout />}>
+          {/* Eski /admin Yolunu Tamamen Gizle ve Anasayfaya Yönlendir */}
+          <Route path="/admin" element={<Navigate to="/" replace />} />
+          <Route path="/admin/*" element={<Navigate to="/" replace />} />
+
+          {/* Yeni Gizli Admin Paneli */}
+          <Route path={ADMIN_LOGIN_PATH} element={<Login />} />
+          <Route path={ADMIN_BASE_PATH} element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="icerikler" element={<ContentList />} />
             <Route path="icerikler/yeni" element={<ContentForm />} />
             <Route path="icerikler/:id/duzenle" element={<ContentForm />} />
+            <Route path="rehberler" element={<AdminGuideList />} />
+            <Route path="rehberler/yeni" element={<AdminGuideForm />} />
+            <Route path="rehberler/:id/duzenle" element={<AdminGuideForm />} />
             <Route path="yorumlar" element={<ReviewList />} />
             <Route path="kategoriler" element={<CategoryManager />} />
             <Route path="ayarlar" element={<SettingsManager />} />

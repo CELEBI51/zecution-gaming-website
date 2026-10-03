@@ -7,14 +7,22 @@ import {
   CarFront,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  Gauge,
   MessageCircle,
   Menu,
+  Search,
   ShoppingBag,
+  Sparkles,
   Wrench,
   X,
 } from 'lucide-react'
 import { FaDiscord, FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa6'
 import UserNavButton from './components/UserNavButton.jsx'
+import SearchModal from './components/SearchModal.jsx'
+import GuideModal from './components/GuideModal.jsx'
+import { GUIDES, GUIDE_CATEGORIES } from './data/guidesData.js'
+import { api, getMediaUrl } from './services/api.js'
 import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/zecution_gaming/'
@@ -42,6 +50,56 @@ function App() {
   const [isReady, setIsReady] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [guides, setGuides] = useState([])
+  const [guidesLoading, setGuidesLoading] = useState(true)
+  const [selectedGuideCategory, setSelectedGuideCategory] = useState('Tümü')
+  const [activeGuideModal, setActiveGuideModal] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    setGuidesLoading(true)
+    api.getGuides()
+      .then((data) => {
+        if (isMounted) {
+          const list = Array.isArray(data) ? data : []
+          setGuides(list.filter((g) => g.isActive !== false))
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setGuides([])
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setGuidesLoading(false)
+        }
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const homeGuides = guides.filter((guide) => {
+    if (selectedGuideCategory === 'Tümü') return true
+    if (selectedGuideCategory === 'Assetto Corsa') return guide.game?.includes('Assetto Corsa') || guide.category === 'Assetto Corsa'
+    if (selectedGuideCategory === 'BeamNG.drive') return guide.game?.includes('BeamNG') || guide.category === 'BeamNG.drive'
+    if (selectedGuideCategory === 'Grafik & CSP') return guide.category === 'Grafik & CSP'
+    if (selectedGuideCategory === 'Donanım & Ayarlar') return guide.category === 'Donanım & Ayarlar'
+    return guide.game === selectedGuideCategory || guide.category === selectedGuideCategory
+  })
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSearchOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const scrollServices = (direction) => {
     if (!servicesRef.current) return
@@ -177,6 +235,17 @@ function App() {
           <a href="#hakkimizda">Hakkımızda</a>
         </nav>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <button
+            type="button"
+            className="header-search-btn"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Arama paneli"
+            title="Arama Paneli (Ctrl+K)"
+          >
+            <Search size={16} />
+            <span className="header-search-btn__text">Ara...</span>
+            <kbd className="header-search-btn__kbd">Ctrl K</kbd>
+          </button>
           <UserNavButton />
           <button
             className="menu-button"
@@ -192,7 +261,18 @@ function App() {
 
       {menuOpen && (
         <nav className="mobile-nav" aria-label="Mobil menü">
-          <div style={{ padding: '0.5rem 1rem 1rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ padding: '0.5rem 1rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center', width: '100%', maxWidth: '24rem', margin: '0 auto' }}>
+            <button
+              type="button"
+              className="mobile-search-btn"
+              onClick={() => {
+                setMenuOpen(false)
+                setSearchOpen(true)
+              }}
+            >
+              <Search size={18} />
+              <span>Tüm İçeriklerde Ara...</span>
+            </button>
             <UserNavButton />
           </div>
           <a href="/teklif-al">Teklif Al</a>
@@ -284,13 +364,129 @@ function App() {
         </section>
 
         <section id="rehberler" className="guide-gateway section-pad">
-          <div className="guide-layout">
-            <div className="guide-icon" aria-hidden="true"><BookOpen /></div>
-            <div>
-              <h2>Kurulumdan ayara,<br />yolda kalma.</h2>
-              <p>Assetto Corsa ve BeamNG için kurulum anlatımları, pratik ayarlar ve video rehberleri.</p>
+          <div className="guide-gateway-inner">
+            <div className="guide-header-row">
+              <div className="guide-header-copy">
+                <div className="guide-eyebrow">
+                  <Sparkles size={14} /> Bilgi Merkezi & Kurulum
+                </div>
+                <h2>Kurulumdan ayara,<br />yolda kalma.</h2>
+                <p>
+                  Assetto Corsa ve BeamNG için adım adım kurulum anlatımları, CSP, Pure grafik paketleri,
+                  direksiyon FFB ayarları ve pratik çözümler.
+                </p>
+              </div>
+              <div className="guide-header-action">
+                <a className="guide-all-link" href="/rehberler">
+                  Tüm Rehberleri Keşfet ({guides.length}) <ArrowUpRight size={18} />
+                </a>
+              </div>
             </div>
-            <a className="pill-link" href="/rehberler">Rehberlere git <ArrowUpRight size={18} /></a>
+
+            {/* Category Pills on Homepage */}
+            <div className="guide-home-filters">
+              {GUIDE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`guide-home-filter-btn ${selectedGuideCategory === cat ? 'is-active' : ''}`}
+                  onClick={() => setSelectedGuideCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Guide Cards Grid */}
+            {guidesLoading ? (
+              <div className="guide-home-grid">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="guide-home-card guide-home-card--skeleton">
+                    <div className="guide-skeleton-shimmer" />
+                  </div>
+                ))}
+              </div>
+            ) : homeGuides.length === 0 ? (
+              <div className="guide-home-empty">
+                <BookOpen size={40} className="guide-home-empty-icon" />
+                <p>Şu anda bu kategoride yayınlanmış rehber bulunmuyor. Yeni rehberlerimiz çok yakında eklenecektir.</p>
+              </div>
+            ) : (
+              <div className="guide-home-grid">
+                {homeGuides.map((guide) => (
+                  <a
+                    key={guide.id || guide.slug}
+                    href={`/rehberler/${guide.slug}`}
+                    className="guide-home-card"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    {/* Kapak Görseli Arka Planı */}
+                    <div className="guide-home-card-bg-wrap" aria-hidden="true">
+                      <img
+                        src={getMediaUrl(guide.coverImage || '/media/images/cm-csp-preview.jpg')}
+                        alt=""
+                        className="guide-home-card-bg-img"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = '/media/images/cm-csp-preview.jpg'
+                        }}
+                      />
+                      <div className="guide-home-card-gradient" />
+                      <div className="guide-home-card-glow" />
+                    </div>
+
+                    {/* Kapak Görseli Üzerinde Duran İçerikler */}
+                    <div className="guide-home-card-content">
+                      <div className="guide-home-card-header">
+                        <span className={`guide-game-pill guide-game-pill--${guide.gameCode || 'assetto-corsa'}`}>
+                          {guide.game}
+                        </span>
+                        <span className="guide-meta-chip">
+                          <Clock size={12} /> {guide.time}
+                        </span>
+                        <span className="guide-meta-chip">
+                          <Gauge size={12} /> {guide.difficulty}
+                        </span>
+                      </div>
+
+                      <div className="guide-home-card-body">
+                        <h3 className="guide-home-card-title">{guide.title}</h3>
+                        <p className="guide-home-card-summary">{guide.summary}</p>
+                      </div>
+
+                      {guide.highlights && guide.highlights.length > 0 && (
+                        <div className="guide-home-card-tags">
+                          {guide.highlights.slice(0, 3).map((h, i) => (
+                            <span key={i} className="guide-home-card-tag">
+                              #{h}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="guide-home-card-footer">
+                        <span className="guide-home-step-count">
+                          <BookOpen size={14} /> {guide.steps?.length || 0} Adım Anlatım
+                        </span>
+                        <span className="guide-home-btn">
+                          Rehberi Oku <ArrowUpRight size={16} />
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+
+            <div className="guide-bottom-bar">
+              <div className="guide-bottom-info">
+                <BookOpen size={18} />
+                <span>Takıldığın bir ayar veya hata mı var? Tüm rehber arşivini inceleyebilir veya doğrudan kurulum desteği alabilirsin.</span>
+              </div>
+              <a href="/rehberler" className="guide-bottom-link">
+                Tüm Rehberleri Listele <ArrowUpRight size={16} />
+              </a>
+            </div>
           </div>
         </section>
 
@@ -433,6 +629,11 @@ function App() {
       <div className={`notice ${notice ? 'notice--visible' : ''}`} role="status" aria-live="polite">
         {notice}
       </div>
+
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      {activeGuideModal && (
+        <GuideModal guide={activeGuideModal} onClose={() => setActiveGuideModal(null)} />
+      )}
     </div>
   )
 }

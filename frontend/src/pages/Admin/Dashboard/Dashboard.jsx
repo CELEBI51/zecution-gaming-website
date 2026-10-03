@@ -17,6 +17,7 @@ import {
   Star,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 import { isReviewRead, markReviewAsRead, subscribeToNotificationUpdates } from '../../../utils/notifications.js'
 
 export default function Dashboard() {
@@ -98,7 +99,7 @@ export default function Dashboard() {
           <h1>Kontrol Paneli</h1>
         </div>
         <Link
-          to="/admin/icerikler/yeni"
+          to={adminPath('icerikler/yeni')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -398,7 +399,7 @@ export default function Dashboard() {
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: '#fff' }}>
                 Son İçerikler
               </h3>
-              <Link to="/admin/icerikler" style={{ fontSize: '0.8rem', color: '#d880ff', textDecoration: 'none', fontWeight: 600 }}>
+              <Link to={adminPath('icerikler')} style={{ fontSize: '0.8rem', color: '#d880ff', textDecoration: 'none', fontWeight: 600 }}>
                 Tümünü Gör →
               </Link>
             </div>
@@ -417,7 +418,7 @@ export default function Dashboard() {
                 {recentContents.map((content) => (
                   <Link
                     key={content.id}
-                    to={`/admin/icerikler/${content.id}/duzenle`}
+                    to={adminPath(`icerikler/${content.id}/duzenle`)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -518,7 +519,7 @@ export default function Dashboard() {
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                 <Star size={18} style={{ color: '#fbbf24' }} /> Son Değerlendirmeler
               </h3>
-              <Link to="/admin/yorumlar" style={{ fontSize: '0.8rem', color: '#d880ff', textDecoration: 'none', fontWeight: 600 }}>
+              <Link to={adminPath('yorumlar')} style={{ fontSize: '0.8rem', color: '#d880ff', textDecoration: 'none', fontWeight: 600 }}>
                 Tümünü Gör →
               </Link>
             </div>
@@ -539,7 +540,7 @@ export default function Dashboard() {
                   return (
                     <Link
                       key={rev.id}
-                      to="/admin/yorumlar"
+                      to={adminPath('yorumlar')}
                       onClick={() => markReviewAsRead(rev.id)}
                       style={{
                         display: 'flex',
@@ -617,7 +618,7 @@ export default function Dashboard() {
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <Link
-                  to="/admin/icerikler/yeni"
+                  to={adminPath('icerikler/yeni')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -637,7 +638,7 @@ export default function Dashboard() {
                 </Link>
 
                 <Link
-                  to="/admin/yorumlar"
+                  to={adminPath('yorumlar')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -657,7 +658,7 @@ export default function Dashboard() {
                 </Link>
 
                 <Link
-                  to="/admin/kategoriler"
+                  to={adminPath('kategoriler')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -677,7 +678,7 @@ export default function Dashboard() {
                 </Link>
 
                 <Link
-                  to="/admin/ayarlar"
+                  to={adminPath('ayarlar')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',

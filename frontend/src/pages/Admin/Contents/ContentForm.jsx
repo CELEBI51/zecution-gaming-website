@@ -13,6 +13,7 @@ import {
   Upload,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 import './ContentForm.css'
 import { categoryRows } from '../../../utils/categories.js'
 
@@ -171,7 +172,7 @@ export default function ContentForm() {
         savedContent = await api.createContent(payload)
         setNotice('İçerik başarıyla oluşturuldu!')
         // Düzenleme moduna yönlendir
-        navigate(`/admin/icerikler/${savedContent.id}/duzenle`, { replace: true })
+        navigate(adminPath(`icerikler/${savedContent.id}/duzenle`), { replace: true })
       }
     } catch (err) {
       setError(err.message || 'Kayıt sırasında bir hata oluştu')
@@ -289,7 +290,7 @@ export default function ContentForm() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <button
             type="button"
-            onClick={() => navigate('/admin/icerikler')}
+            onClick={() => navigate(adminPath('icerikler'))}
             style={{
               display: 'grid',
               placeItems: 'center',

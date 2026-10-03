@@ -513,4 +513,75 @@ export const api = {
     })
     return res
   },
+
+  // ----------------- REHBERLER (GUIDES) -----------------
+  async getGuides(params = {}) {
+    try {
+      const search = new URLSearchParams(params).toString()
+      const res = await request(`/guides${search ? `?${search}` : ''}`)
+      return res.guides || []
+    } catch {
+      return []
+    }
+  },
+
+  async getGuide(slug) {
+    try {
+      const res = await request(`/guides/${encodeURIComponent(slug)}`)
+      return res.guide || null
+    } catch {
+      return null
+    }
+  },
+
+  async adminGetGuides(params = {}) {
+    const search = new URLSearchParams(params).toString()
+    const res = await request(`/admin/guides${search ? `?${search}` : ''}`)
+    return res.guides || []
+  },
+
+  async adminGetGuide(id) {
+    const res = await request(`/admin/guides/${encodeURIComponent(id)}`)
+    return res.guide || null
+  },
+
+  async adminCreateGuide(data) {
+    const res = await request('/admin/guides', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    return res
+  },
+
+  async adminUpdateGuide(id, data) {
+    const res = await request(`/admin/guides/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+    return res
+  },
+
+  async adminDeleteGuide(id) {
+    const res = await request(`/admin/guides/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    })
+    return res
+  },
+
+  async adminUploadGuideImages(files) {
+    const formData = new FormData()
+    if (Array.isArray(files)) {
+      files.forEach((file) => formData.append('images', file))
+    } else if (files instanceof FileList) {
+      Array.from(files).forEach((file) => formData.append('images', file))
+    } else {
+      formData.append('images', files)
+    }
+
+    const res = await request('/admin/guides/upload', {
+      method: 'POST',
+      body: formData,
+    })
+    return res
+  },
 }

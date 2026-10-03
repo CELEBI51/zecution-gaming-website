@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertCircle, ArrowRight, Loader2, Lock } from 'lucide-react'
 import { api } from '../../../services/api.js'
+import { ADMIN_BASE_PATH } from '../../../config/routes.js'
 import './Login.css'
 
 export default function Login() {
@@ -18,7 +19,7 @@ export default function Login() {
 
     try {
       await api.login(email, password)
-      navigate('/admin', { replace: true })
+      navigate(ADMIN_BASE_PATH, { replace: true })
     } catch (err) {
       setError(err.message || 'Giriş yapılamadı. E-posta veya şifrenizi kontrol edin.')
     } finally {

@@ -14,6 +14,7 @@ import {
   MessageSquare,
 } from 'lucide-react'
 import { api } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 import {
   modSubmissionStatuses,
   modSubmissionSaleTypes,
@@ -95,7 +96,7 @@ export default function ModSubmissionDetail() {
     try {
       setDeleting(true)
       await api.deleteModSubmission(id)
-      navigate('/admin/mod-basvurulari', { replace: true })
+      navigate(adminPath('mod-basvurulari'), { replace: true })
     } catch (err) {
       alert(`Silme işlemi başarısız: ${err.message}`)
       setDeleting(false)
@@ -108,7 +109,7 @@ export default function ModSubmissionDetail() {
       <div className="admin-topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <Link
-            to="/admin/mod-basvurulari"
+            to={adminPath('mod-basvurulari')}
             className="quote-admin-button"
             style={{ textDecoration: 'none', padding: '0.45rem 0.75rem' }}
           >

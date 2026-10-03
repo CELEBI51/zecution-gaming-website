@@ -14,6 +14,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
+import { adminPath } from '../../../config/routes.js'
 
 export default function ContentList() {
   const [contents, setContents] = useState([])
@@ -99,7 +100,7 @@ export default function ContentList() {
           <h1>İçerik Yönetimi</h1>
         </div>
         <Link
-          to="/admin/icerikler/yeni"
+          to={adminPath('icerikler/yeni')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -499,7 +500,7 @@ export default function ContentList() {
                         ) : (
                           <>
                             <Link
-                              to={`/admin/icerikler/${item.id}/duzenle`}
+                              to={adminPath(`icerikler/${item.id}/duzenle`)}
                               title="Düzenle"
                               style={{
                                 padding: '0.45rem',

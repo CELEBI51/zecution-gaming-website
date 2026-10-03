@@ -35,6 +35,10 @@ import {
   modSubmissionsPublicRoutes,
   modSubmissionsAdminRoutes,
 } from './modules/mod-submissions/mod-submissions.routes.js'
+import {
+  guidesPublicRoutes,
+  guidesAdminRoutes,
+} from './modules/guides/guides.routes.js'
 
 const app = express()
 
@@ -123,6 +127,7 @@ app.use('/api/auth', userAuthRouter)
 app.use('/api/games', gamesRoutes)
 app.use('/api/categories', categoriesPublicRoutes)
 app.use('/api/contents', contentsPublicRoutes)
+app.use('/api/guides', guidesPublicRoutes)
 app.use('/api/settings', settingsPublicRoutes)
 app.use('/api/quotes', quotesPublicRoutes)
 app.use('/api/mod-submissions', modSubmissionsPublicRoutes)
@@ -131,6 +136,7 @@ app.use('/api/mod-submissions', modSubmissionsPublicRoutes)
 app.use('/api/admin/auth', authRoutes)
 app.use('/api/admin/categories', categoriesAdminRoutes)
 app.use('/api/admin/contents', contentsAdminRoutes)
+app.use('/api/admin/guides', guidesAdminRoutes)
 app.use('/api/admin/quotes', quotesAdminRoutes)
 app.use('/api/admin/mod-submissions', modSubmissionsAdminRoutes)
 app.use('/api/admin', mediaAdminRoutes)

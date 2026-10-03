@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
+  BookOpen,
   ExternalLink,
   FolderTree,
   LayoutDashboard,
@@ -13,6 +14,7 @@ import {
   UploadCloud,
 } from 'lucide-react'
 import { api } from '../../services/api.js'
+import { ADMIN_BASE_PATH, ADMIN_LOGIN_PATH, adminPath } from '../../config/routes.js'
 import NotificationCenter from './Notifications/NotificationCenter.jsx'
 import './AdminLayout.css'
 
@@ -38,7 +40,7 @@ export default function AdminLayout() {
         }
       } catch (err) {
         if (isMounted) {
-          navigate('/admin/login', { replace: true })
+          navigate(ADMIN_LOGIN_PATH, { replace: true })
         }
       } finally {
         if (isMounted) {
@@ -58,7 +60,7 @@ export default function AdminLayout() {
     try {
       await api.logout()
     } finally {
-      navigate('/admin/login', { replace: true })
+      navigate(ADMIN_LOGIN_PATH, { replace: true })
     }
   }
 
@@ -89,14 +91,14 @@ export default function AdminLayout() {
           </div>
 
           <nav className="admin-nav" aria-label="Admin ana menü">
-            <NavLink to="/admin/talepler" className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
+            <NavLink to={adminPath('talepler')} className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
               <MessageSquare size={19} />
               <span>Mod Talepleri</span>
               {counts.unreadQuotesCount > 0 && (
                 <span className="admin-nav__counter">{counts.unreadQuotesCount}</span>
               )}
             </NavLink>
-            <NavLink to="/admin/mod-basvurulari" className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
+            <NavLink to={adminPath('mod-basvurulari')} className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}>
               <UploadCloud size={19} />
               <span>Mod Başvuruları</span>
               {counts.unreadSubmissionsCount > 0 && (
@@ -104,7 +106,7 @@ export default function AdminLayout() {
               )}
             </NavLink>
             <NavLink
-              to="/admin"
+              to={ADMIN_BASE_PATH}
               end
               className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}
             >
@@ -113,7 +115,7 @@ export default function AdminLayout() {
             </NavLink>
 
             <NavLink
-              to="/admin/icerikler"
+              to={adminPath('icerikler')}
               className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}
             >
               <Package size={19} />
@@ -121,7 +123,15 @@ export default function AdminLayout() {
             </NavLink>
 
             <NavLink
-              to="/admin/yorumlar"
+              to={adminPath('rehberler')}
+              className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}
+            >
+              <BookOpen size={19} />
+              <span>Rehberler</span>
+            </NavLink>
+
+            <NavLink
+              to={adminPath('yorumlar')}
               className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}
             >
               <Star size={19} />
@@ -132,7 +142,7 @@ export default function AdminLayout() {
             </NavLink>
 
             <NavLink
-              to="/admin/kategoriler"
+              to={adminPath('kategoriler')}
               className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}
             >
               <FolderTree size={19} />
@@ -140,7 +150,7 @@ export default function AdminLayout() {
             </NavLink>
 
             <NavLink
-              to="/admin/ayarlar"
+              to={adminPath('ayarlar')}
               className={({ isActive }) => `admin-nav__link ${isActive ? 'is-active' : ''}`}
             >
               <Settings size={19} />
