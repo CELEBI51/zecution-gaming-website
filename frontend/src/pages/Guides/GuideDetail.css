@@ -506,6 +506,8 @@
   font-size: 1.05rem;
   line-height: 1.65;
   color: rgba(255, 255, 255, 0.9);
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 /* Requirements & Path Grid */
@@ -693,8 +695,10 @@
 .forum-step-desc {
   font-size: 0.94rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 .forum-step-image-wrap {
@@ -795,6 +799,8 @@
   font-size: 0.86rem;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.5;
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 .forum-step-tip svg {
@@ -897,6 +903,8 @@
 
 .forum-solution-row p {
   margin: 0;
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 .forum-solution-tag {
