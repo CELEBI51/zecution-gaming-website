@@ -66,6 +66,7 @@ export default function AdminGuideForm() {
   const [newRequirement, setNewRequirement] = useState('')
 
   const [uploadingStepIndex, setUploadingStepIndex] = useState(null)
+  const [uploadingCover, setUploadingCover] = useState(false)
 
   const [steps, setSteps] = useState([
     {
@@ -248,6 +249,24 @@ export default function AdminGuideForm() {
       setError(err.message || 'Görsel yüklenirken bir hata oluştu.')
     } finally {
       setUploadingStepIndex(null)
+    }
+  }
+
+  const handleUploadCoverImage = async (file) => {
+    if (!file) return
+    try {
+      setUploadingCover(true)
+      setError('')
+      const res = await api.adminUploadGuideImages([file])
+      if (res && Array.isArray(res.urls) && res.urls.length > 0) {
+        setCoverImage(res.urls[0])
+        setNotice('Kapak görseli başarıyla VDS sunucusuna yüklendi!')
+        setTimeout(() => setNotice(''), 3500)
+      }
+    } catch (err) {
+      setError(err.message || 'Kapak görseli yüklenirken bir hata oluştu.')
+    } finally {
+      setUploadingCover(false)
     }
   }
 
@@ -562,17 +581,62 @@ export default function AdminGuideForm() {
           </div>
 
           <div className="form-group">
-            <label>Kapak Görseli URL Yolu</label>
-            <input
-              type="text"
-              value={coverImage}
-              onChange={(e) => setCoverImage(e.target.value)}
-              placeholder="/media/images/pure-rain-preview.jpg"
-            />
+            <label>Kapak Görseli Yükle veya Belirle</label>
+
+            {/* Bilgisayardan VDS'e Yükleme Butonu */}
+            <div className="cover-upload-bar">
+              <label className="admin-cover-upload-btn">
+                {uploadingCover ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>VDS Sunucusuna Yükleniyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud size={17} />
+                    <span>Bilgisayardan Kapak Görseli Yükle (VDS'e Kaydet)</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp, image/gif"
+                  style={{ display: 'none' }}
+                  disabled={uploadingCover}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleUploadCoverImage(e.target.files[0])
+                      e.target.value = ''
+                    }
+                  }}
+                />
+              </label>
+              <span className="cover-upload-hint">
+                PNG, JPG veya WEBP seçin. Görsel doğrudan VDS sunucunuza yüklenip kapak olarak atanır.
+              </span>
+            </div>
+
+            <div className="cover-url-input-wrap">
+              <input
+                type="text"
+                value={coverImage}
+                onChange={(e) => setCoverImage(e.target.value)}
+                placeholder="/media/images/pure-rain-preview.jpg veya https://..."
+              />
+              {coverImage && (
+                <button
+                  type="button"
+                  className="cover-clear-btn"
+                  onClick={() => setCoverImage('')}
+                  title="Görseli Temizle"
+                >
+                  <X size={14} /> Temizle
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="preset-images-row">
-            <span className="preset-label">Hazır Vitrin Görselleri:</span>
+            <span className="preset-label">Veya Hazır Vitrin Görsellerinden Seç:</span>
             {PRESET_IMAGES.map((img, i) => (
               <button
                 key={i}
@@ -588,7 +652,11 @@ export default function AdminGuideForm() {
           {coverImage && (
             <div className="cover-preview-box">
               <span>Görsel Önizlemesi:</span>
-              <img src={coverImage} alt="Kapak Önizleme" />
+              <img
+                src={getMediaUrl(coverImage)}
+                alt="Kapak Önizleme"
+                className="cover-preview-img"
+              />
             </div>
           )}
         </section>
