@@ -1,7 +1,10 @@
+import dns from 'node:dns'
 import { app } from './app.js'
 import { env } from './config/env.js'
 import { connectDatabase, disconnectDatabase } from './config/database.js'
 import { ensureUploadDirs } from './services/storage.service.js'
+
+dns.setDefaultResultOrder('ipv4first')
 
 async function bootstrap() {
   try {

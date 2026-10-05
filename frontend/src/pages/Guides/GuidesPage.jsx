@@ -227,61 +227,58 @@ export default function GuidesPage() {
                   to={`/rehberler/${guide.slug}`}
                   className="guide-card"
                 >
-                  {/* Kapak Görseli Arka Planı ve Gradient Katmanı */}
-                  <div className="guide-card-bg-wrap" aria-hidden="true">
+                  {/* 1. Kapak Görseli (Üstte, tamamen açık ve net) */}
+                  <div className="guide-photo-media" aria-hidden="true">
                     <img
                       src={getMediaUrl(guide.coverImage || '/media/images/cm-csp-preview.jpg')}
-                      alt=""
-                      className="guide-card-bg-img"
+                      alt={guide.title}
+                      className="guide-photo-img"
                       loading="lazy"
                       onError={(e) => {
                         e.currentTarget.src = '/media/images/cm-csp-preview.jpg'
                       }}
                     />
-                    <div className="guide-card-bg-gradient" />
-                    <div className="guide-card-ambient-glow" />
+                    <div className="guide-photo-media-overlay" />
                   </div>
 
-                  {/* Kapak Görseli Üzerinde Duran İçerikler */}
-                  <div className="guide-card-content">
-                    <div className="guide-card-top">
-                      <span className={`guide-game-pill guide-game-pill--${guide.gameCode || 'assetto-corsa'}`}>
-                        {guide.game}
-                      </span>
-                      <span className="guide-meta-chip">
-                        <Clock size={12} /> {guide.time}
-                      </span>
-                      <span className="guide-meta-chip">
-                        <Gauge size={12} /> {guide.difficulty}
-                      </span>
+                  {/* 2. Başlık ve Bilgi Alanı (Kapağın altında ayrı uzanıyor) */}
+                  <div className="guide-photo-info">
+                    <div className="guide-photo-info-top">
+                      <div className="guide-photo-pills">
+                        <span className={`guide-photo-pill guide-photo-pill--${guide.gameCode || 'assetto-corsa'}`}>
+                          {guide.game}
+                        </span>
+                        <span className="guide-photo-pill guide-photo-pill--meta">
+                          <Clock size={11} /> {guide.time || '5 dk okuma'}
+                        </span>
+                        <span className="guide-photo-pill guide-photo-pill--difficulty">
+                          <Gauge size={11} /> {guide.difficulty || 'Kolay'}
+                        </span>
+                      </div>
+                      <div className="guide-photo-steps">
+                        <BookOpen size={13} /> {guide.steps?.length || guide.stepsCount || 0} Adım
+                      </div>
                     </div>
 
-                    <div className="guide-card-body">
-                      <h3 className="guide-card-title">{guide.title}</h3>
-                      <p className="guide-card-summary">{guide.summary}</p>
+                    <div className="guide-photo-body">
+                      <h3 className="guide-photo-title">{guide.title}</h3>
+                      <p className="guide-photo-summary">{guide.summary}</p>
                     </div>
 
                     {guide.highlights && guide.highlights.length > 0 && (
-                      <div className="guide-card-tags">
+                      <div className="guide-photo-tags">
                         {guide.highlights.slice(0, 3).map((h, i) => (
-                          <span key={i} className="guide-card-tag">
+                          <span key={i} className="guide-photo-tag">
                             #{h}
                           </span>
                         ))}
-                        {guide.highlights.length > 3 && (
-                          <span className="guide-card-tag guide-card-tag--more">
-                            +{guide.highlights.length - 3}
-                          </span>
-                        )}
                       </div>
                     )}
 
-                    <div className="guide-card-footer">
-                      <span className="guide-card-steps-count">
-                        <BookOpen size={14} /> {guide.steps?.length || 0} Adım
-                      </span>
-                      <span className="guide-card-action">
-                        Rehberi Oku <ArrowUpRight size={16} />
+                    <div className="guide-photo-footer">
+                      <span className="guide-read-label">Rehberi İncele</span>
+                      <span className="guide-photo-action-btn">
+                        <ArrowUpRight size={16} />
                       </span>
                     </div>
                   </div>

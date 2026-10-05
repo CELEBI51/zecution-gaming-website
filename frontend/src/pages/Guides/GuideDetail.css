@@ -1379,3 +1379,28 @@
     justify-content: center;
   }
 }
+
+@media (max-width: 480px) {
+  .forum-container {
+    padding: 1rem 0.75rem 3.5rem;
+    gap: 1.25rem;
+  }
+  .forum-thread-header {
+    padding: 1.15rem 1rem;
+    border-radius: 1rem;
+  }
+  .forum-thread-title {
+    font-size: clamp(1.4rem, 6vw, 1.85rem);
+  }
+  .forum-post-content {
+    padding: 1.15rem 1rem;
+    border-radius: 1rem;
+  }
+  .forum-step-card {
+    padding: 1rem;
+    border-radius: 0.9rem;
+  }
+  .forum-related-grid {
+    grid-template-columns: 1fr;
+  }
+}

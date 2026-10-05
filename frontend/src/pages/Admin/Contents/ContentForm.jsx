@@ -14,6 +14,19 @@ import {
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
 import { adminPath } from '../../../config/routes.js'
+import {
+  getAllProducers,
+  saveProducer,
+  updateProducer,
+  deleteProducer,
+  isPermanentPlatformName,
+  isProducerFounder,
+  isProducerPartner,
+  getProducerAvatar,
+  saveProducerAvatar,
+  getProducerAvatars,
+  setServerProducerAvatars,
+} from '../../../services/producers.js'
 import './ContentForm.css'
 import { categoryRows } from '../../../utils/categories.js'
 
@@ -71,20 +84,38 @@ export default function ContentForm() {
   const [mediaList, setMediaList] = useState([])
   const [features, setFeatures] = useState([])
 
+  // Yapımcı Yönetimi
+  const [producersList, setProducersList] = useState(() => getAllProducers())
+  const [isAddingNewProducer, setIsAddingNewProducer] = useState(false)
+  const [newProducerName, setNewProducerName] = useState('')
+  const [isEditingProducer, setIsEditingProducer] = useState(false)
+  const [editingProducerName, setEditingProducerName] = useState('')
+  const [producerAvatarsMap, setProducerAvatarsMap] = useState(() => getProducerAvatars())
+  const [uploadingProducerAvatar, setUploadingProducerAvatar] = useState(false)
+
   // Veri yükleme
   useEffect(() => {
     let isMounted = true
 
     async function initialize() {
       try {
-        const [gamesRes, categoriesRes] = await Promise.all([
-          api.getGames(),
-          api.getAdminCategories(),
+        const [gamesRes, categoriesRes, contentsRes, settingsRes] = await Promise.all([
+          api.getGames().catch(() => []),
+          api.getAdminCategories().catch(() => []),
+          api.getContents({ limit: 100 }).catch(() => ({ items: [] })),
+          api.getSettings().catch(() => ({})),
         ])
 
         if (!isMounted) return
         setGames(gamesRes)
         setCategories(categoriesRes)
+        if (settingsRes?.producer_avatars) {
+          setServerProducerAvatars(settingsRes.producer_avatars)
+          setProducerAvatarsMap(getProducerAvatars())
+        }
+        if (contentsRes?.items) {
+          setProducersList(getAllProducers(contentsRes.items))
+        }
 
         if (isEdit) {
           const content = await api.getAdminContentById(id)
@@ -163,6 +194,10 @@ export default function ContentForm() {
       publishedAt: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
     }
 
+    if (formData.producer) {
+      saveProducer(formData.producer)
+    }
+
     try {
       let savedContent
       if (isEdit) {
@@ -220,6 +255,41 @@ export default function ContentForm() {
       setMediaList((prev) => prev.filter((m) => m.id !== mediaId))
     } catch (err) {
       alert(err.message)
+    }
+  }
+
+  const handleUploadProducerAvatar = async (file) => {
+    if (!file) return
+    const currentProducer = (formData.producer || 'Zecution Gaming').replace(/👑/g, '').trim()
+    setUploadingProducerAvatar(true)
+    try {
+      const url = await api.uploadProducerAvatar(file)
+      if (url) {
+        saveProducerAvatar(currentProducer, url)
+        setProducerAvatarsMap((prev) => ({ ...prev, [currentProducer]: url }))
+
+        try {
+          const currentSettings = await api.getAdminSettings()
+          let existingAvatars = {}
+          try {
+            existingAvatars = JSON.parse(currentSettings.producer_avatars || '{}')
+          } catch {
+            existingAvatars = {}
+          }
+          existingAvatars[currentProducer] = url
+          await api.updateSettings({
+            ...currentSettings,
+            producer_avatars: JSON.stringify(existingAvatars),
+          })
+          setServerProducerAvatars(existingAvatars)
+        } catch (settingsErr) {
+          console.error('Ayarlar kaydedilemedi:', settingsErr)
+        }
+      }
+    } catch (err) {
+      alert(err.message || 'Profil fotoğrafı yüklenemedi.')
+    } finally {
+      setUploadingProducerAvatar(false)
     }
   }
 
@@ -492,14 +562,325 @@ export default function ContentForm() {
 
 
             <div className="form-field">
-              <label htmlFor="producer">Yapımcı</label>
-              <input
-                id="producer"
-                name="producer"
-                type="text"
-                value={formData.producer}
-                onChange={handleChange}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <label htmlFor="producer" style={{ margin: 0 }}>Yapımcı</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  {!isAddingNewProducer && !isEditingProducer ? (
+                    <>
+                      <button
+                        type="button"
+                        style={{
+                          fontSize: '0.78rem',
+                          padding: '0.2rem 0.65rem',
+                          color: '#c084fc',
+                          background: 'rgba(177, 60, 255, 0.1)',
+                          border: '1px solid rgba(177, 60, 255, 0.4)',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => {
+                          setIsAddingNewProducer(true)
+                          setIsEditingProducer(false)
+                        }}
+                      >
+                        + Yeni Yapımcı Ekle
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          fontSize: '0.78rem',
+                          padding: '0.2rem 0.65rem',
+                          color: '#38bdf8',
+                          background: 'rgba(56, 189, 248, 0.1)',
+                          border: '1px solid rgba(56, 189, 248, 0.4)',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => {
+                          setEditingProducerName(formData.producer || 'Cml Gaming')
+                          setIsEditingProducer(true)
+                          setIsAddingNewProducer(false)
+                        }}
+                        title="Seçili yapımcının adını düzenle veya düzelt"
+                      >
+                        ✏️ Yapımcıyı Düzenle
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      style={{
+                        fontSize: '0.78rem',
+                        padding: '0.2rem 0.65rem',
+                        color: '#94a3b8',
+                        background: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        setIsAddingNewProducer(false)
+                        setIsEditingProducer(false)
+                      }}
+                    >
+                      Listeden Seç / İptal
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {!isAddingNewProducer && !isEditingProducer ? (
+                <>
+                  <select
+                    id="producer"
+                    name="producer"
+                    value={formData.producer || 'Zecution Gaming'}
+                    onChange={(e) => {
+                      if (e.target.value === '__add_new__') {
+                        setIsAddingNewProducer(true)
+                      } else {
+                        handleChange(e)
+                      }
+                    }}
+                  >
+                    {producersList.map((p) => (
+                      <option key={p} value={p}>
+                        {p.toLowerCase().includes('zecution') ? 'Zecution Gaming 👑 (Kurucu)' : p}
+                      </option>
+                    ))}
+                    <option value="__add_new__">+ Yeni Yapımcı Ekle...</option>
+                  </select>
+
+                  {/* Seçili Yapımcının Profil Fotoğrafı */}
+                  {(() => {
+                    const selClean = (formData.producer || 'Zecution Gaming').replace(/👑/g, '').trim()
+                    const avatarUrl = getProducerAvatar(selClean, producerAvatarsMap)
+                    const initials = selClean
+                      .split(' ')
+                      .map((w) => w[0])
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .join('')
+                      .toUpperCase() || 'ZG'
+
+                    return (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: '0.65rem',
+                          padding: '0.65rem 0.85rem',
+                          background: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          borderRadius: '8px',
+                          gap: '0.75rem',
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{ position: 'relative', width: '2.5rem', height: '2.5rem', flexShrink: 0 }}>
+                            {avatarUrl ? (
+                              <img
+                                src={getMediaUrl(avatarUrl)}
+                                alt={selClean}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  borderRadius: '50%',
+                                  objectFit: 'cover',
+                                  border: '2px solid #a855f7',
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/media/images/logo.jpg'
+                                }}
+                              />
+                            ) : (
+                              <div
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  borderRadius: '50%',
+                                  background: '#191522',
+                                  border: '2px solid #7c3aed',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: '#fff',
+                                  fontWeight: 800,
+                                  fontSize: '0.85rem',
+                                }}
+                              >
+                                {initials}
+                              </div>
+                            )}
+                            <span
+                              style={{
+                                position: 'absolute',
+                                bottom: '0',
+                                right: '0',
+                                width: '0.55rem',
+                                height: '0.55rem',
+                                borderRadius: '50%',
+                                background: '#22c55e',
+                                border: '1.5px solid #121212',
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#fff' }}>
+                              {selClean} Profil Fotoğrafı
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: avatarUrl ? '#4ade80' : '#ffffff73' }}>
+                              {avatarUrl ? '✓ Özel fotoğraf yüklü' : 'Varsayılan monogram (baş harfler)'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <label
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            padding: '0.35rem 0.75rem',
+                            background: 'rgba(168, 85, 247, 0.15)',
+                            border: '1px solid rgba(168, 85, 247, 0.4)',
+                            borderRadius: '5px',
+                            color: '#c084fc',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: uploadingProducerAvatar ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          {uploadingProducerAvatar ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                          <span>{avatarUrl ? 'Fotoğrafı Değiştir' : 'Fotoğraf Yükle'}</span>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,image/jpg"
+                            style={{ display: 'none' }}
+                            disabled={uploadingProducerAvatar}
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleUploadProducerAvatar(e.target.files[0])
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    )
+                  })()}
+                </>
+              ) : isEditingProducer ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(56, 189, 248, 0.05)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#7dd3fc', fontWeight: '500' }}>
+                    Yapımcıyı Düzenle: <strong>{formData.producer}</strong>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      placeholder="Yeni veya düzeltilmiş adı yazın..."
+                      value={editingProducerName}
+                      onChange={(e) => setEditingProducerName(e.target.value)}
+                      autoFocus
+                      style={{ flex: 1, minWidth: '180px' }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn--primary"
+                      style={{ padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}
+                      onClick={() => {
+                        const clean = editingProducerName.trim().replace(/👑/g, '').trim()
+                        if (clean) {
+                          const oldName = formData.producer || 'Zecution Gaming'
+                          if (isPermanentPlatformName(oldName)) {
+                            alert('Zecution Gaming kurucu yapımcıdır, adı değiştirilemez.')
+                            return
+                          }
+                          updateProducer(oldName, clean)
+                          setProducersList((prev) => prev.map((p) => (p.toLowerCase() === oldName.toLowerCase() ? clean : p)))
+                          setFormData((prev) => ({ ...prev, producer: clean }))
+                          setIsEditingProducer(false)
+                        }
+                      }}
+                    >
+                      Kaydet
+                    </button>
+                    {!isPermanentPlatformName(formData.producer) && (
+                      <button
+                        type="button"
+                        style={{
+                          padding: '0.5rem 0.85rem',
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                          color: '#f87171',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                          whiteSpace: 'nowrap',
+                        }}
+                        onClick={() => {
+                          const target = formData.producer
+                          if (window.confirm(`"${target}" yapımcısını listeden silmek istediğinize emin misiniz?`)) {
+                            deleteProducer(target)
+                            setProducersList((prev) => prev.filter((p) => p.toLowerCase() !== target.toLowerCase()))
+                            setFormData((prev) => ({ ...prev, producer: 'Zecution Gaming' }))
+                            setIsEditingProducer(false)
+                          }
+                        }}
+                      >
+                        Sil
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      style={{
+                        padding: '0.5rem 0.85rem',
+                        background: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#cbd5e1',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        whiteSpace: 'nowrap',
+                      }}
+                      onClick={() => setIsEditingProducer(false)}
+                    >
+                      İptal
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Yeni yapımcı adını yazın..."
+                    value={newProducerName}
+                    onChange={(e) => setNewProducerName(e.target.value)}
+                    autoFocus
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn--primary"
+                    style={{ padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}
+                    onClick={() => {
+                      const clean = newProducerName.trim().replace(/👑/g, '').trim()
+                      if (clean) {
+                        saveProducer(clean)
+                        setProducersList((prev) => Array.from(new Set([...prev, clean])))
+                        setFormData((prev) => ({ ...prev, producer: clean }))
+                        setNewProducerName('')
+                        setIsAddingNewProducer(false)
+                      }
+                    }}
+                  >
+                    Kaydet & Seç
+                  </button>
+                </div>
+              )}
+              <span style={{ fontSize: '0.75rem', color: '#ffffff80', marginTop: '0.35rem', display: 'block' }}>
+                Seçtiğiniz yapımcı mod sayfasında özel kartıyla (gönderi sayısı, katılım yılı ve rozeti) gösterilir.
+              </span>
             </div>
 
             <div className="form-field">

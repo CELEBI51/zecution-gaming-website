@@ -39,7 +39,22 @@ async function loadRawGuides() {
     }
 
     const parsed = JSON.parse(record.value)
-    return Array.isArray(parsed) ? parsed : DEFAULT_GUIDES
+    const list = Array.isArray(parsed) ? parsed : DEFAULT_GUIDES
+    return list.map((g) => {
+      const isZecution = !g.author?.name || g.author.name.toLowerCase().includes('zecution')
+      const { reputation, ...cleanAuthor } = g.author || {}
+      return {
+        ...g,
+        author: {
+          ...cleanAuthor,
+          name: isZecution ? 'Zecution Gaming 👑' : (g.author?.name || 'Zecution Gaming 👑'),
+          role: isZecution ? 'Kurucu' : (g.author?.role || 'Mod Yapımcısı'),
+          badge: isZecution ? 'KURUCU' : (g.author?.badge || 'ONAYLI YAPIMCI'),
+          avatar: g.author?.avatar || '/media/images/logo.jpg',
+          posts: g.author?.posts || '148 Gönderi',
+        },
+      }
+    })
   } catch (err) {
     console.error('Error loading guides from DB:', err)
     return DEFAULT_GUIDES
@@ -131,12 +146,11 @@ export async function createGuide(data) {
     targetPath: data.targetPath || '',
     isActive: data.isActive !== false,
     author: data.author || {
-      name: 'Zecution Sim Ekibi',
-      role: 'Simülasyon Moderatörü',
-      badge: 'RESMİ REHBER',
+      name: 'Zecution Gaming 👑',
+      role: 'Kurucu',
+      badge: 'KURUCU',
       avatar: '/media/images/logo.jpg',
       posts: '148 Gönderi',
-      reputation: '+920 Rep',
     },
     stats: {
       views: '1.2k Görüntülenme',

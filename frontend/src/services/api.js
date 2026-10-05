@@ -14,7 +14,10 @@ export const UPLOAD_BASE =
 export function getMediaUrl(path) {
   if (!path) return '/media/images/logo.jpg'
   if (path.startsWith('http://') || path.startsWith('https://')) return path
-  if (path.startsWith('/uploads')) return `${UPLOAD_BASE}${path}`
+  if (path.startsWith('/uploads')) {
+    const sep = path.includes('?') ? '&' : '?'
+    return `${UPLOAD_BASE}${path}${sep}v=20261005_1930`
+  }
   return path
 }
 
@@ -477,6 +480,25 @@ export const api = {
     return res.data
   },
 
+  async verifyEmail({ email, code }) {
+    const res = await request('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    })
+    if (res?.data?.token && typeof localStorage !== 'undefined') {
+      localStorage.setItem('zecution_user_token', res.data.token)
+    }
+    return res.data
+  },
+
+  async resendVerification(email) {
+    const res = await request('/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    })
+    return res.data
+  },
+
   async logoutUser() {
     try {
       await request('/auth/logout', { method: 'POST' })
@@ -583,5 +605,15 @@ export const api = {
       body: formData,
     })
     return res
+  },
+
+  async uploadProducerAvatar(file) {
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const res = await request('/admin/settings/upload-avatar', {
+      method: 'POST',
+      body: formData,
+    })
+    return res.url
   },
 }

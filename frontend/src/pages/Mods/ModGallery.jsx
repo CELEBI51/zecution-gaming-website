@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   ArrowRight,
@@ -37,20 +37,98 @@ const CATEGORY_ICONS = {
   addons: Puzzle,
 }
 
+const DEFAULT_GAMES = [
+  {
+    id: 'assetto-corsa',
+    name: 'Assetto Corsa',
+    shortName: 'Assetto Corsa',
+    description: 'Drift, cadde ve pist simülasyonu modları.',
+    image: '/media/images/game-assetto-corsa.png',
+    Icon: Gamepad2,
+    tone: 'violet',
+  },
+  {
+    id: 'ets2',
+    name: 'Euro Truck Simulator 2',
+    shortName: 'ETS2',
+    description: 'Türkiye haritası, otobüs ve tır modları.',
+    image: '/media/images/game-ets2.jpg',
+    Icon: Truck,
+    tone: 'amber',
+  },
+  {
+    id: 'beamng',
+    name: 'BeamNG.drive',
+    shortName: 'BeamNG',
+    description: 'Gerçekçi soft-body fizik ve kaza modları.',
+    image: '/media/images/game-beamng.jpg',
+    Icon: Mountain,
+    tone: 'orange',
+  },
+]
+
+const DEFAULT_CATEGORIES = [
+  {
+    id: 'vehicles',
+    name: 'Araç Modları',
+    description: 'Otomobil, drift ve cadde araçları.',
+    gameSlug: 'assetto-corsa',
+    Icon: CarFront,
+    image: '/media/images/category-assetto-vehicles.jpg',
+  },
+  {
+    id: 'maps',
+    name: 'Harita Modları',
+    description: 'Tokyo Shuto, Daikoku ve otoban haritaları.',
+    gameSlug: 'assetto-corsa',
+    Icon: Map,
+    image: '/media/images/category-assetto-maps.jpg',
+  },
+  {
+    id: 'servers',
+    name: 'Sunucular',
+    description: 'Zecution çevrim içi sunucu paketleri.',
+    gameSlug: 'assetto-corsa',
+    Icon: Server,
+    image: '/media/images/category-assetto-servers.jpg',
+  },
+]
+
 function ModGallery() {
   const [selectedGame, setSelectedGame] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [games, setGames] = useState([])
-  const [categories, setCategories] = useState([])
+  const [games, setGames] = useState(DEFAULT_GAMES)
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
   const [mods, setMods] = useState([])
   const [loading, setLoading] = useState(true)
 
   // Arama Durumları
+  const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
   const [onlyInCategory, setOnlyInCategory] = useState(true)
   const searchInputRef = useRef(null)
   const searchSectionRef = useRef(null)
+
+  // URL query parametresi varsa (örn: yapımcı profili filtreleme) otomatik ara
+  useEffect(() => {
+    const qParam = searchParams.get('search') || searchParams.get('q') || searchParams.get('producer')
+    if (qParam) {
+      setSearchQuery(qParam)
+      setAppliedSearch(qParam)
+      setOnlyInCategory(false)
+      setSelectedGame('assetto-corsa')
+      // URL'deki query parametresini temizle ki sayfa yenilendiğinde (F5) takılı kalmasın
+      if (window.location.search) {
+        window.history.replaceState({}, '', window.location.pathname)
+      }
+      window.requestAnimationFrame(() => {
+        setTimeout(() => {
+          document.querySelector('#mod-sonuclari')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 120)
+      })
+    }
+  }, [searchParams])
 
   useEffect(() => {
     let isMounted = true
@@ -59,54 +137,102 @@ function ModGallery() {
       try {
         setLoading(true)
         const [gamesData, categoriesData, contentsData] = await Promise.all([
-          api.getGames(),
-          api.getCategories({ section: 'gallery' }),
-          api.getContents({ section: 'gallery', limit: 100 }),
+          api.getGames().catch(() => []),
+          api.getCategories({ section: 'gallery' }).catch(() => []),
+          api.getContents({ section: 'gallery', limit: 100 }).catch(() => ({ items: [] })),
         ])
 
         if (!isMounted) return
 
         // Oyunlar
-        const mappedGames = gamesData.map((g) => {
-          const meta = GAME_META[g.slug] || { shortName: g.name, Icon: Gamepad2, tone: 'violet', defaultImg: '/media/images/logo.jpg' }
-          return {
-            id: g.slug,
-            name: g.name,
-            shortName: meta.shortName,
-            description: g.description || 'Oyun modları ve içerikleri.',
-            image: g.coverImage || meta.defaultImg,
-            Icon: meta.Icon,
-            tone: meta.tone,
-          }
-        })
-        setGames(mappedGames)
+        if (Array.isArray(gamesData) && gamesData.length > 0) {
+          const mappedGames = gamesData.map((g) => {
+            const meta = GAME_META[g.slug] || { shortName: g.name, Icon: Gamepad2, tone: 'violet', defaultImg: '/media/images/logo.jpg' }
+            return {
+              id: g.slug,
+              name: g.name,
+              shortName: meta.shortName,
+              description: g.description || 'Oyun modları ve içerikleri.',
+              image: g.coverImage || meta.defaultImg,
+              Icon: meta.Icon,
+              tone: meta.tone,
+            }
+          })
+          setGames(mappedGames)
+        } else {
+          setGames(DEFAULT_GAMES)
+        }
 
         // Kategoriler
-        const mappedCategories = categoriesData.map((c) => ({
-          id: c.slug,
-          name: c.name,
-          description: c.name,
-          gameSlug: c.game?.slug || 'assetto-corsa',
-          Icon: CATEGORY_ICONS[c.slug] || Puzzle,
-          image: c.slug === 'vehicles' ? '/media/images/category-assetto-vehicles.jpg' : c.slug === 'servers' ? '/media/images/category-assetto-servers.jpg' : null,
-        }))
-        setCategories(mappedCategories)
+        if (Array.isArray(categoriesData) && categoriesData.length > 0) {
+          const categoryImages = {
+            vehicles: '/media/images/category-assetto-vehicles.jpg',
+            maps: '/media/images/category-assetto-maps.jpg',
+            servers: '/media/images/category-assetto-servers.jpg',
+          }
 
-        // Modlar
-        const mappedMods = (contentsData.items || []).map((item) => ({
+          const mappedCategories = categoriesData
+            .filter((c) => c.slug !== 'addons' && c.slug !== 'eklentiler' && c.id !== 'addons')
+            .map((c) => ({
+              id: c.slug,
+              name: c.name,
+              description: c.description || (c.slug === 'maps' ? 'Tokyo Shuto, Daikoku ve otoban haritaları.' : c.name),
+              gameSlug: c.game?.slug || 'assetto-corsa',
+              Icon: CATEGORY_ICONS[c.slug] || Map,
+              image: categoryImages[c.slug] || '/media/images/category-assetto-maps.jpg',
+            }))
+          setCategories(mappedCategories)
+        } else {
+          setCategories(DEFAULT_CATEGORIES)
+        }
+
+        // Sitedeki gerçek modlar (Test/çöp kayıtlar filtrelenir)
+        const rawApiMods = (contentsData?.items || []).filter(
+          (item) => item.title && !['jhfkjh', 'sfas'].includes(item.title)
+        )
+
+        const apiMods = rawApiMods.map((item) => ({
           id: item.id,
           slug: item.slug || item.id,
           name: item.title,
           producer: item.producer || 'Zecution Gaming',
           description: item.shortDescription || item.description || '',
-          game: item.game?.slug || '',
-          category: item.category?.slug || '',
+          game: item.game?.slug || 'assetto-corsa',
+          category: item.category?.slug || 'vehicles',
           image: getMediaUrl(item.coverImage?.filePath || item.coverImage?.thumbnailPath),
           downloadUrl: item.downloadUrl,
+          viewCount: item.viewCount || 0,
+          downloadCount: item.downloadCount || 0,
         }))
-        setMods(mappedMods)
+
+        // Sitede var olan gerçek modları çeşit çeşit karıştırarak sırala (Spor, Harita, Klasik, Minibüs, Sedan)
+        const customVarietyOrder = [
+          'honda-s2000-ap2-v2',
+          'real-monaco',
+          'tofas-doganslx-ankara-isi',
+          'bmw-e36-320i-convertible-1997',
+          'cingan-gasa-ford-transit-minibus',
+          'tofas-dogans-atmosferik-adana-isi',
+          'fiat-linea-eski-kasa-2009-bedelinea',
+          'fiat-linea-2014-13-multijet',
+          'jz-linea',
+        ]
+
+        const sortedMods = [...apiMods].sort((a, b) => {
+          const idxA = customVarietyOrder.indexOf(a.slug)
+          const idxB = customVarietyOrder.indexOf(b.slug)
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB
+          if (idxA !== -1) return -1
+          if (idxB !== -1) return 1
+          return 0
+        })
+
+        setMods(sortedMods)
       } catch (err) {
         console.error('Galeri yükleme hatası:', err)
+        setGames(DEFAULT_GAMES)
+        setCategories(DEFAULT_CATEGORIES)
+        setMods([])
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -163,7 +289,11 @@ function ModGallery() {
 
   const handleSearchSubmit = (e) => {
     if (e) e.preventDefault()
-    setAppliedSearch(searchQuery.trim())
+    const trimmed = searchQuery.trim()
+    setAppliedSearch(trimmed)
+    if (!trimmed && window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
     window.requestAnimationFrame(() => {
       document.querySelector('#mod-sonuclari')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
@@ -172,6 +302,11 @@ function ModGallery() {
   const handleClearSearch = () => {
     setSearchQuery('')
     setAppliedSearch('')
+    setSelectedCategory(null)
+    setOnlyInCategory(false)
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
     searchInputRef.current?.focus()
   }
 
@@ -191,6 +326,11 @@ function ModGallery() {
     setSelectedGame(gameId)
     setSelectedCategory(null)
     setOnlyInCategory(false)
+    setSearchQuery('')
+    setAppliedSearch('')
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
     window.requestAnimationFrame(() => {
       setTimeout(() => {
         if (gameId === 'assetto-corsa') {
@@ -365,13 +505,17 @@ function ModGallery() {
                       selectedCategoryObj && onlyInCategory
                         ? `"${selectedCategoryObj.name}" kategorisinde mod ara...`
                         : activeGame
-                        ? `${activeGame.name} modları arasında ara...`
-                        : 'Mod galerisinde ara (araç, harita, sunucu...)'
+                          ? `${activeGame.name} modları arasında ara...`
+                          : 'Mod galerisinde ara (araç, harita, sunucu...)'
                     }
                     value={searchQuery}
                     onChange={(e) => {
-                      setSearchQuery(e.target.value)
-                      setAppliedSearch(e.target.value)
+                      const val = e.target.value
+                      setSearchQuery(val)
+                      setAppliedSearch(val)
+                      if (!val.trim() && window.location.search) {
+                        window.history.replaceState({}, '', window.location.pathname)
+                      }
                     }}
                   />
                   {searchQuery && (
@@ -420,10 +564,15 @@ function ModGallery() {
                   <span className="mod-quick-cat-label">Kategori:</span>
                   <button
                     type="button"
-                    className={`mod-quick-cat-pill ${!selectedCategory ? 'is-active' : ''}`}
+                    className={`mod-quick-cat-pill ${!selectedCategory && !appliedSearch.trim() ? 'is-active' : ''}`}
                     onClick={() => {
                       setSelectedCategory(null)
                       setOnlyInCategory(false)
+                      setSearchQuery('')
+                      setAppliedSearch('')
+                      if (window.location.search) {
+                        window.history.replaceState({}, '', window.location.pathname)
+                      }
                     }}
                   >
                     Tüm Kategoriler
@@ -482,13 +631,27 @@ function ModGallery() {
                       className="mod-card__media"
                       onClick={() => api.trackContentClick(mod.slug)}
                     >
-                      <img src={mod.image} alt={mod.name} loading="lazy" />
+                      <img
+                        src={mod.image}
+                        alt={mod.name}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = '/media/images/logo.jpg'
+                        }}
+                      />
                       <span className="mod-card__hover-overlay">
                         <Eye size={20} /> Detayları İncele
                       </span>
                     </Link>
                     <div className="mod-card__body">
-                      <span className="mod-card__producer">{mod.producer}</span>
+                      <div className="mod-card__meta">
+                        <span className="mod-card__producer">{mod.producer}</span>
+                        {mod.viewCount !== undefined && mod.viewCount > 0 && (
+                          <span className="mod-card__views" title={`${mod.viewCount} görüntülenme`}>
+                            <Eye size={12} /> {mod.viewCount}
+                          </span>
+                        )}
+                      </div>
                       <h3>
                         <Link
                           to={`/modlar/${mod.slug}`}

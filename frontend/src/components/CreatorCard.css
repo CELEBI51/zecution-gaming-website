@@ -1,0 +1,176 @@
+.creator-card {
+  position: relative;
+  background: #0f0c18;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.creator-card--founder {
+  border-color: rgba(177, 60, 255, 0.32);
+  background: radial-gradient(circle at 50% 0%, rgba(127, 34, 201, 0.16), transparent 70%), #0f0c18;
+}
+
+.creator-card-avatar-wrap {
+  position: relative;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 0.2rem;
+}
+
+.creator-card-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(177, 60, 255, 0.65);
+  box-shadow: 0 0 22px rgba(127, 34, 201, 0.45);
+  object-fit: cover;
+  background: #08060c;
+}
+
+.creator-card-avatar--monogram {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #2b124c, #130a24);
+  color: #e9d5ff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border: 2px solid rgba(177, 60, 255, 0.5);
+}
+
+.creator-card-online-dot {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #0f0c18;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+.creator-card-name {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.creator-card-role {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.creator-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, rgba(127, 34, 201, 0.3), rgba(177, 60, 255, 0.45));
+  border: 1px solid rgba(177, 60, 255, 0.6);
+  color: #f5d0fe;
+  padding: 0.22rem 0.75rem;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(177, 60, 255, 0.2);
+}
+
+.creator-card-badge--founder {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(234, 179, 8, 0.2));
+  border-color: rgba(234, 179, 8, 0.5);
+  color: #fef08a;
+  box-shadow: 0 2px 14px rgba(234, 179, 8, 0.25);
+}
+
+.creator-card-badge--partner {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(168, 85, 247, 0.35));
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #bae6fd;
+  box-shadow: 0 2px 14px rgba(56, 189, 248, 0.25);
+}
+
+.creator-card-badge--verified {
+  background: linear-gradient(135deg, rgba(127, 34, 201, 0.3), rgba(177, 60, 255, 0.45));
+  border-color: rgba(177, 60, 255, 0.6);
+  color: #f5d0fe;
+  box-shadow: 0 2px 10px rgba(177, 60, 255, 0.2);
+}
+
+.creator-crown-icon {
+  color: #facc15;
+  filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.6));
+}
+
+.creator-card-details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.85rem 0;
+  margin: 0.4rem 0;
+  border-block: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.82rem;
+}
+
+.creator-card-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.creator-card-detail-row strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.creator-card-cta {
+  width: 100%;
+  margin-top: 0.2rem;
+}
+
+.creator-card-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(127, 34, 201, 0.35), rgba(177, 60, 255, 0.25));
+  border: 1px solid rgba(177, 60, 255, 0.45);
+  border-radius: 0.75rem;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.creator-card-btn:hover {
+  background: linear-gradient(135deg, #7f22c9, #b13cff);
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(177, 60, 255, 0.4);
+}

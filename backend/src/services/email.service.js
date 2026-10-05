@@ -37,14 +37,22 @@ export function verifyReviewActionToken(token) {
  * SMTP aktarıcısını hazırlar.
  */
 function getTransporter() {
-  const host = process.env.SMTP_HOST || env.SMTP_HOST
-  const port = Number(process.env.SMTP_PORT || env.SMTP_PORT || 587)
+  const host = process.env.SMTP_HOST || env.SMTP_HOST || 'smtp.gmail.com'
+  const port = Number(process.env.SMTP_PORT || env.SMTP_PORT || 465)
   const user = process.env.SMTP_USER || env.SMTP_USER
-  const pass = process.env.SMTP_PASS || env.SMTP_PASS
+  const pass = (process.env.SMTP_PASS || env.SMTP_PASS || '').trim().replace(/\s+/g, '')
   const secure = process.env.SMTP_SECURE === 'true' || port === 465
 
-  if (!host || !user || !pass) {
+  if (!user || !pass) {
     return null
+  }
+
+  // Gmail hesabı kullanılıyorsa yerel Gmail servisini kullan
+  if (host === 'smtp.gmail.com' || (user && user.endsWith('@gmail.com'))) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass },
+    })
   }
 
   return nodemailer.createTransport({
@@ -199,3 +207,81 @@ export async function sendNewReviewEmail({ review, content, user }) {
     console.error('[Email] E-posta gönderilirken hata oluştu:', err)
   }
 }
+
+/**
+ * Yeni kullanıcı kaydı veya e-posta doğrulama için 6 haneli kod içeren e-posta gönderir.
+ */
+export async function sendVerificationEmail({ email, username, code }) {
+  try {
+    const transporter = getTransporter()
+    const emailSubject = `🎮 [Zecution Gaming] E-Posta Doğrulama Kodunuz: ${code}`
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0b0e; color: #f1f5f9; margin: 0; padding: 20px; }
+    .card { max-width: 540px; margin: 0 auto; background: #131218; border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 16px; padding: 32px 28px; box-shadow: 0 10px 35px rgba(0,0,0,0.75); }
+    .header { text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 20px; margin-bottom: 24px; }
+    .logo-badge { display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: #ffffff; font-weight: 900; font-size: 15px; padding: 6px 16px; border-radius: 20px; letter-spacing: 1px; margin-bottom: 12px; }
+    .title { color: #fff; font-size: 22px; font-weight: 800; margin: 0 0 8px; }
+    .subtitle { color: #94a3b8; font-size: 14px; margin: 0; }
+    .code-container { text-align: center; margin: 28px 0; padding: 24px 16px; background: rgba(168, 85, 247, 0.08); border: 2px dashed rgba(168, 85, 247, 0.4); border-radius: 14px; }
+    .code-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #c084fc; font-weight: 700; margin-bottom: 8px; }
+    .code-val { font-size: 38px; font-weight: 900; letter-spacing: 8px; color: #ffffff; font-family: monospace, Courier, sans-serif; text-shadow: 0 0 15px rgba(168, 85, 247, 0.6); }
+    .notice { font-size: 13px; color: #94a3b8; text-align: center; line-height: 1.6; margin: 20px 0 0; }
+    .notice strong { color: #f1f5f9; }
+    .footer { text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; margin-top: 28px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="logo-badge">ZECUTION GAMING</div>
+      <h1 class="title">E-Posta Doğrulama Kodu</h1>
+      <p class="subtitle">Aramıza hoş geldin <strong>${username}</strong>! Hesabını aktif etmek için aşağıdaki kodu kullanabilirsin.</p>
+    </div>
+
+    <div class="code-container">
+      <div class="code-label">6 Haneli Doğrulama Kodun</div>
+      <div class="code-val">${code}</div>
+    </div>
+
+    <p class="notice">
+      Bu kod <strong>15 dakika</strong> boyunca geçerlidir.<br/>
+      Eğer bu hesabı siz oluşturmadıysanız, bu e-postayı güvenle göz ardı edebilirsiniz.
+    </p>
+
+    <div class="footer">
+      © 2026 Zecution Gaming • Güvenli Topluluk & Mod Platformu
+    </div>
+  </div>
+</body>
+</html>
+`
+
+    if (transporter) {
+      const fromAddr = process.env.SMTP_FROM || env.SMTP_FROM || `"Zecution Gaming" <${process.env.SMTP_USER || 'no-reply@zecution.com'}>`
+      await transporter.sendMail({
+        from: fromAddr,
+        to: email,
+        subject: emailSubject,
+        text: `Zecution Gaming Doğrulama Kodunuz: ${code}\n\nBu kod 15 dakika boyunca geçerlidir.\nEğer bu hesabı siz oluşturmadıysanız bu e-postayı güvenle göz ardı edebilirsiniz.`,
+        html: htmlContent,
+      })
+      console.log(`[Email] Doğrulama kodu e-postası gönderildi -> ${email} (Kod: ${code})`)
+    } else {
+      console.log('----------------------------------------------------')
+      console.log('[Email Simulation - SMTP Yapılandırılmadı]')
+      console.log(`Alıcı: ${email}`)
+      console.log(`Konu: ${emailSubject}`)
+      console.log(`>>> E-POSTA DOĞRULAMA KODU: ${code} <<<`)
+      console.log('----------------------------------------------------')
+    }
+  } catch (err) {
+    console.error('[Email] Doğrulama e-postası gönderilirken hata oluştu:', err)
+  }
+}
+

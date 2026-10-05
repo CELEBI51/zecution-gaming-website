@@ -3,6 +3,8 @@ import {
   registerUser,
   loginUser,
   logoutUser,
+  verifyEmail,
+  resendVerificationCode,
   updateUserProfile,
   saveUserAvatar,
 } from '../../services/user-auth.service.js'
@@ -32,15 +34,51 @@ export async function register(req, res, next) {
       { ipAddress, userAgent }
     )
 
-    res.cookie(COOKIE_NAME, result.sessionToken, getCookieOptions())
-
     res.status(201).json({
+      success: true,
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function verifyEmailController(req, res, next) {
+  try {
+    const { email, code } = req.body
+    const ipAddress = req.ip
+    const userAgent = req.headers['user-agent']
+
+    const result = await verifyEmail(
+      { email, code },
+      { ipAddress, userAgent }
+    )
+
+    if (result.sessionToken) {
+      res.cookie(COOKIE_NAME, result.sessionToken, getCookieOptions())
+    }
+
+    res.json({
       success: true,
       data: {
         user: result.user,
         token: result.sessionToken,
         expiresAt: result.expiresAt,
+        message: result.message,
       },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function resendVerificationController(req, res, next) {
+  try {
+    const { email } = req.body
+    const result = await resendVerificationCode(email)
+    res.json({
+      success: true,
+      data: result,
     })
   } catch (error) {
     next(error)

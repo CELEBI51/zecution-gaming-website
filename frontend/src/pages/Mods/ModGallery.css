@@ -375,8 +375,8 @@
 
 .type-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.85rem, 1.5vw, 1.25rem);
   margin-bottom: clamp(4rem, 8vw, 7rem);
 }
 
@@ -398,10 +398,6 @@
 
 .type-card:nth-child(3) {
   animation-delay: 120ms;
-}
-
-.type-card:nth-child(4) {
-  animation-delay: 180ms;
 }
 
 .type-card__icon {
@@ -597,7 +593,19 @@
   color: #8b5cf6;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0;
+}
+
+.mod-card__views {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #c084fc;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(192, 132, 252, 0.12);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
 }
 
 .mod-card h3 {

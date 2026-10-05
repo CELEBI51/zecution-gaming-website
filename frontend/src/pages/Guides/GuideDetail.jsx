@@ -23,11 +23,13 @@ import {
   ShieldCheck,
   Sparkles,
   Wrench,
+  Crown,
 } from 'lucide-react'
 import { FaYoutube } from 'react-icons/fa6'
 import { GUIDES } from '../../data/guidesData.js'
 import { api, getMediaUrl } from '../../services/api.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
+import CreatorCard from '../../components/CreatorCard.jsx'
 import './GuideDetail.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/zecution_gaming/'
@@ -219,9 +221,11 @@ export default function GuideDetail() {
                 alt=""
                 className="forum-author-mini-avatar"
               />
-              <span className="forum-author-name">{guide.author?.name || 'Zecution Sim Ekibi'}</span>
+              <span className="forum-author-name">
+                {guide.author?.name ? guide.author.name.replace(/Zecution Sim Ekibi/gi, 'Zecution Gaming 👑') : 'Zecution Gaming 👑'}
+              </span>
               <span className="forum-author-badge">
-                <ShieldCheck size={13} /> {guide.author?.badge || 'YÖNETİCİ'}
+                <Crown size={12} className="creator-crown-icon" /> KURUCU
               </span>
             </div>
 
@@ -252,44 +256,17 @@ export default function GuideDetail() {
         <div className="forum-post-wrapper">
           {/* Left Column: Author Card (Forum Style) */}
           <aside className="forum-author-col">
-            <div className="forum-author-card">
-              <div className="forum-author-avatar-wrap">
-                <img
-                  src={guide.author?.avatar || '/media/images/logo.jpg'}
-                  alt={guide.author?.name}
-                  className="forum-author-avatar"
-                />
-                <span className="forum-online-dot" title="Çevrimiçi" />
-              </div>
-              <h3 className="forum-author-card-name">{guide.author?.name}</h3>
-              <span className="forum-author-rank">{guide.author?.role}</span>
-              <span className="forum-author-tag-pill">{guide.author?.badge}</span>
-
-              <div className="forum-author-details">
-                <div className="forum-author-detail-row">
-                  <span>Gönderi:</span>
-                  <strong>{guide.author?.posts || '148'}</strong>
-                </div>
-                <div className="forum-author-detail-row">
-                  <span>İtibar:</span>
-                  <strong className="text-violet">{guide.author?.reputation || '+920'}</strong>
-                </div>
-                <div className="forum-author-detail-row">
-                  <span>Katılım:</span>
-                  <strong>2024</strong>
-                </div>
-              </div>
-
-              <div className="forum-author-cta">
-                <button
-                  type="button"
-                  className="forum-author-contact-btn"
-                  onClick={handleSetupInquiry}
-                >
-                  <Wrench size={14} /> Kurulum Hizmeti İste
-                </button>
-              </div>
-            </div>
+            <CreatorCard
+              name={guide.author?.name ? guide.author.name.replace(/Zecution Sim Ekibi/gi, 'Zecution Gaming 👑') : 'Zecution Gaming 👑'}
+              role={guide.author?.role || 'Kurucu'}
+              badge={guide.author?.badge || 'KURUCU'}
+              avatar={guide.author?.avatar || '/media/images/logo.jpg'}
+              posts={guide.author?.posts || allGuides.length || '148'}
+              joinYear="2024"
+              actionText="Kurulum Hizmeti İste"
+              actionIcon={Wrench}
+              onAction={handleSetupInquiry}
+            />
           </aside>
 
           {/* Right Column: Forum Post Body */}
@@ -542,7 +519,7 @@ export default function GuideDetail() {
               {/* Forum Signature */}
               <div className="forum-signature">
                 <p>
-                  <strong>Zecution Gaming Simülasyon Ekibi</strong> — Sorularınız veya kurulumda yaşadığınız teknik sorunlar için aşağıdaki hizmet butonundan ya da Instagram DM üzerinden bizimle iletişime geçebilirsiniz.
+                  <strong>Zecution Gaming 👑</strong> — Sorularınız veya kurulumda yaşadığınız teknik sorunlar için aşağıdaki hizmet butonundan ya da Instagram DM üzerinden bizimle iletişime geçebilirsiniz.
                 </p>
               </div>
 

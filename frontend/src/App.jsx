@@ -21,6 +21,7 @@ import { FaDiscord, FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa6'
 import UserNavButton from './components/UserNavButton.jsx'
 import SearchModal from './components/SearchModal.jsx'
 import GuideModal from './components/GuideModal.jsx'
+import HomeModSlider from './components/HomeModSlider.jsx'
 import { GUIDES, GUIDE_CATEGORIES } from './data/guidesData.js'
 import { api, getMediaUrl } from './services/api.js'
 import './App.css'
@@ -338,17 +339,7 @@ function App() {
           </div>
         </section>
 
-        <section id="mod-galerisi" className="gallery-gateway section-pad">
-          <a className="gateway-card" href="/modlar" aria-label="Mod galerisine git">
-            <div className="gateway-card-bg" aria-hidden="true" />
-            <div className="gateway-copy">
-              <span className="eyebrow">Tüm araçlar</span>
-              <h2>Mod<br />Galerisi</h2>
-              <p>Yayınlanan modları, görsellerini ve indirme bağlantılarını tek yerde keşfet.</p>
-            </div>
-            <span className="round-arrow"><ArrowUpRight /></span>
-          </a>
-        </section>
+        <HomeModSlider />
 
         <section className="store-gateway section-pad">
           <a className="store-gateway-card" href="/magaza" aria-label="Assetto Corsa mağazasına git">
@@ -370,7 +361,7 @@ function App() {
                 <div className="guide-eyebrow">
                   <Sparkles size={14} /> Bilgi Merkezi & Kurulum
                 </div>
-                <h2>Kurulumdan ayara,<br />yolda kalma.</h2>
+                <h2>Kurulumdan Ayara, Yolda Kalma</h2>
                 <p>
                   Assetto Corsa ve BeamNG için adım adım kurulum anlatımları, CSP, Pure grafik paketleri,
                   direksiyon FFB ayarları ve pratik çözümler.
@@ -418,58 +409,59 @@ function App() {
                     key={guide.id || guide.slug}
                     href={`/rehberler/${guide.slug}`}
                     className="guide-home-card"
-                    style={{ textDecoration: 'none' }}
                   >
-                    {/* Kapak Görseli Arka Planı */}
-                    <div className="guide-home-card-bg-wrap" aria-hidden="true">
+                    {/* 1. Kapak Görseli (Üstte, tamamen açık ve temiz) */}
+                    <div className="guide-photo-media" aria-hidden="true">
                       <img
                         src={getMediaUrl(guide.coverImage || '/media/images/cm-csp-preview.jpg')}
-                        alt=""
-                        className="guide-home-card-bg-img"
+                        alt={guide.title}
+                        className="guide-photo-img"
                         loading="lazy"
                         onError={(e) => {
                           e.currentTarget.src = '/media/images/cm-csp-preview.jpg'
                         }}
                       />
-                      <div className="guide-home-card-gradient" />
-                      <div className="guide-home-card-glow" />
+                      <div className="guide-photo-media-overlay" />
                     </div>
 
-                    {/* Kapak Görseli Üzerinde Duran İçerikler */}
-                    <div className="guide-home-card-content">
-                      <div className="guide-home-card-header">
-                        <span className={`guide-game-pill guide-game-pill--${guide.gameCode || 'assetto-corsa'}`}>
-                          {guide.game}
-                        </span>
-                        <span className="guide-meta-chip">
-                          <Clock size={12} /> {guide.time}
-                        </span>
-                        <span className="guide-meta-chip">
-                          <Gauge size={12} /> {guide.difficulty}
-                        </span>
+                    {/* 2. Başlık ve Bilgi Alanı (Kapağın altında ayrı uzanıyor) */}
+                    <div className="guide-photo-info">
+                      <div className="guide-photo-info-top">
+                        <div className="guide-photo-pills">
+                          <span className={`guide-photo-pill guide-photo-pill--${guide.gameCode || 'assetto-corsa'}`}>
+                            {guide.game}
+                          </span>
+                          <span className="guide-photo-pill guide-photo-pill--meta">
+                            <Clock size={11} /> {guide.time || '5 dk okuma'}
+                          </span>
+                          <span className="guide-photo-pill guide-photo-pill--difficulty">
+                            <Gauge size={11} /> {guide.difficulty || 'Kolay'}
+                          </span>
+                        </div>
+                        <div className="guide-photo-steps">
+                          <BookOpen size={13} /> {guide.steps?.length || guide.stepsCount || 0} Adım
+                        </div>
                       </div>
 
-                      <div className="guide-home-card-body">
-                        <h3 className="guide-home-card-title">{guide.title}</h3>
-                        <p className="guide-home-card-summary">{guide.summary}</p>
+                      <div className="guide-photo-body">
+                        <h3 className="guide-photo-title">{guide.title}</h3>
+                        <p className="guide-photo-summary">{guide.summary}</p>
                       </div>
 
                       {guide.highlights && guide.highlights.length > 0 && (
-                        <div className="guide-home-card-tags">
+                        <div className="guide-photo-tags">
                           {guide.highlights.slice(0, 3).map((h, i) => (
-                            <span key={i} className="guide-home-card-tag">
+                            <span key={i} className="guide-photo-tag">
                               #{h}
                             </span>
                           ))}
                         </div>
                       )}
 
-                      <div className="guide-home-card-footer">
-                        <span className="guide-home-step-count">
-                          <BookOpen size={14} /> {guide.steps?.length || 0} Adım Anlatım
-                        </span>
-                        <span className="guide-home-btn">
-                          Rehberi Oku <ArrowUpRight size={16} />
+                      <div className="guide-photo-footer">
+                        <span className="guide-read-label">Rehberi İncele</span>
+                        <span className="guide-photo-action-btn">
+                          <ArrowUpRight size={16} />
                         </span>
                       </div>
                     </div>

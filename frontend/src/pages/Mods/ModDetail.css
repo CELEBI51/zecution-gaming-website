@@ -2,7 +2,122 @@
 
 .mod-detail-information > *, .mod-features-block dl > div > * { min-width: 0; }
 .mod-detail-breadcrumb { flex-wrap: wrap; overflow-wrap: anywhere; }
+.mod-detail-sidebar { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+.mod-producer-card-wrap { width: 100%; }
 @media (max-width: 480px) {
   .mod-features-block dl > div { grid-template-columns: 1fr !important; gap: 0.25rem !important; }
   .mod-detail-heading h1 { font-size: clamp(1.8rem, 8vw, 2.5rem) !important; }
 }
+
+/* İndirme Paneli Başlık, Tarih ve Tıklanma / Görüntülenme Sayacı */
+.mod-panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.mod-panel-header-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: #ffffff73;
+  font-weight: 500;
+}
+
+.mod-panel-header-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #c084fc;
+  font-weight: 650;
+  background: rgba(192, 132, 252, 0.12);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.mod-panel-meta-sep {
+  opacity: 0.4;
+  font-size: 0.7rem;
+}
+
+.mod-panel-date {
+  color: #ffffff73;
+}
+
+/* İndirme Paneli İstatistik Kutuları */
+.mod-panel-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.65rem;
+  margin: 1.2rem 0 1.5rem;
+}
+
+.mod-panel-stat-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #28232e;
+  border-radius: 4px;
+  background: #16141a;
+  transition: all 0.2s ease;
+}
+
+.mod-panel-stat-box:hover {
+  border-color: #7f22c966;
+  background: #19161f;
+  transform: translateY(-1px);
+}
+
+.mod-panel-stat-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 4px;
+  background: rgba(147, 80, 223, 0.14);
+  color: #c084fc;
+  flex-shrink: 0;
+}
+
+.mod-panel-stat-icon-wrap--dl {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+.mod-panel-stat-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mod-panel-stat-number {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.mod-panel-stat-label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #8b8492;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 900px) {
+  .mod-download-panel .mod-panel-header-row,
+  .mod-download-panel h2,
+  .mod-download-panel .mod-panel-stats-grid {
+    grid-column: 1 / -1;
+  }
+}
+

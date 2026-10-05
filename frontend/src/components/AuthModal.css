@@ -1,14 +1,23 @@
 .auth-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 10000;
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 999999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1.25rem;
   animation: authFadeIn 0.22s ease-out;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 @keyframes authFadeIn {
@@ -275,4 +284,96 @@
 
 .auth-switch-link:hover {
   color: #e9d5ff;
+}
+
+.auth-highlight-email {
+  color: #c084fc;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.auth-otp-wrapper {
+  margin-top: 0.35rem;
+}
+
+.auth-otp-input {
+  text-align: center;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace, Courier;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.45rem;
+  padding: 0.85rem 1rem !important;
+  color: #a855f7 !important;
+  background: #15141c !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.15) inset;
+}
+
+.auth-otp-input:focus {
+  border-color: #c084fc !important;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.3) inset, 0 0 0 3px rgba(168, 85, 247, 0.25) !important;
+}
+
+.auth-verify-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.auth-resend-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 0.55rem 1.1rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-resend-btn:hover:not(:disabled) {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.auth-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+
+.auth-back-link:hover {
+  color: #c084fc;
+}
+
+.auth-spam-notice {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px dashed rgba(168, 85, 247, 0.35);
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.78rem;
+  color: #c084fc;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.auth-spam-notice strong {
+  color: #f1f5f9;
 }

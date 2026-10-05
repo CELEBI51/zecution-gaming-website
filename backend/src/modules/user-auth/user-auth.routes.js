@@ -5,6 +5,8 @@ import {
   register,
   login,
   logout,
+  verifyEmailController,
+  resendVerificationController,
   getMe,
   updateProfile,
   uploadAvatar,
@@ -53,6 +55,8 @@ function handleAvatarUpload(req, res, next) {
 
 userAuthRouter.post('/register', authLimiter, register)
 userAuthRouter.post('/login', authLimiter, login)
+userAuthRouter.post('/verify-email', authLimiter, verifyEmailController)
+userAuthRouter.post('/resend-verification', authLimiter, resendVerificationController)
 userAuthRouter.post('/logout', logout)
 userAuthRouter.get('/me', requireUser, getMe)
 userAuthRouter.patch('/profile', requireUser, updateProfile)

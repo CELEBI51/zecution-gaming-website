@@ -1,10 +1,43 @@
 import { useState, useEffect } from 'react'
-import { X, Lock, Mail, User, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import {
+  X,
+  Lock,
+  Mail,
+  User,
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
+  ShieldCheck,
+  RefreshCw,
+  ArrowLeft,
+  KeyRound,
+} from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import './AuthModal.css'
 
 export default function AuthModal() {
-  const { isModalOpen, modalMode, setModalMode, closeAuthModal, login, register } = useAuth()
+  const {
+    isModalOpen,
+    modalMode,
+    setModalMode,
+    closeAuthModal,
+    login,
+    register,
+    verifyEmail,
+    resendVerification,
+  } = useAuth()
+
+  // Body scroll lock
+  useEffect(() => {
+    if (isModalOpen) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [isModalOpen])
 
   // Form alanları
   const [emailOrUsername, setEmailOrUsername] = useState('')
@@ -13,14 +46,36 @@ export default function AuthModal() {
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
 
+  // E-posta doğrulama alanları
+  const [pendingEmail, setPendingEmail] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+  const [resendCountdown, setResendCountdown] = useState(0)
+  const [resending, setResending] = useState(false)
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  // Modal kapandığında veya mod değiştiğinde hataları temizle
+  // Geri sayım sayacı
+  useEffect(() => {
+    let timer
+    if (resendCountdown > 0) {
+      timer = setInterval(() => {
+        setResendCountdown((prev) => (prev > 0 ? prev - 1 : 0))
+      }, 1000)
+    }
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [resendCountdown])
+
+  // Modal kapandığında veya mod değiştiğinde hataları ve kodları temizle
   useEffect(() => {
     setError('')
     setSuccess('')
+    if (modalMode !== 'verify') {
+      setVerificationCode('')
+    }
   }, [modalMode, isModalOpen])
 
   // ESC tuşuyla kapatma
@@ -51,6 +106,15 @@ export default function AuthModal() {
       await login(emailOrUsername.trim(), password.trim())
       // Başarılı olursa login fonksiyonu modalı kapatır
     } catch (err) {
+      // E-posta doğrulanmamışsa doğrudan doğrulama adımına yönlendir
+      if (err.details?.needsVerification) {
+        const targetEmail = err.details.email || (emailOrUsername.includes('@') ? emailOrUsername.trim() : '')
+        setPendingEmail(targetEmail)
+        setModalMode('verify')
+        setResendCountdown(60)
+        setError(err.message || 'Hesabınız henüz doğrulanmamış. Lütfen e-postanıza gönderilen 6 haneli kodu giriniz.')
+        return
+      }
       setError(err?.message || 'Giriş yapılamadı. Bilgilerinizi kontrol edin.')
     } finally {
       setLoading(false)
@@ -89,7 +153,15 @@ export default function AuthModal() {
 
     try {
       setLoading(true)
-      await register(cleanUsername, cleanEmail, cleanPassword)
+      const res = await register(cleanUsername, cleanEmail, cleanPassword)
+
+      // Doğrulama adımı gerekiyorsa modal modunu 'verify' olarak değiştir
+      if (res?.needsVerification) {
+        setPendingEmail(res.email || cleanEmail)
+        setModalMode('verify')
+        setResendCountdown(60)
+        setSuccess('Kayıt başarılı! E-posta adresinize 6 haneli doğrulama kodu gönderildi.')
+      }
     } catch (err) {
       setError(err?.message || 'Kayıt işlemi başarısız oldu.')
     } finally {
@@ -97,7 +169,46 @@ export default function AuthModal() {
     }
   }
 
-  return (
+  const handleVerifySubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+
+    const cleanCode = verificationCode.trim()
+    if (!cleanCode || cleanCode.length < 6) {
+      setError('Lütfen 6 haneli doğrulama kodunu eksiksiz giriniz.')
+      return
+    }
+
+    try {
+      setLoading(true)
+      await verifyEmail({ email: pendingEmail, code: cleanCode })
+      // Başarılı doğrulamada kullanıcı oturumu açılır ve modal kapanır
+    } catch (err) {
+      setError(err?.message || 'Doğrulama kodu hatalı veya süresi dolmuş.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResendCode = async () => {
+    if (resendCountdown > 0 || resending || !pendingEmail) return
+
+    try {
+      setResending(true)
+      setError('')
+      setSuccess('')
+      const res = await resendVerification(pendingEmail)
+      setResendCountdown(60)
+      setSuccess(res?.message || 'Yeni doğrulama kodu e-posta adresinize gönderildi.')
+    } catch (err) {
+      setError(err?.message || 'Kod gönderilemedi. Lütfen biraz sonra tekrar deneyin.')
+    } finally {
+      setResending(false)
+    }
+  }
+
+  const modalContent = (
     <div className="auth-modal-backdrop" onClick={closeAuthModal}>
       <div className="auth-modal-card" onClick={(e) => e.stopPropagation()}>
         <button
@@ -111,31 +222,47 @@ export default function AuthModal() {
 
         {/* Modal Başlık */}
         <div className="auth-modal-header">
-          <h2>{modalMode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur'}</h2>
-          <p>
-            {modalMode === 'login'
-              ? 'Yorum yapmak ve modlara puan vermek için hesabına giriş yap.'
-              : 'Zecution Gaming topluluğuna katıl ve değerlendirmelerini paylaş.'}
-          </p>
+          {modalMode === 'verify' ? (
+            <>
+              <div className="auth-modal-icon-badge">
+                <ShieldCheck size={30} />
+              </div>
+              <h2>E-Posta Doğrulama</h2>
+              <p>
+                <strong className="auth-highlight-email">{pendingEmail}</strong> adresine 6 haneli bir onay kodu gönderdik. Hesabınızı aktifleştirmek için kodu giriniz.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>{modalMode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur'}</h2>
+              <p>
+                {modalMode === 'login'
+                  ? 'Yorum yapmak ve modlara puan vermek için hesabına giriş yap.'
+                  : 'Gerçek e-posta adresiniz ile Zecution Gaming topluluğuna katılın.'}
+              </p>
+            </>
+          )}
         </div>
 
-        {/* Sekmeler */}
-        <div className="auth-modal-tabs">
-          <button
-            type="button"
-            className={`auth-modal-tab ${modalMode === 'login' ? 'is-active' : ''}`}
-            onClick={() => setModalMode('login')}
-          >
-            Giriş Yap
-          </button>
-          <button
-            type="button"
-            className={`auth-modal-tab ${modalMode === 'register' ? 'is-active' : ''}`}
-            onClick={() => setModalMode('register')}
-          >
-            Kayıt Ol
-          </button>
-        </div>
+        {/* Sekmeler (Sadece Login ve Register modunda görünür) */}
+        {modalMode !== 'verify' && (
+          <div className="auth-modal-tabs">
+            <button
+              type="button"
+              className={`auth-modal-tab ${modalMode === 'login' ? 'is-active' : ''}`}
+              onClick={() => setModalMode('login')}
+            >
+              Giriş Yap
+            </button>
+            <button
+              type="button"
+              className={`auth-modal-tab ${modalMode === 'register' ? 'is-active' : ''}`}
+              onClick={() => setModalMode('register')}
+            >
+              Kayıt Ol
+            </button>
+          </div>
+        )}
 
         {/* Hata ve Başarı Uyarıları */}
         {error && (
@@ -151,8 +278,95 @@ export default function AuthModal() {
           </div>
         )}
 
-        {/* GİRİŞ YAP FORMU */}
-        {modalMode === 'login' ? (
+        {/* MOD: E-POSTA DOĞRULAMA (VERIFY) */}
+        {modalMode === 'verify' ? (
+          <form className="auth-modal-form" onSubmit={handleVerifySubmit}>
+            <div className="auth-input-group auth-otp-group">
+              <label htmlFor="verify-code">6 Haneli Doğrulama Kodu</label>
+              <div className="auth-input-wrapper auth-otp-wrapper">
+                <KeyRound size={18} className="auth-input-icon" />
+                <input
+                  id="verify-code"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  placeholder="••••••"
+                  className="auth-otp-input"
+                  value={verificationCode}
+                  onChange={(e) =>
+                    setVerificationCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))
+                  }
+                  autoComplete="one-time-code"
+                  autoFocus
+                  required
+                />
+              </div>
+              <span className="auth-field-hint">
+                Kod 15 dakika boyunca geçerlidir.
+              </span>
+            </div>
+
+            <div className="auth-spam-notice">
+              💡 E-posta ana kutunuzda görünmüyorsa lütfen <strong>Spam (Gereksiz E-posta)</strong> veya <strong>Tanıtımlar</strong> klasörünüzü kontrol edin.
+            </div>
+
+            <button
+              type="submit"
+              className="auth-submit-btn"
+              disabled={loading || verificationCode.length < 6}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Doğrulanıyor...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={16} />
+                  <span>Hesabımı Doğrula ve Giriş Yap</span>
+                </>
+              )}
+            </button>
+
+            <div className="auth-verify-actions">
+              <button
+                type="button"
+                className="auth-resend-btn"
+                onClick={handleResendCode}
+                disabled={resendCountdown > 0 || resending}
+              >
+                {resending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Gönderiliyor...</span>
+                  </>
+                ) : resendCountdown > 0 ? (
+                  <span>Kodu Tekrar Gönder ({resendCountdown}s)</span>
+                ) : (
+                  <>
+                    <RefreshCw size={14} />
+                    <span>Kodu Tekrar Gönder</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="auth-switch-link auth-back-link"
+                onClick={() => {
+                  setModalMode('login')
+                  setError('')
+                  setSuccess('')
+                }}
+              >
+                <ArrowLeft size={14} />
+                <span>Giriş Ekranına Dön</span>
+              </button>
+            </div>
+          </form>
+        ) : modalMode === 'login' ? (
+          /* GİRİŞ YAP FORMU */
           <form className="auth-modal-form" onSubmit={handleLoginSubmit}>
             <div className="auth-input-group">
               <label htmlFor="login-identifier">E-posta veya Kullanıcı Adı</label>
@@ -186,11 +400,7 @@ export default function AuthModal() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="auth-submit-btn"
-              disabled={loading}
-            >
+            <button type="submit" className="auth-submit-btn" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
@@ -222,31 +432,36 @@ export default function AuthModal() {
                 <input
                   id="reg-username"
                   type="text"
-                  placeholder="Kullanıcı adı"
+                  placeholder="Örn: KralOyuncu"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoComplete="username"
-                  maxLength={30}
+                  maxLength={25}
                   required
                 />
               </div>
-              <span className="auth-field-hint">Yorumlarınızda bu isim görünecektir.</span>
+              <span className="auth-field-hint">
+                Harf, rakam, nokta veya alt çizgi içerebilir. Uygunsuz ve troll isimler engellenir.
+              </span>
             </div>
 
             <div className="auth-input-group">
-              <label htmlFor="reg-email">E-posta Adresi</label>
+              <label htmlFor="reg-email">Gerçek E-Posta Adresi</label>
               <div className="auth-input-wrapper">
                 <Mail size={16} className="auth-input-icon" />
                 <input
                   id="reg-email"
                   type="email"
-                  placeholder="E-posta adresi"
+                  placeholder="adiniz@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
                   required
                 />
               </div>
+              <span className="auth-field-hint">
+                Doğrulama kodu bu e-postaya gönderilecektir. Geçici e-postalar kabul edilmez.
+              </span>
             </div>
 
             <div className="auth-input-group">
@@ -281,18 +496,14 @@ export default function AuthModal() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="auth-submit-btn"
-              disabled={loading}
-            >
+            <button type="submit" className="auth-submit-btn" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  <span>Hesap Oluşturuluyor...</span>
+                  <span>Kod Gönderiliyor...</span>
                 </>
               ) : (
-                <span>Kayıt Ol ve Giriş Yap</span>
+                <span>Kayıt Ol ve Doğrulama Kodu Al</span>
               )}
             </button>
 
@@ -311,4 +522,8 @@ export default function AuthModal() {
       </div>
     </div>
   )
+
+  if (typeof document === 'undefined') return null
+
+  return createPortal(modalContent, document.body)
 }

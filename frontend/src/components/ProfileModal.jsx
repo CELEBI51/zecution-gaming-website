@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import {
   X,
   Camera,
@@ -40,6 +41,17 @@ export default function ProfileModal({ isOpen, onClose }) {
   const [success, setSuccess] = useState('')
 
   const fileInputRef = useRef(null)
+
+  // Body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [isOpen])
 
   // Initialize or reset form when modal opens or user updates
   useEffect(() => {
@@ -174,7 +186,7 @@ export default function ProfileModal({ isOpen, onClose }) {
     }
   }
 
-  return (
+  const modalContent = (
     <div className="profile-modal-backdrop" onClick={() => !loading && onClose()}>
       <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
         <button
@@ -380,4 +392,8 @@ export default function ProfileModal({ isOpen, onClose }) {
       </div>
     </div>
   )
+
+  if (typeof document === 'undefined') return null
+
+  return createPortal(modalContent, document.body)
 }

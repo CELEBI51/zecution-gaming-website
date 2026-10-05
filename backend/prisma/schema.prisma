@@ -188,18 +188,21 @@ model ContentReaction {
 }
 
 model User {
-  id           String         @id @default(uuid()) @db.Uuid
-  username     String         @unique @db.VarChar(50)
-  email        String         @unique @db.VarChar(255)
-  passwordHash String         @map("password_hash")
-  avatarUrl    String?        @map("avatar_url")
-  isActive     Boolean        @default(true) @map("is_active")
-  role         String         @default("USER") @db.VarChar(20)
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
-  sessions     UserSession[]
-  reviews      ContentReview[]
-  modSubmissions ModSubmission[]
+  id                    String          @id @default(uuid()) @db.Uuid
+  username              String          @unique @db.VarChar(50)
+  email                 String          @unique @db.VarChar(255)
+  passwordHash          String          @map("password_hash")
+  avatarUrl             String?         @map("avatar_url")
+  isActive              Boolean         @default(true) @map("is_active")
+  isEmailVerified       Boolean         @default(false) @map("is_email_verified")
+  verificationCode      String?         @map("verification_code") @db.VarChar(10)
+  verificationExpiresAt DateTime?       @map("verification_expires_at")
+  role                  String          @default("USER") @db.VarChar(20)
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
+  sessions              UserSession[]
+  reviews               ContentReview[]
+  modSubmissions        ModSubmission[]
 
   @@map("users")
 }

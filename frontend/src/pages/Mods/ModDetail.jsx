@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2, Eye, Download } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
 import ContentReviews from '../../components/ContentReviews.jsx'
 import UserNavButton from '../../components/UserNavButton.jsx'
+import CreatorCard from '../../components/CreatorCard.jsx'
+import {
+  isProducerFounder,
+  setServerProducerAvatars,
+  setServerProducerRoles,
+  setServerDeletedProducers,
+} from '../../services/producers.js'
 import './ModDetail.css'
 
 const DEFAULT_INSTAGRAM = 'https://www.instagram.com/zecution_gaming/'
@@ -13,6 +20,7 @@ export default function ModDetail() {
   const { slug } = useParams()
   const [mod, setMod] = useState(null)
   const [relatedMods, setRelatedMods] = useState([])
+  const [producerModCount, setProducerModCount] = useState(1)
   const [settings, setSettings] = useState({})
   const [activeImage, setActiveImage] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
@@ -36,7 +44,25 @@ export default function ModDetail() {
         if (!mounted) return
         setMod(modData)
         setSettings(settingsData)
-        api.trackContentClick(slug)
+        if (settingsData?.producer_avatars) {
+          setServerProducerAvatars(settingsData.producer_avatars)
+        }
+        if (settingsData?.producer_roles) {
+          setServerProducerRoles(settingsData.producer_roles)
+        }
+        if (settingsData?.deleted_producers) {
+          setServerDeletedProducers(settingsData.deleted_producers)
+        }
+
+        // Tıklanma / görüntülenme sayısını artır ve anında güncelle
+        api
+          .trackContentClick(slug)
+          .then((res) => {
+            if (res?.viewCount !== undefined && mounted) {
+              setMod((prev) => (prev ? { ...prev, viewCount: res.viewCount } : prev))
+            }
+          })
+          .catch(() => {})
 
         if (modData?.game?.slug) {
           try {
@@ -45,6 +71,21 @@ export default function ModDetail() {
           } catch {
             if (mounted) setRelatedMods([])
           }
+        }
+
+        // Yapımcının toplam mod sayısını hesapla
+        try {
+          const allGallery = await api.getContents({ section: 'gallery', limit: 100 })
+          const allItems = allGallery?.items || []
+          const prodClean = (modData?.producer || 'Zecution Gaming').toLowerCase().replace(/👑/g, '').trim()
+          const matches = allItems.filter(
+            (item) => (item.producer || 'Zecution Gaming').toLowerCase().replace(/👑/g, '').trim() === prodClean
+          )
+          if (mounted) {
+            setProducerModCount(matches.length > 0 ? matches.length : 1)
+          }
+        } catch {
+          if (mounted) setProducerModCount(1)
         }
       } catch (loadError) {
         if (mounted) setError(loadError.message || 'Mod detayları yüklenemedi.')
@@ -89,6 +130,8 @@ export default function ModDetail() {
     return <div className="mod-detail-state"><h1>Mod bulunamadı</h1><p>{error || 'İstenen içerik mevcut değil.'}</p><Link to="/modlar">Galeriye dön</Link></div>
   }
 
+  const isFounder = isProducerFounder(mod.producer || 'Zecution Gaming')
+  const cleanProducer = (mod.producer || 'Zecution Gaming').replace(/👑/g, '').trim()
   const instagramUrl = settings.instagram_url || DEFAULT_INSTAGRAM
   const discordUrl = settings.discord_url || DEFAULT_DISCORD
   const features = mod.features || []
@@ -97,6 +140,28 @@ export default function ModDetail() {
   const description = mod.description || mod.shortDescription || ''
   const showPrevious = () => setActiveImage((current) => (current === 0 ? images.length - 1 : current - 1))
   const showNext = () => setActiveImage((current) => (current === images.length - 1 ? 0 : current + 1))
+
+  const handleDownload = async () => {
+    try {
+      const res = await api.trackContentDownload(mod.slug)
+      if (res?.downloadCount !== undefined) {
+        setMod((prev) => (prev ? { ...prev, downloadCount: res.downloadCount } : prev))
+      }
+    } catch {
+      // sessizce geç
+    }
+  }
+
+  const handleContact = async () => {
+    try {
+      const res = await api.trackContentClick(mod.slug)
+      if (res?.viewCount !== undefined) {
+        setMod((prev) => (prev ? { ...prev, viewCount: res.viewCount } : prev))
+      }
+    } catch {
+      // sessizce geç
+    }
+  }
 
   return (
     <div className="mod-detail-page">
@@ -115,8 +180,18 @@ export default function ModDetail() {
           <h1>{mod.title}</h1>
           {mod.shortDescription && <div className="mod-detail-lead">{mod.shortDescription}</div>}
           <div className="mod-detail-meta">
-            <span>Yapımcı <strong>{mod.producer || 'Zecution Gaming'}</strong></span>
+            <span>
+              Yapımcı <strong>{cleanProducer} {isFounder && '👑'}</strong>
+            </span>
             <span>Görsel <strong>{images.length}</strong></span>
+            <span>
+              Görüntülenme <strong>{(mod.viewCount || 0).toLocaleString('tr-TR')}</strong>
+            </span>
+            {Boolean(mod.downloadUrl) && (
+              <span>
+                İndirme <strong>{(mod.downloadCount || 0).toLocaleString('tr-TR')}</strong>
+              </span>
+            )}
           </div>
         </section>
 
@@ -153,40 +228,97 @@ export default function ModDetail() {
             )}
           </div>
 
-          <aside className="mod-download-panel">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
-              <span className="mod-panel-category">{categoryName}</span>
-              {(mod.publishedAt || mod.createdAt) && (
-                <span style={{ fontSize: '0.75rem', color: '#ffffff73', fontWeight: 500 }}>
-                  {new Date(mod.publishedAt || mod.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </span>
+          <div className="mod-detail-sidebar">
+            <aside className="mod-download-panel">
+              <div className="mod-panel-header-row">
+                <span className="mod-panel-category">{categoryName}</span>
+                <div className="mod-panel-header-meta">
+                  <span className="mod-panel-header-stat" title="Tıklanma / Görüntülenme Sayısı">
+                    <Eye size={13} />
+                    <span>{(mod.viewCount || 0).toLocaleString('tr-TR')}</span>
+                  </span>
+                  {(mod.publishedAt || mod.createdAt) && (
+                    <>
+                      <span className="mod-panel-meta-sep">•</span>
+                      <span className="mod-panel-date">
+                        {new Date(mod.publishedAt || mod.createdAt).toLocaleDateString('tr-TR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <h2>{mod.title}</h2>
+              <p>{mod.shortDescription || description}</p>
+
+              {/* Tıklanma / Görüntülenme & İndirme İstatistikleri */}
+              <div className="mod-panel-stats-grid">
+                <div className="mod-panel-stat-box" title="Toplam tıklanma ve görüntülenme sayısı">
+                  <div className="mod-panel-stat-icon-wrap">
+                    <Eye size={17} />
+                  </div>
+                  <div className="mod-panel-stat-info">
+                    <strong className="mod-panel-stat-number">
+                      {(mod.viewCount || 0).toLocaleString('tr-TR')}
+                    </strong>
+                    <span className="mod-panel-stat-label">Görüntülenme</span>
+                  </div>
+                </div>
+
+                {Boolean(mod.downloadUrl) && (
+                  <div className="mod-panel-stat-box" title="Toplam indirme sayısı">
+                    <div className="mod-panel-stat-icon-wrap mod-panel-stat-icon-wrap--dl">
+                      <Download size={17} />
+                    </div>
+                    <div className="mod-panel-stat-info">
+                      <strong className="mod-panel-stat-number">
+                        {(mod.downloadCount || 0).toLocaleString('tr-TR')}
+                      </strong>
+                      <span className="mod-panel-stat-label">İndirme</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {mod.downloadUrl ? (
+                <a
+                  className="mod-primary-action"
+                  href={mod.downloadUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={handleDownload}
+                >
+                  Modu indir
+                </a>
+              ) : (
+                <a
+                  className="mod-primary-action"
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={handleContact}
+                >
+                  Instagram'dan iletişime geç
+                </a>
               )}
+              <a className="mod-secondary-action" href={discordUrl} target="_blank" rel="noreferrer">Discord sunucusu</a>
+            </aside>
+
+            {/* Yapımcı Kartı */}
+            <div className="mod-producer-card-wrap">
+              <CreatorCard
+                name={mod.producer || 'Zecution Gaming'}
+                posts={isFounder ? Math.max(producerModCount, 12) : producerModCount}
+                joinYear="2024"
+                actionText={isFounder ? 'Kurulum Hizmeti İste' : 'Yapımcının Diğer Modları'}
+                actionHref={isFounder ? instagramUrl : `/modlar?search=${encodeURIComponent(cleanProducer)}`}
+              />
             </div>
-            <h2>{mod.title}</h2>
-            <p>{mod.shortDescription || description}</p>
-            {mod.downloadUrl ? (
-              <a
-                className="mod-primary-action"
-                href={mod.downloadUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => api.trackContentDownload(mod.slug)}
-              >
-                Modu indir
-              </a>
-            ) : (
-              <a
-                className="mod-primary-action"
-                href={instagramUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => api.trackContentClick(mod.slug)}
-              >
-                Instagram'dan iletişime geç
-              </a>
-            )}
-            <a className="mod-secondary-action" href={discordUrl} target="_blank" rel="noreferrer">Discord sunucusu</a>
-          </aside>
+          </div>
         </section>
 
         <section className="mod-detail-information">

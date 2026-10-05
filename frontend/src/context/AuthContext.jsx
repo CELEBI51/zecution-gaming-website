@@ -63,6 +63,20 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  const verifyEmail = async ({ email, code }) => {
+    const data = await api.verifyEmail({ email, code })
+    if (data?.user) {
+      setUser(data.user)
+      setIsModalOpen(false)
+    }
+    return data
+  }
+
+  const resendVerification = async (email) => {
+    const data = await api.resendVerification(email)
+    return data
+  }
+
   const logout = async () => {
     try {
       await api.logoutUser()
@@ -106,6 +120,8 @@ export function AuthProvider({ children }) {
         setModalMode,
         login,
         register,
+        verifyEmail,
+        resendVerification,
         logout,
         updateProfile,
         uploadAvatar,

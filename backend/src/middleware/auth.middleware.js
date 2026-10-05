@@ -123,6 +123,10 @@ export async function requireUser(req, _res, next) {
       throw new UnauthorizedError('Oturum süreniz dolmuş veya geçersiz. Lütfen tekrar giriş yapın.')
     }
 
+    if (!authData.user.isEmailVerified) {
+      throw new ForbiddenError('İşleme devam edebilmek için lütfen e-posta adresinizi doğrulayınız.')
+    }
+
     req.user = authData.user
     req.userSession = authData.session
     next()
