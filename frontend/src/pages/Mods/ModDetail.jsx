@@ -209,7 +209,15 @@ export default function ModDetail() {
                 />
               ) : (
                 <button className="mod-gallery-image" type="button" onClick={() => setIsLightboxOpen(true)} aria-label="Görseli tam ekranda aç">
-                  <img key={images[activeImage]} src={images[activeImage]} alt={`${mod.title} görünüm ${activeImage + 1}`} />
+                  <img
+                    key={images[activeImage]}
+                    src={images[activeImage]}
+                    alt={`${mod.title} görünüm ${activeImage + 1}`}
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = '/media/images/logo.jpg'
+                    }}
+                  />
                 </button>
               )}
               <span className="mod-gallery-counter">{String(activeImage + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}</span>
@@ -220,7 +228,15 @@ export default function ModDetail() {
               <div className="mod-gallery-thumbnails">
                 {mediaItems.map((item, index) => (
                   <button key={`${item.url}-${index}`} type="button" className={activeImage === index ? 'is-active' : ''} onClick={() => setActiveImage(index)} aria-label={`${index + 1}. medyayı göster`}>
-                    <img src={item.thumbnail} alt="" loading="lazy" />
+                    <img
+                      src={item.thumbnail}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null
+                        e.target.src = '/media/images/logo.jpg'
+                      }}
+                    />
                     <span>{item.isVideo ? 'VIDEO' : String(index + 1).padStart(2, '0')}</span>
                   </button>
                 ))}
@@ -374,7 +390,14 @@ export default function ModDetail() {
                 style={{ maxWidth: '90vw', maxHeight: '85vh' }}
               />
             ) : (
-              <img src={images[activeImage]} alt={`${mod.title} tam ekran görünüm`} />
+              <img
+                src={images[activeImage]}
+                alt={`${mod.title} tam ekran görünüm`}
+                onError={(e) => {
+                  e.target.onerror = null
+                  e.target.src = '/media/images/logo.jpg'
+                }}
+              />
             )}
             {images.length > 1 && <><button className="mod-lightbox-prev" type="button" onClick={showPrevious} aria-label="Önceki görsel"><ChevronLeft size={30} /></button><button className="mod-lightbox-next" type="button" onClick={showNext} aria-label="Sonraki görsel"><ChevronRight size={30} /></button></>}
             <span>{activeImage + 1} / {images.length}</span>
