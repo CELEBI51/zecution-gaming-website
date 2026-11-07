@@ -12,3 +12,6 @@
 .filter-list button.is-parent { font-weight: 750; margin-top: 0.65rem; border-top: 1px solid #17141b1a; }
 .filter-list button.is-child { margin-left: min(calc(var(--category-depth) * 1rem), 3rem); width: calc(100% - min(calc(var(--category-depth) * 1rem), 3rem)); }
 .filter-list button span { min-width: 0; overflow-wrap: anywhere; }
+.product-copy > p { white-space: pre-line; overflow-wrap: anywhere; }
+.product-platforms { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.9rem; }
+.product-platform-pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.6rem; border-radius: 999px; background: #17141b0d; border: 1px solid #17141b1a; color: #2b2633; font-size: 0.68rem; font-weight: 700; }

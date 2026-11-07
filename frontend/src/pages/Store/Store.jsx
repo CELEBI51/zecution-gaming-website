@@ -11,6 +11,11 @@ import { api, getMediaUrl } from '../../services/api.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
 import './Store.css'
 import { categoryRows } from '../../utils/categories.js'
+import {
+  formatStorePrice,
+  getPlatformConfig,
+  sanitizePurchaseOptions,
+} from '../../utils/purchaseOptions.js'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/zecution_gaming/'
 
@@ -56,7 +61,8 @@ function Store() {
           gameName: item.game?.name || 'Assetto Corsa',
           image: getMediaUrl(item.coverImage?.filePath || item.coverImage?.thumbnailPath),
           description: item.shortDescription || item.description || '',
-          priceLabel: item.priceLabel || (item.price ? `${item.price} ₺` : 'Fiyat için iletişime geç'),
+          priceLabel: formatStorePrice(item),
+          purchaseOptions: sanitizePurchaseOptions(item.purchaseOptions),
           detailPath: `/magaza/${item.slug}`,
         }))
 
@@ -200,6 +206,20 @@ function Store() {
                       <span className="product-type">Araç modu</span>
                       <h3>{product.name}</h3>
                       <p>{product.description}</p>
+                      {product.purchaseOptions?.length > 0 && (
+                        <div className="product-platforms">
+                          {product.purchaseOptions.slice(0, 3).map((opt, i) => {
+                            const cfg = getPlatformConfig(opt.platform)
+                            const PlatIcon = cfg.Icon
+                            return (
+                              <span key={opt.id || i} className="product-platform-pill">
+                                <PlatIcon size={12} style={{ color: cfg.accent }} />
+                                {cfg.key === 'custom' ? opt.label : cfg.name}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      )}
                       <div className="product-footer">
                         <strong>{product.priceLabel}</strong>
                         <a

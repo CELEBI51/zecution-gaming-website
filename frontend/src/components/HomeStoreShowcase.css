@@ -1,0 +1,393 @@
+.store-showcase-gateway {
+  position: relative;
+  background-color: #09070f;
+  background-image:
+    radial-gradient(circle at 88% 18%, rgba(127, 34, 201, 0.22), transparent 46%),
+    radial-gradient(circle at 12% 82%, rgba(177, 60, 255, 0.15), transparent 42%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f1edfa;
+  overflow: hidden;
+  padding-top: clamp(2.6rem, 4.5vw, 4.4rem);
+  padding-bottom: clamp(3rem, 5vw, 5rem);
+}
+
+.store-showcase-eyebrow {
+  font-size: 0.95rem;
+  margin-bottom: 0.45rem;
+}
+
+.store-carousel-container {
+  position: relative;
+  width: 100%;
+}
+
+.store-carousel-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 16px 0 24px;
+  margin: -16px 0 -24px;
+}
+
+.store-carousel-track {
+  display: flex;
+  gap: 28px;
+  will-change: transform;
+  align-items: stretch;
+}
+
+.store-hero-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  width: 100%;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(177, 60, 255, 0.24);
+  background: linear-gradient(145deg, #110c1c 0%, #0d0915 100%);
+  text-decoration: none;
+  color: inherit;
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.65),
+    0 0 40px rgba(127, 34, 201, 0.12);
+  transition:
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+  isolation: isolate;
+}
+
+.store-hero-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(177, 60, 255, 0.72);
+  box-shadow:
+    0 28px 65px rgba(0, 0, 0, 0.78),
+    0 0 48px rgba(177, 60, 255, 0.28);
+}
+
+.store-hero-media {
+  position: relative;
+  width: 100%;
+  min-height: clamp(20rem, 34vw, 31rem);
+  background: #050308;
+  overflow: hidden;
+}
+
+.store-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  filter: brightness(0.99) contrast(1.04);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+}
+
+.store-hero-card:hover .store-hero-img {
+  transform: scale(1.035);
+  filter: brightness(1.04) contrast(1.07);
+}
+
+.store-hero-media-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 72%, rgba(17, 12, 28, 0.55) 100%),
+    linear-gradient(180deg, rgba(5, 3, 8, 0.28) 0%, transparent 28%, transparent 78%, rgba(13, 9, 21, 0.45) 100%);
+  pointer-events: none;
+}
+
+.store-hero-live-badge {
+  position: absolute;
+  top: 1.15rem;
+  left: 1.15rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(12, 8, 22, 0.78);
+  border: 1px solid rgba(192, 132, 252, 0.45);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.store-hero-live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #c084fc;
+  box-shadow: 0 0 12px #c084fc;
+  animation: storePulseDot 1.6s ease-in-out infinite;
+}
+
+@keyframes storePulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+}
+
+.store-hero-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.35rem;
+  padding: clamp(1.5rem, 2.8vw, 2.6rem);
+  background: linear-gradient(180deg, rgba(22, 16, 36, 0.92) 0%, rgba(15, 11, 25, 0.98) 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 0;
+}
+
+.store-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.store-hero-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.store-hero-title {
+  margin: 0;
+  font-size: clamp(1.65rem, 2.6vw, 2.55rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  transition: color 0.22s ease;
+  overflow-wrap: anywhere;
+}
+
+.store-hero-card:hover .store-hero-title {
+  color: #ebd0ff;
+}
+
+.store-hero-desc {
+  margin: 0;
+  font-size: clamp(0.92rem, 1.08vw, 1.02rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.store-hero-meta-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.2rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.store-hero-price-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.store-hero-price-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.store-hero-price-value {
+  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.store-hero-price-note {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.store-hero-platforms {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.store-hero-platform-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.34rem 0.72rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #f5f0ff;
+  background: rgba(177, 60, 255, 0.14);
+  border: 1px solid rgba(177, 60, 255, 0.32);
+}
+
+.store-hero-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.store-hero-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.55rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7f22c9, #b13cff);
+  box-shadow: 0 8px 26px rgba(177, 60, 255, 0.38);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.store-hero-card:hover .store-hero-cta-btn {
+  transform: translateX(3px);
+  box-shadow: 0 12px 32px rgba(177, 60, 255, 0.55);
+}
+
+.store-hero-hint {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.store-carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: -0.25rem;
+}
+
+.store-carousel-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  transition: width 0.28s ease, background 0.28s ease;
+}
+
+.store-carousel-dot:hover {
+  background: rgba(192, 132, 252, 0.65);
+}
+
+.store-carousel-dot.is-active {
+  width: 1.8rem;
+  background: linear-gradient(90deg, #7f22c9, #c084fc);
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.55);
+}
+
+.store-hero-skeleton {
+  min-height: 26rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    110deg,
+    rgba(20, 15, 32, 0.75) 25%,
+    rgba(42, 26, 66, 0.45) 37%,
+    rgba(20, 15, 32, 0.75) 63%
+  );
+  background-size: 200% 100%;
+  animation: storeSkeletonWave 1.5s ease infinite;
+}
+
+@keyframes storeSkeletonWave {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .store-hero-card {
+    grid-template-columns: 1fr;
+  }
+
+  .store-hero-media {
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+
+  .store-hero-media-shade {
+    background: linear-gradient(
+      180deg,
+      rgba(5, 3, 8, 0.24) 0%,
+      transparent 35%,
+      rgba(15, 11, 25, 0.6) 100%
+    );
+  }
+
+  .store-hero-info {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+@media (max-width: 640px) {
+  .store-showcase-gateway {
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .store-hero-info {
+    padding: 1.25rem 1.15rem 1.35rem;
+    gap: 1.05rem;
+  }
+
+  .store-hero-live-badge {
+    top: 0.85rem;
+    left: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.66rem;
+  }
+
+  .store-hero-cta-btn {
+    width: 100%;
+  }
+
+  .store-hero-hint {
+    display: none;
+  }
+}

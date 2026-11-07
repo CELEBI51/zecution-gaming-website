@@ -99,6 +99,7 @@ export async function listPublicContents({
         shortDescription: true,
         price: true,
         priceLabel: true,
+        purchaseOptions: true,
         downloadUrl: true,
         isFeatured: true,
         viewCount: true,
@@ -748,6 +749,7 @@ export async function createContent(data) {
   const createData = {
     ...data,
     slug,
+    purchaseOptions: Array.isArray(data.purchaseOptions) ? data.purchaseOptions : [],
     downloadUrl: data.downloadUrl || null,
     publishedAt,
   }
@@ -773,6 +775,9 @@ export async function updateContent(id, data) {
   }
 
   const updateData = { ...data }
+  if (data.purchaseOptions !== undefined) {
+    updateData.purchaseOptions = Array.isArray(data.purchaseOptions) ? data.purchaseOptions : []
+  }
   await validateContentCategory({ ...existing, ...data })
 
   if (data.slug && data.slug !== existing.slug) {

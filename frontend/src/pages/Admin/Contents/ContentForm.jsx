@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
+  ArrowUpRight,
   Check,
   Download,
   Eye,
+  GripVertical,
   Loader2,
   Plus,
   Save,
@@ -14,6 +18,15 @@ import {
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../../services/api.js'
 import { adminPath } from '../../../config/routes.js'
+import {
+  PURCHASE_PLATFORMS,
+  QUICK_ADD_PLATFORMS,
+  createPurchaseOptionId,
+  detectPlatformFromUrl,
+  getPlatformConfig,
+  normalizePurchaseUrl,
+  sanitizePurchaseOptions,
+} from '../../../utils/purchaseOptions.js'
 import {
   getAllProducers,
   saveProducer,
@@ -70,7 +83,8 @@ export default function ContentForm() {
     shortDescription: '',
     description: '',
     price: '',
-    priceLabel: 'Fiyat için iletişime geç',
+    priceLabel: '',
+    purchaseOptions: [],
     downloadUrl: '',
     isFeatured: false,
     viewCount: 0,
@@ -83,6 +97,9 @@ export default function ContentForm() {
   const [categories, setCategories] = useState([])
   const [mediaList, setMediaList] = useState([])
   const [features, setFeatures] = useState([])
+  const [draggedFeatureIdx, setDraggedFeatureIdx] = useState(null)
+  const [featureDragEnabledIdx, setFeatureDragEnabledIdx] = useState(null)
+  const [siteSettings, setSiteSettings] = useState({})
 
   // Yapımcı Yönetimi
   const [producersList, setProducersList] = useState(() => getAllProducers())
@@ -109,6 +126,7 @@ export default function ContentForm() {
         if (!isMounted) return
         setGames(gamesRes)
         setCategories(categoriesRes)
+        setSiteSettings(settingsRes || {})
         if (settingsRes?.producer_avatars) {
           setServerProducerAvatars(settingsRes.producer_avatars)
           setProducerAvatarsMap(getProducerAvatars())
@@ -133,6 +151,7 @@ export default function ContentForm() {
             description: content.description || '',
             price: content.price !== null ? String(content.price) : '',
             priceLabel: content.priceLabel || '',
+            purchaseOptions: Array.isArray(content.purchaseOptions) ? content.purchaseOptions : [],
             downloadUrl: content.downloadUrl || '',
             isFeatured: Boolean(content.isFeatured),
             viewCount: content.viewCount || 0,
@@ -167,6 +186,81 @@ export default function ContentForm() {
     }))
   }
 
+  // Satın Alma Seçenekleri Yönetimi
+  const handleAddPurchaseOption = (platformKey = 'custom') => {
+    const config = getPlatformConfig(platformKey)
+    let defaultUrl = ''
+    if (platformKey === 'instagram' && siteSettings?.instagram_url) {
+      defaultUrl = siteSettings.instagram_url
+    } else if (platformKey === 'discord' && siteSettings?.discord_url) {
+      defaultUrl = siteSettings.discord_url
+    }
+
+    const newOption = {
+      id: createPurchaseOptionId(),
+      platform: config.key,
+      label: config.defaultLabel,
+      url: defaultUrl,
+      note: '',
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      purchaseOptions: [...(prev.purchaseOptions || []), newOption],
+    }))
+  }
+
+  const handlePurchaseOptionChange = (index, field, value) => {
+    setFormData((prev) => {
+      const list = [...(prev.purchaseOptions || [])]
+      const current = { ...list[index] }
+
+      if (field === 'platform') {
+        const oldConfig = getPlatformConfig(current.platform)
+        const nextConfig = getPlatformConfig(value)
+        current.platform = nextConfig.key
+        if (!current.label?.trim() || current.label === oldConfig.defaultLabel) {
+          current.label = nextConfig.defaultLabel
+        }
+      } else if (field === 'url') {
+        current.url = value
+        const detected = detectPlatformFromUrl(value)
+        if (detected && current.platform === 'custom') {
+          const oldConfig = getPlatformConfig(current.platform)
+          const nextConfig = getPlatformConfig(detected)
+          current.platform = nextConfig.key
+          if (!current.label?.trim() || current.label === oldConfig.defaultLabel) {
+            current.label = nextConfig.defaultLabel
+          }
+        }
+      } else {
+        current[field] = value
+      }
+
+      list[index] = current
+      return { ...prev, purchaseOptions: list }
+    })
+  }
+
+  const handleMovePurchaseOption = (index, direction) => {
+    setFormData((prev) => {
+      const list = [...(prev.purchaseOptions || [])]
+      const targetIndex = index + direction
+      if (targetIndex < 0 || targetIndex >= list.length) return prev
+      const temp = list[index]
+      list[index] = list[targetIndex]
+      list[targetIndex] = temp
+      return { ...prev, purchaseOptions: list }
+    })
+  }
+
+  const handleRemovePurchaseOption = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      purchaseOptions: (prev.purchaseOptions || []).filter((_, i) => i !== index),
+    }))
+  }
+
   // Formu kaydet
   const handleSave = async (e) => {
     if (e) e.preventDefault()
@@ -178,9 +272,33 @@ export default function ContentForm() {
       setError('Seçili kategori içerik kabul etmiyor. Aktif bir alt kategori seçiniz.')
       return
     }
+
+    if (formData.section === 'STORE' && Array.isArray(formData.purchaseOptions)) {
+      for (let i = 0; i < formData.purchaseOptions.length; i += 1) {
+        const opt = formData.purchaseOptions[i]
+        const normalizedUrl = normalizePurchaseUrl(opt?.url)
+        if (!normalizedUrl) {
+          setError(`${i + 1}. satın alma seçeneği için geçerli bir bağlantı (URL) giriniz veya seçeneği siliniz.`)
+          return
+        }
+        try {
+          const parsed = new URL(normalizedUrl)
+          if (!['http:', 'https:'].includes(parsed.protocol)) {
+            throw new Error('Invalid protocol')
+          }
+        } catch {
+          setError(`${i + 1}. satın alma seçeneğindeki bağlantı geçerli bir URL değil (Örn: https://patreon.com/...).`)
+          return
+        }
+      }
+    }
+
     setError('')
     setNotice('')
     setSaving(true)
+
+    const cleanedPurchaseOptions =
+      formData.section === 'STORE' ? sanitizePurchaseOptions(formData.purchaseOptions) : []
 
     const payload = {
       ...formData,
@@ -190,6 +308,7 @@ export default function ContentForm() {
       saleMethod: formData.section === 'STORE' ? 'CONTACT' : 'FREE',
       price: formData.section === 'STORE' && formData.price ? Number(formData.price) : null,
       priceLabel: formData.section === 'STORE' ? formData.priceLabel : null,
+      purchaseOptions: cleanedPurchaseOptions,
       downloadUrl: formData.section === 'GALLERY' ? formData.downloadUrl : null,
       publishedAt: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
     }
@@ -294,16 +413,74 @@ export default function ContentForm() {
   }
 
   // Dinamik Özellik Yönetimi
+  const persistFeatureOrder = async (nextFeatures) => {
+    if (!isEdit) return
+    const savedIds = nextFeatures.map((f) => f.id).filter(Boolean)
+    if (savedIds.length < 2) return
+    try {
+      await api.reorderFeatures(id, savedIds)
+      setNotice('Özellik satır sıralaması güncellendi.')
+    } catch (err) {
+      alert(err.message || 'Özellik sıralaması kaydedilemedi')
+    }
+  }
+
   const handleAddFeatureRow = () => {
-    setFeatures((prev) => [...prev, { label: '', value: '', isNew: true }])
+    setFeatures((prev) => [
+      ...prev,
+      { tempId: createPurchaseOptionId(), label: '', value: '', isNew: true },
+    ])
   }
 
   const handleFeatureChange = (index, field, value) => {
     setFeatures((prev) => {
       const copy = [...prev]
-      copy[index][field] = value
+      copy[index] = { ...copy[index], [field]: value }
       return copy
     })
+  }
+
+  const handleMoveFeature = (index, direction) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= features.length) return
+    const next = [...features]
+    const temp = next[index]
+    next[index] = next[targetIndex]
+    next[targetIndex] = temp
+    setFeatures(next)
+    persistFeatureOrder(next)
+  }
+
+  const handleFeatureDragStart = (e, index) => {
+    setDraggedFeatureIdx(index)
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move'
+      try {
+        e.dataTransfer.setData('text/plain', String(index))
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  const handleFeatureDragOver = (e, overIndex) => {
+    e.preventDefault()
+    if (draggedFeatureIdx === null || draggedFeatureIdx === overIndex) return
+    setFeatures((prev) => {
+      const next = [...prev]
+      const [moved] = next.splice(draggedFeatureIdx, 1)
+      next.splice(overIndex, 0, moved)
+      return next
+    })
+    setDraggedFeatureIdx(overIndex)
+  }
+
+  const handleFeatureDragEnd = () => {
+    if (draggedFeatureIdx !== null) {
+      persistFeatureOrder(features)
+    }
+    setDraggedFeatureIdx(null)
+    setFeatureDragEnabledIdx(null)
   }
 
   const handleSaveFeature = async (index) => {
@@ -313,14 +490,23 @@ export default function ContentForm() {
 
     try {
       if (feat.id) {
-        await api.updateFeature(feat.id, { label: feat.label, value: feat.value })
-      } else {
-        const created = await api.addFeature(id, { label: feat.label, value: feat.value })
-        setFeatures((prev) => {
-          const copy = [...prev]
-          copy[index] = created
-          return copy
+        await api.updateFeature(feat.id, {
+          label: feat.label,
+          value: feat.value,
+          sortOrder: index + 1,
         })
+      } else {
+        const created = await api.addFeature(id, {
+          label: feat.label,
+          value: feat.value,
+          sortOrder: index + 1,
+        })
+        const nextList = features.map((item, i) => (i === index ? created : item))
+        setFeatures(nextList)
+        const savedIds = nextList.map((f) => f.id).filter(Boolean)
+        if (savedIds.length > 1) {
+          await api.reorderFeatures(id, savedIds)
+        }
       }
       setNotice('Özellik kaydedildi.')
     } catch (err) {
@@ -993,35 +1179,185 @@ export default function ContentForm() {
 
 
         <div className="content-form-card">
-            <h2 className="content-form-heading">{formData.section === 'STORE' ? 'Ücret Bilgileri' : 'Mod İndirme Bağlantısı'}</h2>
+            <h2 className="content-form-heading">{formData.section === 'STORE' ? 'Ücret ve Satın Alma Seçenekleri' : 'Mod İndirme Bağlantısı'}</h2>
 
             {formData.section === 'STORE' && (
-            <div className="form-grid-2">
-              <div className="form-field">
-                <label htmlFor="price">Fiyat (TL)</label>
-                <input
-                  id="price"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  placeholder="Örn: 250"
-                  value={formData.price}
-                  onChange={handleChange}
-                />
+            <>
+              <div className="form-grid-2">
+                <div className="form-field">
+                  <label htmlFor="price">Fiyat (TL)</label>
+                  <input
+                    id="price"
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    placeholder="Örn: 250"
+                    value={formData.price}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="priceLabel">Fiyat Etiketi / Görünüm Metni</label>
+                  <input
+                    id="priceLabel"
+                    name="priceLabel"
+                    type="text"
+                    placeholder="Örn: 250 ₺ veya Fiyat için iletişime geç"
+                    value={formData.priceLabel}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
 
-              <div className="form-field">
-                <label htmlFor="priceLabel">Fiyat Etiketi / Buton Metni</label>
-                <input
-                  id="priceLabel"
-                  name="priceLabel"
-                  type="text"
-                  placeholder="Örn: Fiyat için iletişime geç"
-                  value={formData.priceLabel}
-                  onChange={handleChange}
-                />
+              <div className="purchase-options-section">
+                <div className="purchase-options-header">
+                  <div>
+                    <h3>Satın Alma Bağlantıları (Patreon, Shopier veya Özel Link)</h3>
+                    <p>
+                      Ürün sayfasında görünecek satın alma butonlarını ekleyin. Patreon, Shopier, Gumroad veya dilediğiniz herhangi bir adresi ekleyebilir, sıralamasını değiştirebilirsiniz.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="purchase-quick-bar">
+                  {QUICK_ADD_PLATFORMS.map((platKey) => {
+                    const cfg = getPlatformConfig(platKey)
+                    const PlatIcon = cfg.Icon
+                    return (
+                      <button
+                        key={cfg.key}
+                        type="button"
+                        className="purchase-quick-btn"
+                        onClick={() => handleAddPurchaseOption(cfg.key)}
+                      >
+                        <PlatIcon size={14} style={{ color: cfg.accent }} />
+                        <span>+ {platKey === 'custom' ? 'Özel Link Ekle' : `${cfg.name} Ekle`}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {(!formData.purchaseOptions || formData.purchaseOptions.length === 0) ? (
+                  <div className="purchase-options-empty">
+                    Henüz özel bir satın alma seçeneği eklenmedi. Seçenek eklemezseniz ürün sayfasında varsayılan olarak <strong>Instagram</strong> ve <strong>Discord</strong> butonları gösterilir. Yukarıdaki butonlardan Patreon veya istediğiniz herhangi bir satın alma linkini ekleyebilirsiniz.
+                  </div>
+                ) : (
+                  <div className="purchase-options-list">
+                    {formData.purchaseOptions.map((opt, index) => {
+                      const cfg = getPlatformConfig(opt.platform)
+                      const PlatIcon = cfg.Icon
+                      const previewHref = normalizePurchaseUrl(opt.url)
+                      return (
+                        <div
+                          key={opt.id || index}
+                          className={`purchase-option-card ${index === 0 ? 'is-primary' : ''}`}
+                        >
+                          <div className="purchase-option-topbar">
+                            <div className="purchase-option-platform">
+                              <span className={`purchase-option-badge ${index === 0 ? 'is-primary' : ''}`}>
+                                {index === 0 ? '#1 Ana Satın Alma Butonu' : `#${index + 1} Seçenek`}
+                              </span>
+                              <span className="purchase-option-platform-icon">
+                                <PlatIcon size={15} style={{ color: cfg.accent }} />
+                              </span>
+                              <select
+                                aria-label="Satın alma platformu"
+                                value={cfg.key}
+                                onChange={(e) => handlePurchaseOptionChange(index, 'platform', e.target.value)}
+                              >
+                                {PURCHASE_PLATFORMS.map((p) => (
+                                  <option key={p.key} value={p.key}>
+                                    {p.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="purchase-option-actions">
+                              {formData.purchaseOptions.length > 1 && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="purchase-option-icon-btn"
+                                    title="Yukarı Taşı"
+                                    disabled={index === 0}
+                                    onClick={() => handleMovePurchaseOption(index, -1)}
+                                  >
+                                    <ArrowUp size={14} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="purchase-option-icon-btn"
+                                    title="Aşağı Taşı"
+                                    disabled={index === formData.purchaseOptions.length - 1}
+                                    onClick={() => handleMovePurchaseOption(index, 1)}
+                                  >
+                                    <ArrowDown size={14} />
+                                  </button>
+                                </>
+                              )}
+                              {previewHref && (
+                                <a
+                                  href={previewHref}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="purchase-option-icon-btn"
+                                  title="Linki Yeni Sekmede Test Et"
+                                >
+                                  <span>Test Et</span>
+                                  <ArrowUpRight size={13} />
+                                </a>
+                              )}
+                              <button
+                                type="button"
+                                className="purchase-option-icon-btn purchase-option-icon-btn--danger"
+                                title="Seçeneği Kaldır"
+                                onClick={() => handleRemovePurchaseOption(index)}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="purchase-option-fields">
+                            <div className="form-field">
+                              <label>Buton Metni *</label>
+                              <input
+                                type="text"
+                                placeholder={cfg.defaultLabel}
+                                value={opt.label || ''}
+                                onChange={(e) => handlePurchaseOptionChange(index, 'label', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="form-field">
+                              <label>Yönlendirilecek Bağlantı (URL) *</label>
+                              <input
+                                type="url"
+                                placeholder={cfg.placeholder}
+                                value={opt.url || ''}
+                                onChange={(e) => handlePurchaseOptionChange(index, 'url', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="form-field form-field--full">
+                              <label>Alt Bilgi / Not (İsteğe Bağlı)</label>
+                              <input
+                                type="text"
+                                placeholder="Örn: Anında otomatik teslimat, Kredi kartı geçerli, Tier 2 üyelik vb."
+                                value={opt.note || ''}
+                                onChange={(e) => handlePurchaseOptionChange(index, 'note', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
+            </>
             )}
 
             {formData.section === 'GALLERY' && (
@@ -1148,7 +1484,9 @@ export default function ContentForm() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>Araç / Ürün Özellikleri</h3>
-                <small style={{ color: '#ffffff73' }}>Örn: Motor - 1.4 TDI, Model - Detaylı kokpit vb.</small>
+                <small style={{ color: '#ffffff73' }}>
+                  Örn: Motor - 1.4 TDI, Model - Detaylı kokpit vb. Sol taraftaki tutamaçtan sürükleyerek veya oklarla satır sırasını değiştirebilirsiniz.
+                </small>
               </div>
               <button
                 type="button"
@@ -1178,7 +1516,48 @@ export default function ContentForm() {
             ) : (
               <div className="features-list">
                 {features.map((feat, index) => (
-                  <div className="feature-row" key={feat.id || index}>
+                  <div
+                    className={`feature-row ${draggedFeatureIdx === index ? 'is-dragging' : ''}`}
+                    key={feat.id || feat.tempId || index}
+                    draggable={featureDragEnabledIdx === index}
+                    onDragStart={(e) => handleFeatureDragStart(e, index)}
+                    onDragOver={(e) => handleFeatureDragOver(e, index)}
+                    onDrop={(e) => e.preventDefault()}
+                    onDragEnd={handleFeatureDragEnd}
+                  >
+                    <div className="feature-sort-controls">
+                      <span
+                        className="feature-drag-handle"
+                        title="Basılı tutup sürükleyerek sırayı değiştirin"
+                        onMouseDown={() => setFeatureDragEnabledIdx(index)}
+                        onMouseUp={() => setFeatureDragEnabledIdx(null)}
+                      >
+                        <GripVertical size={15} />
+                        <span>{index + 1}</span>
+                      </span>
+                      {features.length > 1 && (
+                        <div className="feature-step-btns">
+                          <button
+                            type="button"
+                            className="feature-step-btn"
+                            title="Bir üst satıra taşı"
+                            disabled={index === 0}
+                            onClick={() => handleMoveFeature(index, -1)}
+                          >
+                            <ArrowUp size={11} />
+                          </button>
+                          <button
+                            type="button"
+                            className="feature-step-btn"
+                            title="Bir alt satıra taşı"
+                            disabled={index === features.length - 1}
+                            onClick={() => handleMoveFeature(index, 1)}
+                          >
+                            <ArrowDown size={11} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <input
                       type="text"
                       placeholder="Özellik Adı (Örn: Motor)"

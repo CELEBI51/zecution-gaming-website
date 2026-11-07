@@ -21,6 +21,44 @@ export const listContentsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20),
 })
 
+const normalizeHttpUrl = (val) => {
+  if (typeof val !== 'string') return val
+  const trimmed = val.trim()
+  if (!trimmed) return trimmed
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(trimmed)) return trimmed
+  return `https://${trimmed}`
+}
+
+export const purchaseOptionSchema = z.object({
+  id: z.string().max(64).optional(),
+  platform: z
+    .enum([
+      'patreon',
+      'shopier',
+      'gumroad',
+      'itchio',
+      'boosty',
+      'buymeacoffee',
+      'kofi',
+      'instagram',
+      'discord',
+      'whatsapp',
+      'telegram',
+      'custom',
+    ])
+    .default('custom'),
+  label: z.string().min(1, 'Satın alma seçeneği başlığı zorunludur').max(120).trim(),
+  url: z.preprocess(
+    normalizeHttpUrl,
+    z
+      .string()
+      .url('Satın alma seçeneği için geçerli bir bağlantı (URL) giriniz')
+      .max(2000)
+      .refine((u) => /^https?:\/\//i.test(u), 'Yalnızca http veya https bağlantıları kabul edilir')
+  ),
+  note: z.string().max(160).trim().optional().or(z.literal('')),
+})
+
 export const createContentSchema = z.object({
   title: z.string().min(1, 'Başlık zorunludur').trim(),
   slug: z.string().optional(),
@@ -36,6 +74,11 @@ export const createContentSchema = z.object({
   description: z.string().nullable().optional(),
   price: z.coerce.number().nonnegative().nullable().optional(),
   priceLabel: z.string().nullable().optional(),
+  purchaseOptions: z
+    .array(purchaseOptionSchema)
+    .max(12, 'En fazla 12 satın alma seçeneği eklenebilir')
+    .nullable()
+    .optional(),
   downloadUrl: z.string().url('Geçerli bir URL giriniz').nullable().optional().or(z.literal('')),
   isFeatured: z.boolean().default(false),
   sortOrder: z.coerce.number().int().default(0),

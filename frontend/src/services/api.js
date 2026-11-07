@@ -416,6 +416,14 @@ export const api = {
     return request(`/admin/features/${featureId}`, { method: 'DELETE' })
   },
 
+  async reorderFeatures(contentId, featureIds) {
+    const res = await request(`/admin/contents/${contentId}/features/reorder`, {
+      method: 'PATCH',
+      body: JSON.stringify({ featureIds }),
+    })
+    return res.data
+  },
+
   // ----------------- KATEGORİ YÖNETİMİ -----------------
   async getAdminCategories(params = {}) {
     const search = new URLSearchParams(params).toString()

@@ -7,3 +7,7 @@ export const createFeatureSchema = z.object({
 })
 
 export const updateFeatureSchema = createFeatureSchema.partial()
+
+export const reorderFeaturesSchema = z.object({
+  featureIds: z.array(z.string().uuid('Geçersiz özellik kimliği')).min(1, 'En az bir özellik kimliği gereklidir'),
+})

@@ -1,11 +1,13 @@
 import { Router } from 'express'
 import {
   addFeature,
+  reorderFeatures,
   updateFeature,
   deleteFeature,
 } from './features.controller.js'
 import {
   createFeatureSchema,
+  reorderFeaturesSchema,
   updateFeatureSchema,
 } from './features.validation.js'
 import { validate } from '../../middleware/validate.middleware.js'
@@ -20,6 +22,11 @@ router.post(
   '/contents/:id/features',
   validate({ body: createFeatureSchema }),
   addFeature
+)
+router.patch(
+  '/contents/:id/features/reorder',
+  validate({ body: reorderFeaturesSchema }),
+  reorderFeatures
 )
 
 // /api/admin/features/:featureId

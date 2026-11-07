@@ -46,3 +46,19 @@ export async function deleteContentFeature(featureId) {
     throw error
   }
 }
+
+export async function reorderContentFeatures(contentId, featureIds) {
+  const updates = featureIds.map((id, index) =>
+    prisma.contentFeature.updateMany({
+      where: { id, contentId },
+      data: { sortOrder: index + 1 },
+    })
+  )
+
+  await prisma.$transaction(updates)
+
+  return prisma.contentFeature.findMany({
+    where: { contentId },
+    orderBy: { sortOrder: 'asc' },
+  })
+}

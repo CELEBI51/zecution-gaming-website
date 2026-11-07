@@ -122,6 +122,7 @@ model Content {
   description      String?
   price            Decimal?       @db.Decimal(10, 2)
   priceLabel       String?        @map("price_label")
+  purchaseOptions  Json?          @map("purchase_options")
   downloadUrl      String?        @map("download_url")
   isFeatured       Boolean        @default(false) @map("is_featured")
   viewCount        Int            @default(0) @map("view_count")

@@ -26,3 +26,15 @@ export async function deleteFeature(req, res, next) {
     next(error)
   }
 }
+
+export async function reorderFeatures(req, res, next) {
+  try {
+    const features = await featuresService.reorderContentFeatures(
+      req.params.id,
+      req.body.featureIds
+    )
+    res.json({ success: true, data: features })
+  } catch (error) {
+    next(error)
+  }
+}

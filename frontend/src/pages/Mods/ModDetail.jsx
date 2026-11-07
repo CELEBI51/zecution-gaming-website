@@ -341,7 +341,7 @@ export default function ModDetail() {
           <article className="mod-description-block">
             <h2>Açıklama</h2>
             <div className="mod-description-copy">
-              {description.split('\n').filter(Boolean).map((paragraph, index) => <p key={`${paragraph}-${index}`}>{paragraph}</p>)}
+              <p>{description}</p>
             </div>
           </article>
 

@@ -12,7 +12,6 @@ import {
   MessageCircle,
   Menu,
   Search,
-  ShoppingBag,
   Sparkles,
   Wrench,
   X,
@@ -22,6 +21,7 @@ import UserNavButton from './components/UserNavButton.jsx'
 import SearchModal from './components/SearchModal.jsx'
 import GuideModal from './components/GuideModal.jsx'
 import HomeModSlider from './components/HomeModSlider.jsx'
+import HomeStoreShowcase from './components/HomeStoreShowcase.jsx'
 import { GUIDES, GUIDE_CATEGORIES } from './data/guidesData.js'
 import { api, getMediaUrl } from './services/api.js'
 import './App.css'
@@ -231,6 +231,7 @@ function App() {
           <a href="/teklif-al">Teklif Al</a>
           <a href="/mod-yayinla">Modunu Yayınla</a>
           <a href="#mod-galerisi">Modlar</a>
+          <a href="#magaza-vitrin">Mağaza</a>
           <a href="#rehberler">Rehberler</a>
           <a href="#hizmetler">Hizmetler</a>
           <a href="#hakkimizda">Hakkımızda</a>
@@ -279,6 +280,7 @@ function App() {
           <a href="/teklif-al">Teklif Al</a>
           <a href="/mod-yayinla" onClick={() => setMenuOpen(false)}>Modunu Yayınla</a>
           <a href="#mod-galerisi" onClick={() => setMenuOpen(false)}>Modlar</a>
+          <a href="#magaza-vitrin" onClick={() => setMenuOpen(false)}>Mağaza</a>
           <a href="#rehberler" onClick={() => setMenuOpen(false)}>Rehberler</a>
           <a href="#hizmetler" onClick={() => setMenuOpen(false)}>Hizmetler</a>
           <a href="#hakkimizda" onClick={() => setMenuOpen(false)}>Hakkımızda</a>
@@ -341,18 +343,7 @@ function App() {
 
         <HomeModSlider />
 
-        <section className="store-gateway section-pad">
-          <a className="store-gateway-card" href="/magaza" aria-label="Assetto Corsa mağazasına git">
-            <div className="store-gateway-bg" aria-hidden="true" />
-            <div className="store-gateway-copy">
-              <span className="store-gateway-icon"><ShoppingBag /></span>
-              <span className="eyebrow">Premium içerikler</span>
-              <h2>Assetto Corsa<br />Mağazası</h2>
-              <p>Ücretli araç modlarını, grafik paketlerini ve 3D modelleri keşfet; satın almak için bize ulaş.</p>
-            </div>
-            <span className="round-arrow"><ArrowUpRight /></span>
-          </a>
-        </section>
+        <HomeStoreShowcase />
 
         <section id="rehberler" className="guide-gateway section-pad">
           <div className="guide-gateway-inner">
@@ -597,6 +588,7 @@ function App() {
             <a href="/teklif-al">Teklif Al</a>
             <a href="/mod-yayinla">Modunu Yayınla</a>
             <a href="#mod-galerisi">Modlar</a>
+            <a href="#magaza-vitrin">Mağaza</a>
             <a href="#rehberler">Rehberler</a>
             <a href="#hizmetler">Hizmetler</a>
             <a href="#hakkimizda">Hakkımızda</a>
