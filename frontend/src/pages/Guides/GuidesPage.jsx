@@ -13,9 +13,10 @@ import {
   X,
 } from 'lucide-react'
 import { FaDiscord, FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa6'
-import { GUIDES, GUIDE_CATEGORIES } from '../../data/guidesData.js'
+import { GUIDES, GUIDE_CATEGORIES, mergeGuidesWithDefaults } from '../../data/guidesData.js'
 import { api, getMediaUrl } from '../../services/api.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
+import LegalFooterLinks from '../../components/LegalFooterLinks.jsx'
 import './GuidesPage.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/zecution_gaming/'
@@ -27,24 +28,24 @@ const SOCIAL_LINKS = [
 ]
 
 export default function GuidesPage() {
-  const [guides, setGuides] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [guides, setGuides] = useState(GUIDES)
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Tümü')
 
   useEffect(() => {
+    window.scrollTo(0, 0)
+    document.title = 'Kurulum & Optimizasyon Rehberleri | Zecution Gaming'
     let isMounted = true
-    setLoading(true)
     api.getGuides()
       .then((data) => {
         if (isMounted) {
-          const list = Array.isArray(data) ? data : []
-          setGuides(list.filter((g) => g.isActive !== false))
+          setGuides(mergeGuidesWithDefaults(data))
         }
       })
       .catch(() => {
         if (isMounted) {
-          setGuides([])
+          setGuides(GUIDES)
         }
       })
       .finally(() => {
@@ -66,6 +67,8 @@ export default function GuidesPage() {
           matchesCategory = guide.game?.includes('Assetto Corsa') || guide.category === 'Assetto Corsa'
         } else if (selectedCategory === 'BeamNG.drive') {
           matchesCategory = guide.game?.includes('BeamNG') || guide.category === 'BeamNG.drive'
+        } else if (selectedCategory === 'Euro Truck Simulator 2') {
+          matchesCategory = guide.game?.includes('Euro Truck') || guide.gameCode === 'ets2'
         } else if (selectedCategory === 'Grafik & CSP') {
           matchesCategory = guide.category === 'Grafik & CSP'
         } else if (selectedCategory === 'Donanım & Ayarlar') {
@@ -337,7 +340,8 @@ export default function GuidesPage() {
             ))}
           </div>
         </div>
-        <div className="guides-footer-bottom">
+        <div className="guides-footer-bottom" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+          <LegalFooterLinks />
           <p>© {new Date().getFullYear()} Zecution Gaming. Tüm hakları saklıdır.</p>
         </div>
       </footer>

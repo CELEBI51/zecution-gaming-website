@@ -26,10 +26,11 @@ import {
   Crown,
 } from 'lucide-react'
 import { FaYoutube } from 'react-icons/fa6'
-import { GUIDES } from '../../data/guidesData.js'
+import { GUIDES, mergeGuidesWithDefaults } from '../../data/guidesData.js'
 import { api, getMediaUrl } from '../../services/api.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
 import CreatorCard from '../../components/CreatorCard.jsx'
+import LegalFooterLinks from '../../components/LegalFooterLinks.jsx'
 import './GuideDetail.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/zecution_gaming/'
@@ -38,13 +39,21 @@ export default function GuideDetail() {
   const { slug } = useParams()
   const navigate = useNavigate()
 
-  const [guide, setGuide] = useState(null)
-  const [allGuides, setAllGuides] = useState([])
-  const [loading, setLoading] = useState(true)
+  const fallbackGuide = useMemo(
+    () => GUIDES.find((g) => g.slug === slug || g.id === slug) || null,
+    [slug]
+  )
+
+  const [guide, setGuide] = useState(fallbackGuide)
+  const [allGuides, setAllGuides] = useState(GUIDES)
+  const [loading, setLoading] = useState(!fallbackGuide)
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     let isMounted = true
-    setLoading(true)
+    const localMatch = GUIDES.find((g) => g.slug === slug || g.id === slug) || null
+    setGuide(localMatch)
+    setLoading(!localMatch)
 
     // Try to get fresh guide data from backend
     api.getGuide(slug)
@@ -52,13 +61,13 @@ export default function GuideDetail() {
         if (isMounted) {
           if (data && data.isActive !== false) {
             setGuide(data)
-          } else {
-            setGuide(null)
+          } else if (localMatch) {
+            setGuide(localMatch)
           }
         }
       })
       .catch(() => {
-        if (isMounted) setGuide(null)
+        if (isMounted && localMatch) setGuide(localMatch)
       })
       .finally(() => {
         if (isMounted) setLoading(false)
@@ -67,16 +76,28 @@ export default function GuideDetail() {
     // Also get all guides for related list
     api.getGuides()
       .then((data) => {
-        if (isMounted && Array.isArray(data)) {
-          setAllGuides(data.filter((g) => g.isActive !== false))
+        if (isMounted) {
+          setAllGuides(mergeGuidesWithDefaults(data))
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        if (isMounted) setAllGuides(GUIDES)
+      })
 
     return () => {
       isMounted = false
     }
   }, [slug])
+
+  useEffect(() => {
+    if (guide?.title) {
+      document.title = `${guide.title} | Zecution Gaming`
+    }
+    if (guide?.summary) {
+      const metaDesc = document.querySelector('meta[name="description"]')
+      if (metaDesc) metaDesc.setAttribute('content', guide.summary)
+    }
+  }, [guide])
 
   const [copiedTarget, setCopiedTarget] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
@@ -603,10 +624,11 @@ export default function GuideDetail() {
 
       {/* Footer */}
       <footer className="forum-footer">
-        <div className="forum-footer-inner">
+        <div className="forum-footer-inner" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <Link to="/" className="forum-guide-brand">
             <img src="/media/images/logo.jpg" alt="Zecution Gaming" />
           </Link>
+          <LegalFooterLinks />
           <p>© {new Date().getFullYear()} Zecution Gaming Bilgi & Simülasyon Merkezi.</p>
         </div>
       </footer>

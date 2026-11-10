@@ -22,7 +22,7 @@ import SearchModal from './components/SearchModal.jsx'
 import GuideModal from './components/GuideModal.jsx'
 import HomeModSlider from './components/HomeModSlider.jsx'
 import HomeStoreShowcase from './components/HomeStoreShowcase.jsx'
-import { GUIDES, GUIDE_CATEGORIES } from './data/guidesData.js'
+import { GUIDES, GUIDE_CATEGORIES, mergeGuidesWithDefaults } from './data/guidesData.js'
 import { api, getMediaUrl } from './services/api.js'
 import './App.css'
 
@@ -52,24 +52,22 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
-  const [guides, setGuides] = useState([])
-  const [guidesLoading, setGuidesLoading] = useState(true)
+  const [guides, setGuides] = useState(GUIDES)
+  const [guidesLoading, setGuidesLoading] = useState(false)
   const [selectedGuideCategory, setSelectedGuideCategory] = useState('Tümü')
   const [activeGuideModal, setActiveGuideModal] = useState(null)
 
   useEffect(() => {
     let isMounted = true
-    setGuidesLoading(true)
     api.getGuides()
       .then((data) => {
         if (isMounted) {
-          const list = Array.isArray(data) ? data : []
-          setGuides(list.filter((g) => g.isActive !== false))
+          setGuides(mergeGuidesWithDefaults(data))
         }
       })
       .catch(() => {
         if (isMounted) {
-          setGuides([])
+          setGuides(GUIDES)
         }
       })
       .finally(() => {
@@ -86,10 +84,11 @@ function App() {
     if (selectedGuideCategory === 'Tümü') return true
     if (selectedGuideCategory === 'Assetto Corsa') return guide.game?.includes('Assetto Corsa') || guide.category === 'Assetto Corsa'
     if (selectedGuideCategory === 'BeamNG.drive') return guide.game?.includes('BeamNG') || guide.category === 'BeamNG.drive'
+    if (selectedGuideCategory === 'Euro Truck Simulator 2') return guide.game?.includes('Euro Truck') || guide.gameCode === 'ets2'
     if (selectedGuideCategory === 'Grafik & CSP') return guide.category === 'Grafik & CSP'
     if (selectedGuideCategory === 'Donanım & Ayarlar') return guide.category === 'Donanım & Ayarlar'
     return guide.game === selectedGuideCategory || guide.category === selectedGuideCategory
-  })
+  }).slice(0, 6)
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -550,13 +549,22 @@ function App() {
         </section>
 
         <section id="hakkimizda" className="about section-pad">
-          <div className="about-mark"><img src="/media/images/logo.jpg" alt="" /></div>
+          <div className="about-mark"><img src="/media/images/logo.jpg" alt="Zecution Gaming" /></div>
           <div className="about-copy">
             <h2>Otomobil tutkusunu<br />dijital dünyaya taşıyoruz.</h2>
             <p>
-              Araç modları ve 3D modeller üretiyor; her projede otomobilin karakterini oyuna
-              yansıtmaya odaklanıyoruz.
+              Assetto Corsa, BeamNG.drive ve Euro Truck Simulator 2 için yüksek detaylı 3D araç modları,
+              gerçekçi fizik kurguları ve adım adım Türkçe kurulum rehberleri üretiyor; her projede
+              otomobilin karakterini simülasyon dünyasına yansıtmaya odaklanıyoruz.
             </p>
+            <div style={{ marginTop: '1.25rem', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <a className="text-link" href="/hakkimizda">
+                Hakkımızda &amp; Vizyonumuz <ArrowUpRight size={18} />
+              </a>
+              <a className="text-link" href="/iletisim">
+                İletişim &amp; Destek Merkezi <ArrowUpRight size={18} />
+              </a>
+            </div>
           </div>
         </section>
 
@@ -569,6 +577,7 @@ function App() {
             <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
               <a href="/teklif-al">Mod talebi oluştur / Teklif al <ArrowUpRight /></a>
               <a href="/mod-yayinla">Mod üreticisi misin? Modunu yayınla <ArrowUpRight /></a>
+              <a href="/iletisim">İletişim &amp; Destek Formu <ArrowUpRight /></a>
             </div>
             <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
               <MessageCircle /> @zecution_gaming <ArrowUpRight />
@@ -587,11 +596,19 @@ function App() {
             <span>Keşfet</span>
             <a href="/teklif-al">Teklif Al</a>
             <a href="/mod-yayinla">Modunu Yayınla</a>
-            <a href="#mod-galerisi">Modlar</a>
-            <a href="#magaza-vitrin">Mağaza</a>
-            <a href="#rehberler">Rehberler</a>
+            <a href="/modlar">Mod Galerisi</a>
+            <a href="/magaza">Mağaza</a>
+            <a href="/rehberler">Rehberler</a>
             <a href="#hizmetler">Hizmetler</a>
-            <a href="#hakkimizda">Hakkımızda</a>
+          </nav>
+          <nav className="footer-nav" aria-label="Kurumsal ve yasal menü">
+            <span>Kurumsal &amp; Yasal</span>
+            <a href="/hakkimizda">Hakkımızda</a>
+            <a href="/iletisim">İletişim</a>
+            <a href="/gizlilik-politikasi">Gizlilik Politikası</a>
+            <a href="/cerez-politikasi">Çerez Politikası</a>
+            <a href="/kullanim-kosullari">Kullanım Koşulları &amp; Telif</a>
+            <a href="/kvkk">KVKK Aydınlatma Metni</a>
           </nav>
           <div className="footer-socials">
             <span>Bizi takip et</span>
@@ -605,7 +622,7 @@ function App() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Zecution Gaming</p>
+          <p>© {new Date().getFullYear()} Zecution Gaming (zecution.com). Tüm hakları saklıdır.</p>
           <a href="#top">Başa dön <ArrowUpRight size={16} /></a>
         </div>
       </footer>

@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Loader2, Eye, Download } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
+import { DEFAULT_MODS } from '../../data/modsData.js'
 import ContentReviews from '../../components/ContentReviews.jsx'
 import UserNavButton from '../../components/UserNavButton.jsx'
 import CreatorCard from '../../components/CreatorCard.jsx'
+import LegalFooterLinks from '../../components/LegalFooterLinks.jsx'
 import {
   isProducerFounder,
   setServerProducerAvatars,
@@ -16,23 +18,58 @@ import './ModDetail.css'
 const DEFAULT_INSTAGRAM = 'https://www.instagram.com/zecution_gaming/'
 const DEFAULT_DISCORD = 'https://discord.gg/BsZTzENdAQ'
 
+function buildFallbackMod(slug) {
+  const item = DEFAULT_MODS.find((m) => m.slug === slug || m.id === slug)
+  if (!item) return null
+  return {
+    id: item.id,
+    slug: item.slug,
+    title: item.name,
+    producer: item.producer || 'Zecution Gaming',
+    shortDescription: item.description,
+    description: item.description,
+    downloadUrl: item.downloadUrl,
+    viewCount: 1450,
+    downloadCount: 420,
+    game: {
+      slug: item.gameCode || 'assetto-corsa',
+      name: item.game || 'Assetto Corsa',
+    },
+    category: {
+      slug: item.category?.toLowerCase().includes('harita') ? 'maps' : 'vehicles',
+      name: item.category || 'Araç Modları',
+    },
+    media: item.image
+      ? [{ filePath: item.image, thumbnailPath: item.image, mediaType: 'IMAGE' }]
+      : [],
+    features: (item.tags || []).map((t, idx) => ({
+      id: `tag-${idx}`,
+      label: `Özellik ${idx + 1}`,
+      value: t,
+    })),
+  }
+}
+
 export default function ModDetail() {
   const { slug } = useParams()
-  const [mod, setMod] = useState(null)
+  const initialFallback = useMemo(() => buildFallbackMod(slug), [slug])
+  const [mod, setMod] = useState(initialFallback)
   const [relatedMods, setRelatedMods] = useState([])
   const [producerModCount, setProducerModCount] = useState(1)
   const [settings, setSettings] = useState({})
   const [activeImage, setActiveImage] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialFallback)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     let mounted = true
+    const fallback = buildFallbackMod(slug)
+    setMod(fallback)
+    setLoading(!fallback)
 
     async function loadModDetail() {
       try {
-        setLoading(true)
         setError(null)
         setActiveImage(0)
 
@@ -42,7 +79,9 @@ export default function ModDetail() {
         ])
 
         if (!mounted) return
-        setMod(modData)
+        if (modData) {
+          setMod(modData)
+        }
         setSettings(settingsData)
         if (settingsData?.producer_avatars) {
           setServerProducerAvatars(settingsData.producer_avatars)
@@ -88,7 +127,9 @@ export default function ModDetail() {
           if (mounted) setProducerModCount(1)
         }
       } catch (loadError) {
-        if (mounted) setError(loadError.message || 'Mod detayları yüklenemedi.')
+        if (mounted && !fallback) {
+          setError(loadError.message || 'Mod detayları yüklenemedi.')
+        }
       } finally {
         if (mounted) setLoading(false)
       }
@@ -98,6 +139,16 @@ export default function ModDetail() {
     window.scrollTo({ top: 0 })
     return () => { mounted = false }
   }, [slug])
+
+  useEffect(() => {
+    if (mod?.title) {
+      document.title = `${mod.title} Modu İndir | Zecution Gaming`
+    }
+    if (mod?.shortDescription || mod?.description) {
+      const metaDesc = document.querySelector('meta[name="description"]')
+      if (metaDesc) metaDesc.setAttribute('content', mod.shortDescription || mod.description)
+    }
+  }, [mod])
 
   const mediaItems = useMemo(() => {
     if (!mod?.media?.length) return [{ url: '/media/images/logo.jpg', thumbnail: '/media/images/logo.jpg', isVideo: false }]
@@ -374,7 +425,11 @@ export default function ModDetail() {
         )}
       </main>
 
-      <footer className="mod-detail-footer"><span>© {new Date().getFullYear()} Zecution Gaming</span><Link to="/modlar">Mod galerisi</Link></footer>
+      <footer className="mod-detail-footer" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+        <span>© {new Date().getFullYear()} Zecution Gaming</span>
+        <LegalFooterLinks />
+        <Link to="/modlar">Mod galerisi</Link>
+      </footer>
 
       {isLightboxOpen && (
         <div className="mod-lightbox" role="dialog" aria-modal="true" onClick={() => setIsLightboxOpen(false)}>

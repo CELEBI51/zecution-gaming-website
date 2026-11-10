@@ -5,6 +5,7 @@ import { api, getMediaUrl } from '../../services/api.js'
 import ContentReviews from '../../components/ContentReviews.jsx'
 import CreatorCard from '../../components/CreatorCard.jsx'
 import UserNavButton from '../../components/UserNavButton.jsx'
+import LegalFooterLinks from '../../components/LegalFooterLinks.jsx'
 import {
   isProducerFounder,
   setServerDeletedProducers,
@@ -287,8 +288,9 @@ function ProductDetail() {
         <ContentReviews slug={product.slug} contentTitle={product.title} />
       </main>
 
-      <footer className="product-detail-footer">
+      <footer className="product-detail-footer" style={{ flexWrap: 'wrap', gap: '1rem' }}>
         <span>© {new Date().getFullYear()} Zecution Gaming</span>
+        <LegalFooterLinks />
         <a href="/magaza">Mağazaya dön</a>
       </footer>
     </div>

@@ -29,15 +29,24 @@ import AdminGuideForm from './pages/Admin/Guides/AdminGuideForm.jsx'
 
 import { AuthProvider } from './context/AuthContext.jsx'
 import AuthModal from './components/AuthModal.jsx'
+import CookieConsent from './components/CookieConsent.jsx'
 import AuthPage from './pages/Auth/AuthPage.jsx'
 import GuidesPage from './pages/Guides/GuidesPage.jsx'
 import GuideDetail from './pages/Guides/GuideDetail.jsx'
+import PrivacyPolicy from './pages/Legal/PrivacyPolicy.jsx'
+import CookiePolicy from './pages/Legal/CookiePolicy.jsx'
+import TermsOfUse from './pages/Legal/TermsOfUse.jsx'
+import KvkkPolicy from './pages/Legal/KvkkPolicy.jsx'
+import AboutPage from './pages/Legal/AboutPage.jsx'
+import ContactPage from './pages/Legal/ContactPage.jsx'
+import NotFoundPage from './pages/Legal/NotFoundPage.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <AuthModal />
+        <CookieConsent />
         <Routes>
           {/* Herkese Açık Sayfalar */}
           <Route path="/" element={<App />} />
@@ -52,6 +61,14 @@ createRoot(document.getElementById('root')).render(
           <Route path="/rehberler/:slug" element={<GuideDetail />} />
           <Route path="/giris" element={<AuthPage initialMode="login" />} />
           <Route path="/kayit-ol" element={<AuthPage initialMode="register" />} />
+
+          {/* Kurumsal & Yasal Sayfalar (AdSense Uyumluluğu) */}
+          <Route path="/hakkimizda" element={<AboutPage />} />
+          <Route path="/iletisim" element={<ContactPage />} />
+          <Route path="/gizlilik-politikasi" element={<PrivacyPolicy />} />
+          <Route path="/cerez-politikasi" element={<CookiePolicy />} />
+          <Route path="/kullanim-kosullari" element={<TermsOfUse />} />
+          <Route path="/kvkk" element={<KvkkPolicy />} />
 
           {/* Eski /admin Yolunu Tamamen Gizle ve Anasayfaya Yönlendir */}
           <Route path="/admin" element={<Navigate to="/" replace />} />
@@ -75,6 +92,9 @@ createRoot(document.getElementById('root')).render(
             <Route path="mod-basvurulari" element={<ModSubmissionList />} />
             <Route path="mod-basvurulari/:id" element={<ModSubmissionDetail />} />
           </Route>
+
+          {/* 404 Sayfa Bulunamadı */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -502,12 +502,418 @@ export const GUIDES = [
       description: 'Logitech G29/G920 ve Thrustmaster setler için WheelCheck ile LUT tablosu oluşturma, clipping önleme ve gerçekçi direksiyon sertliği ayarları.',
     },
   },
+  {
+    id: 'srp-yapay-zeka-trafik-kurulumu',
+    slug: 'shutoko-revival-project-ve-yapay-zeka-trafik-kurulumu',
+    title: 'Shutoko Revival Project (SRP) & Yapay Zeka (AI) Trafik Kurulum Rehberi',
+    game: 'Assetto Corsa',
+    gameCode: 'assetto-corsa',
+    category: 'Mod Yükleme',
+    forumCategory: 'Assetto Corsa / Harita & Trafik Yapılandırması',
+    time: '11 dk okuma',
+    difficulty: 'Orta',
+    coverImage: '/media/images/category-assetto-maps.jpg',
+    summary: 'Tokyo otobanı Shutoko Revival Project haritasında tek oyunculu (Single Player) akıcı yapay zeka trafik kurulumu, Traffic Planner ayarları ve şerit değiştirme fiziği.',
+    highlights: ['Shutoko 0.9.x+', '2Real Traffic Planner', 'AI Flood & Yoğunluk', 'Makas & Otoban Trafiği'],
+    targetPath: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\assettocorsa\\content\\tracks\\shuto_revival_project_beta',
+    author: {
+      name: 'Zecution Gaming 👑',
+      role: 'Kurucu',
+      badge: 'KURUCU',
+      avatar: '/media/images/logo.jpg',
+      posts: '148 Gönderi',
+    },
+    stats: {
+      views: '12.6k Görüntülenme',
+      likes: 715,
+      replies: 49,
+      date: 'Ekim 2026',
+    },
+    requirements: [
+      'Content Manager ve güncel Custom Shaders Patch (CSP 0.1.79 veya 0.2.x+)',
+      'Shutoko Revival Project (SRP) ana harita paketi',
+      'Trafik araçları paketi (SRP Traffic Pack veya 2Real Traffic Cars)',
+      'Minimum 16 GB sistem belleği (RAM)',
+    ],
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Shutoko Revival Project Haritasını Yükleyin',
+        description: 'İndirdiğiniz Shutoko Revival Project arşivini açarak içerisindeki klasörü "assettocorsa/content/tracks" dizinine kopyalayın. Haritanın "Shibaura PA", "Tatsumi PA" ve "C1 Outer" gibi farklı başlangıç noktalarının Content Manager’da göründüğünü doğrulayın.',
+        tip: 'Sürükle-bırak yerine büyük boyutlu haritaları doğrudan tracks klasörüne manuel çıkarmak daha sağlıklıdır.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Yapay Zeka Trafik Araçlarını (Traffic Pack) Kurun',
+        description: 'Trafikte akacak olan düşük poligonlu (optimize edilmiş) AI araç paketini "content/cars" klasörüne atın. Normal yüksek poligonlu mod araçlarını trafik olarak seçmek ciddi FPS düşüşüne yol açacağından mutlaka Traffic etiketli araçları tercih edin.',
+        tip: 'Trafik araçları Content Manager listesinde genellikle "Traffic" etiketiyle gruplanır.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Track Day (Pist Günü) ve AI Flood Ayarlarını Yapın',
+        description: 'Content Manager > Drive > Single ekranında sürüş modunu "Track Day" olarak seçin. Pist olarak Shutoko’nun "Track Day / AI" destekli layout seçeneğini belirleyin. CSP > New AI Behavior sekmesinden "AI Flood" özelliğini aktif hale getirin.',
+        tip: 'AI Strength değerini %85-95, AI Aggression değerini ise %15-25 aralığında tutmak kazaları önler.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Oyun İçi Traffic Planner Aracıyla Anlık Trafik Kontrolü',
+        description: 'Alternatif ve daha modern yöntem olan Traffic Planner (Object Inspector) kullanıyorsanız; herhangi bir Free Practice oturumu başlatın, oyun içinde "Object Inspector > Tools > Traffic Planner" penceresini açarak araç sayısını (örn. 80-150 araç) ve hız limitlerini canlı olarak ayarlayın.',
+        tip: 'İşlemciniz zorlanıyorsa aktif araç sayısını 60-80 bandına çekin.',
+      },
+    ],
+    tips: [
+      'Gece sürüşlerinde otoyol aydınlatmalarının ve tünel ışıklarının görünmesi için CSP > Lighting FX modülünün açık olduğundan emin olun.',
+      'Trafik araçlarının farlarının yanması için CSP > New AI Behavior altında "Get back to race after pit" ve far kontrollerini aktif tutun.',
+    ],
+    troubleshooting: [
+      {
+        problem: 'Trafik araçları pitten çıkmıyor veya yol ortasında duruyor.',
+        solution: 'Seçtiğiniz harita düzeninin (layout) AI spline dosyasına (fast_lane.ai) sahip olduğundan emin olun. Yalnızca AI destekli layoutlarda Track Day trafiği çalışır.',
+      },
+      {
+        problem: 'Harita yüklenirken "CPU Occupancy > 99%" uyarısı alıyorum.',
+        solution: 'Track Day modunda eklediğiniz AI araç sayısını azaltın ve CSP > General Patch Settings > CPU Optimizations seçeneklerini etkinleştirin.',
+      },
+    ],
+    youtubeVideo: {
+      id: 'G43oGxEvC0C',
+      title: 'Assetto Corsa Shutoko Otoban Haritası & Trafik Modu Kurulumu',
+      channel: 'Zecution Gaming',
+      duration: '13:15',
+      description: 'Shutoko Revival Project kurulumu, Traffic Planner ile yoğun otoyol trafiği oluşturma ve CPU Occupancy hatasını çözme adımları.',
+    },
+  },
+  {
+    id: 'ets2-mod-ve-harita-kurulumu',
+    slug: 'euro-truck-simulator-2-mod-ve-harita-kurulum-rehberi',
+    title: 'Euro Truck Simulator 2 (ETS2) Araç, Otobüs ve Harita Modu Kurulum Rehberi',
+    game: 'Euro Truck Simulator 2',
+    gameCode: 'ets2',
+    category: 'Mod Yükleme',
+    forumCategory: 'Euro Truck Simulator 2 / Mod Yöneticisi & Sıralama',
+    time: '7 dk okuma',
+    difficulty: 'Kolay',
+    coverImage: '/media/images/game-ets2.jpg',
+    summary: 'ETS2 için indirdiğiniz tır, otobüs, binek otomobil, ses paketi ve Türkiye haritası (.scs) modlarını Belgelerim klasörüne kurma ve Mod Yöneticisi öncelik sıralaması.',
+    highlights: ['.SCS Dosya Kurulumu', 'Mod Yöneticisi Sıralaması', 'Harita DLC Uyumluluğu', 'Otobüs & Tır Modları'],
+    targetPath: 'Belgeler\\Euro Truck Simulator 2\\mod',
+    author: {
+      name: 'Zecution Gaming 👑',
+      role: 'Kurucu',
+      badge: 'KURUCU',
+      avatar: '/media/images/logo.jpg',
+      posts: '148 Gönderi',
+    },
+    stats: {
+      views: '6.4k Görüntülenme',
+      likes: 395,
+      replies: 24,
+      date: 'Ekim 2026',
+    },
+    requirements: [
+      'Steam üzerinden güncel Euro Truck Simulator 2',
+      'İndirilmiş .scs veya .zip uzantılı ETS2 modu',
+      'Harita modları için gerekli resmi harita DLC paketleri',
+    ],
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'İndirdiğiniz Arşivden .SCS Dosyalarını Çıkarın',
+        description: 'İndirdiğiniz mod dosyası .rar veya .zip içindeyse WinRAR/7-Zip ile açın. İçerisinden çıkan ".scs" uzantılı dosyaları masaüstüne çıkarın. Eğer indirdiğiniz dosya doğrudan .scs uzantılıysa herhangi bir ayıklama işlemi yapmayın.',
+        tip: 'Bazı modlar doğrudan .zip olarak da çalışır ancak içinde .scs varsa mutlaka dışarı çıkarılmalıdır.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Belgelerim / Euro Truck Simulator 2 / mod Klasörüne Kopyalayın',
+        description: 'Bilgisayarınızın "Belgeler" (Documents) klasörüne girin, ardından "Euro Truck Simulator 2" klasörünü açın. İçerideki "mod" klasörüne .scs dosyalarınızı yapıştırın. Eğer "mod" klasörü yoksa kendiniz oluşturabilirsiniz.',
+        tip: 'Steam’in kurulu olduğu oyun klasörüne değil, Belgelerim altındaki klasöre atılmalıdır.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Oyun İçi Mod Yöneticisinde (Mod Manager) Aktifleştirin',
+        description: 'Oyunu başlatın ve profil seçim ekranında sağdaki "Mod Yöneticisi" (Mod Manager) butonuna tıklayın. Sol listede gördüğünüz modlara çift tıklayarak sağdaki "Aktif Modlar" sütununa geçirin.',
+        tip: 'Değişiklikleri kaydetmeden çıkarsanız modlar aktif olmaz.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Doğru Öncelik Sıralamasını (Load Order) Yapın',
+        description: 'Birden fazla mod kullanıyorsanız yukarıdan aşağıya doğru sıralama şu şekilde olmalıdır: 1. Ses ve Grafik Modları (En üstte), 2. Fizik ve Tuning Paketleri, 3. Araç / Otobüs Modları, 4. Harita Modları (Def -> Model -> Map sırasıyla en altta).',
+        tip: 'Yanlış sıralama harita yüklenirken oyunun kapanmasına neden olabilir.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Aracı Mod Bayisinden (Access Mod Dealer) Satın Alın',
+        description: 'Profilinize giriş yaptıktan sonra ana menüdeki "Çekici Bayileri" (Truck Dealers) sekmesine tıklayın ve sağ alttaki "Mod Bayisine Eriş" (Access Mod Dealer) butonuna basarak yüklediğiniz aracı galeriden satın alın.',
+        tip: 'Aracı özelleştirirken oyunun çökmemesi için uyumlu şasi ve kabin kombinasyonlarını seçin.',
+      },
+    ],
+    tips: [
+      'Oyun sürümünüz (örneğin 1.50 veya 1.51) ile indirdiğiniz modun sürümünün uyumlu olmasına dikkat edin.',
+      'Bir modu silmeden önce oyun içinde o modla satın aldığınız aracı satmanız, kayıt (save) dosyanızın bozulmasını önler.',
+    ],
+    troubleshooting: [
+      {
+        problem: 'Mod Yöneticisinde modun yanında kırmızı "Uyumsuz (Incompatible)" uyarısı var.',
+        solution: 'Modun manifest.sii dosyasındaki sürüm kilidi eski kalmış olabilir ya da modun ihtiyaç duyduğu bir Harita DLC’si (örn. Going East, Road to the Black Sea) hesabınızda eksiktir.',
+      },
+    ],
+    youtubeVideo: {
+      id: 'gN5hR-h38H8',
+      title: 'ETS2 Araba, Otobüs ve Harita Modu Nasıl Kurulur?',
+      channel: 'Zecution Gaming',
+      duration: '8:45',
+      description: 'Euro Truck Simulator 2 mod klasörü yolu, .scs dosyalarının kurulumu, Mod Yöneticisi öncelik sıralaması ve mod galerisinden araç alma.',
+    },
+  },
+  {
+    id: 'ac-fps-optimizasyon-rehberi',
+    slug: 'assetto-corsa-fps-artirma-ve-csp-optimizasyon-rehberi',
+    title: 'Assetto Corsa FPS Artırma & Düşük/Orta Sistemler İçin CSP Optimizasyon Rehberi',
+    game: 'Assetto Corsa',
+    gameCode: 'assetto-corsa',
+    category: 'Grafik & CSP',
+    forumCategory: 'Assetto Corsa / Performans & FPS Optimizasyonu',
+    time: '9 dk okuma',
+    difficulty: 'Kolay',
+    coverImage: '/media/images/pure-rain-preview.jpg',
+    summary: 'Görüntü kalitesini bozmadan FPS değerinizi ikiye katlayın. Kalabalık sunucularda takılma (stutter), düşük GPU kullanımı ve Extra FX kaynaklı kasmaların çözümü.',
+    highlights: ['+45% FPS Artışı', 'CPU & GPU Optimizasyonu', 'Extra FX Ayarları', 'AMD FSR & MIP LOD'],
+    targetPath: 'Content Manager > Settings > Custom Shaders Patch',
+    author: {
+      name: 'Zecution Gaming 👑',
+      role: 'Kurucu',
+      badge: 'KURUCU',
+      avatar: '/media/images/logo.jpg',
+      posts: '148 Gönderi',
+    },
+    stats: {
+      views: '15.3k Görüntülenme',
+      likes: 890,
+      replies: 61,
+      date: 'Kasım 2026',
+    },
+    requirements: [
+      'Content Manager',
+      'Custom Shaders Patch (CSP v0.1.79 veya v0.2.x)',
+      'Güncel ekran kartı sürücüsü (NVIDIA / AMD)',
+    ],
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Temel Assetto Corsa Video Ayarlarını Dengeli Yapılandırın',
+        description: 'Settings > Assetto Corsa > Video menüsüne gidin. Shadow Resolution değerini 1024x1024, Smoke Generation değerini "Low", World Details değerini "High" yapın. Reflection Resolution ayarını "512x512" ve Rendering Frequency değerini "Two faces per frame" olarak belirleyin.',
+        tip: ' Altı yüzlü yansıma (Six faces per frame) ekran kartı yükünü %40 artırır; iki yüz fazlasıyla yeterlidir.',
+      },
+      {
+        stepNumber: 2,
+        title: 'CSP > General Patch Settings > CPU & GPU Optimizasyonlarını Açın',
+        description: 'Settings > Custom Shaders Patch > General Patch Settings sekmesine gelin. "CPU Optimizations" ve "GPU Optimizations" başlıkları altındaki tüm kutucukları (Flatten nodes, Chunked shadowmaps, Deduplicate meshes) aktif hale getirin.',
+        tip: 'Bu ayarlar kalabalık online sunucularda işlemci darboğazını büyük ölçüde ortadan kaldırır.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Extra FX Modülündeki Ağır Efektleri Kısın',
+        description: 'FPS düşüşünün en büyük kaynağı Extra FX sekmesidir. Bilgisayarınız zorlanıyorsa Extra FX içerisindeki "Local Reflections (SSLR)" ayarını "Low" veya kapalı konuma getirin, "Ambient Occlusion (HBAO+)" seçeneğini kapatıp yalnızca Motion Blur ve TAA’yı açık bırakın.',
+        tip: 'Çok düşük sistemlerde Extra FX modülünü tamamen kapatmak anında +30 FPS kazandırır.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Graphic Adjustments > AMD FidelityFX Super Resolution (FSR) Açın',
+        description: 'CSP > Graphic Adjustments sekmesine inin ve "AMD FidelityFX Super Resolution" özelliğini aktif edin. Kalite profilini "Ultra Quality (%77)" veya "Quality (%67)" olarak seçin. Görüntü keskinliğini koruyarak yüksek FPS artışı sağlar.',
+        tip: 'Hem NVIDIA hem de AMD ekran kartlarında sorunsuz çalışır.',
+      },
+    ],
+    tips: [
+      'Dizüstü bilgisayar kullanıyorsanız Windows Grafik Ayarları üzerinden "acs.exe" dosyasını Yüksek Performanslı harici ekran kartına (NVIDIA/AMD) atadığınızdan emin olun.',
+      'Smart Shadows sekmesinde gölge geçişlerini optimize ederek titreyen gölgeleri ve FPS dalgalanmalarını önleyebilirsiniz.',
+    ],
+    troubleshooting: [
+      {
+        problem: 'FPS yüksek görünmesine rağmen oyunda anlık takılmalar (micro-stutter) oluyor.',
+        solution: 'Framerate Limit değerini monitör yenileme hızınıza sabitleyin ve CSP > GUI sekmesinden gereksiz arka plan Python uygulamalarını devre dışı bırakın.',
+      },
+    ],
+    youtubeVideo: {
+      id: 'PDVR1IeUS0P',
+      title: 'Assetto Corsa FPS Artırma & Grafik Optimizasyon Rehberi',
+      channel: 'Zecution Gaming Sim Ekibi',
+      duration: '10:30',
+      description: 'Düşük ve orta segment bilgisayarlarda görüntüyü bozmadan yüksek FPS alma, Extra FX ayarları ve AMD FSR aktivasyonu.',
+    },
+  },
+  {
+    id: 'ac-neckfx-kamera-ayarlari',
+    slug: 'assetto-corsa-neck-fx-ve-gercekci-kokpit-kamera-ayarlari',
+    title: 'Assetto Corsa Neck FX (Kafa Kamerası) & Gerçekçi Kokpit Görüş (FOV) Rehberi',
+    game: 'Assetto Corsa',
+    gameCode: 'assetto-corsa',
+    category: 'Donanım & Ayarlar',
+    forumCategory: 'Assetto Corsa / Kamera, FOV & Sürüş Hissi',
+    time: '6 dk okuma',
+    difficulty: 'Kolay',
+    coverImage: '/media/images/car-track-mod-preview.jpg',
+    summary: 'Drift ve cadde sürüşlerinde viraj içine ve kayma açısına doğal olarak dönen kafa kamerası (Neck FX), hız hissi ve doğru Field of View (FOV) hesaplaması.',
+    highlights: ['Neck FX Drift Ayarı', 'Look to Apex', 'FOV Kalibrasyonu', 'Kask Kamerası Hissi'],
+    targetPath: 'Content Manager > Settings > Custom Shaders Patch > Neck FX',
+    author: {
+      name: 'Zecution Gaming 👑',
+      role: 'Kurucu',
+      badge: 'KURUCU',
+      avatar: '/media/images/logo.jpg',
+      posts: '148 Gönderi',
+    },
+    stats: {
+      views: '7.1k Görüntülenme',
+      likes: 410,
+      replies: 22,
+      date: 'Kasım 2026',
+    },
+    requirements: [
+      'Content Manager',
+      'Custom Shaders Patch (CSP)',
+    ],
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'CSP > Neck FX Uzantısını Etkinleştirin',
+        description: 'Content Manager > Settings > Custom Shaders Patch > Neck FX sekmesine tıklayın ve en üstteki "Active" kutucuğunu işaretleyin.',
+        tip: 'Neck FX yalnızca birinci şahıs kokpit (First-person cockpit) kamerasında çalışır.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Viraj ve Kayma Takibi (Velocity & Steering Alignment) Ayarlayın',
+        description: '"Align with velocity" değerini %65, "Align with steering" değerini %25 olarak ayarlayın. Bu sayede araç yanlamaya (drift) başladığında sürücünün başı otomatik olarak aracın gittiği yöne ve viraj çıkışına doğru döner.',
+        tip: 'Sadece pist yarışı yapıyorsanız Velocity değerini %35, Steering değerini %40 tutabilirsiniz.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Sarsıntı ve Ufuk Kilidini (Horizon Lock) Dengeli Tutun',
+        description: 'Yol tümseklerinde baş dönmesi yaşamamak için "Horizon lock" değerini %40 - %50 seviyesine getirin, "Tilt with G-forces" (G kuvvetiyle yatma) değerini ise hafif bir ivme hissi için %20 civarında bırakın.',
+        tip: 'Aşırı G-kuvveti eğimi frenlemelerde kadranı görmenizi zorlaştırabilir.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Doğru Görüş Açısını (Field of View - FOV) Belirleyin',
+        description: 'Sürüşe girdikten sonra sağ menüden "Onboard Settings" uygulamasını açın. Tek monitör (24-27 inç) kullanıyorsanız FOV değerini 50° - 56° arasında ayarlayıp koltuk yüksekliğini (Pitch & Seat Position) direksiyon simidiyle hizalayın ve "Save" butonuna basın.',
+        tip: 'Her araç için yaptığınız koltuk ayarı otomatik olarak o araca özel kaydedilir.',
+      },
+    ],
+    tips: [
+      'Sağ ve sola anlık bakış (Glance left/right) tuşlarını direksiyonunuzun üzerindeki tuşlara atarsanız Neck FX bu geçişleri sert kesme yerine yumuşak kafa dönüşüyle yapar.',
+    ],
+    troubleshooting: [
+      {
+        problem: 'Neck FX açık olmasına rağmen kokpit kamerası hiç hareket etmiyor.',
+        solution: 'F1 tuşuyla kamera değiştirdiğinizde "Dash Cam" yerine "Cockpit Cam" (direksiyonun göründüğü ilk iç kamera) seçili olduğundan emin olun.',
+      },
+    ],
+    youtubeVideo: {
+      id: '1fU649lM3gU',
+      title: 'Assetto Corsa En Gerçekçi Neck FX & Drift Kamera Ayarları',
+      channel: 'Zecution Gaming',
+      duration: '6:50',
+      description: 'Drift ve makas sürüşleri için en akıcı Neck FX parametreleri, Onboard Settings koltuk hizalama ve FOV ayarları.',
+    },
+  },
+  {
+    id: '3d-arac-mod-gelistirme-temelleri',
+    slug: 'blender-ve-kseditor-ile-assetto-corsa-arac-modu-yapimi-temelleri',
+    title: 'Blender & ksEditor ile Assetto Corsa Araç Modu Geliştirme Temelleri',
+    game: 'Assetto Corsa',
+    gameCode: 'assetto-corsa',
+    category: 'Temel Kurulum',
+    forumCategory: '3D Modelleme / Mod Geliştirme & ksEditor İş Akışı',
+    time: '14 dk okuma',
+    difficulty: 'İleri Seviye',
+    coverImage: '/media/images/setup-service.jpg',
+    summary: 'Kendi 3D araç modunuzu üretmeye nereden başlamalısınız? Blender’da dummy/empty hiyerarşisi, FBX dışa aktarma, ksEditor shader atamaları ve data/fizik yapısı.',
+    highlights: ['Blender 3D Hiyerarşi', 'ksEditor & KN5 Export', 'PBR Shader & Materyaller', 'Fizik & Data Yapısı'],
+    targetPath: 'assettocorsa\\sdk\\editor\\ksEditor.exe',
+    author: {
+      name: 'Zecution Gaming 👑',
+      role: 'Kurucu',
+      badge: 'KURUCU',
+      avatar: '/media/images/logo.jpg',
+      posts: '148 Gönderi',
+    },
+    stats: {
+      views: '9.8k Görüntülenme',
+      likes: 645,
+      replies: 44,
+      date: 'Kasım 2026',
+    },
+    requirements: [
+      'Blender 3.6 / 4.x veya Autodesk 3ds Max',
+      'Assetto Corsa SDK (Steam >assettocorsa > sdk > editor > ksEditor)',
+      'Content Manager (CM Showroom ve Data Unpacker)',
+      'DDS doku kaydetme aracı (Paint.NET veya Photoshop Intel Texture Works)',
+    ],
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Blender İçerisinde Doğru Dummy (Empty) Hiyerarşisini Kurun',
+        description: 'Assetto Corsa oyun motoru tekerlekleri, kaliperleri, direksiyonu ve kapıları tanımak için özel isimlendirilmiş Empty (Dummy) objelerine ihtiyaç duyar. Tekerlekler için WHEEL_LF, WHEEL_RF, WHEEL_LR, WHEEL_RR; süspansiyon ve fren kaliperleri için SUSP_LF, DISC_LF; direksiyon için STEER_HR düğümlerini doğru eksen yönleriyle (Y-Up, Z-Forward) yerleştirin.',
+        tip: 'Ölçek (Scale) değerlerinin tüm objelerde 1.000 (Ctrl+A > Apply Scale) olduğundan emin olun; aksi halde tekerlekler oyunda yamuk döner.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Materyal İsimlendirmesi ve UV Haritalama',
+        description: 'Araç gövde boyası (EXT_Body), camlar (EXT_Glass), far camları, jantlar (EXT_Rim), lastik yanakları ve iç mekan plastik/deri yüzeyleri için ayrı materyaller oluşturun. Tüm kaplama dosyalarını (Diffuse, Normal Map, Map/Specular) .dds formatında "texture" klasöründe toplayın.',
+        tip: 'Toplam üçgen (triangle) sayısını 250.000 - 350.000 bandında tutmak hem yüksek detay hem yüksek FPS sağlar.',
+      },
+      {
+        stepNumber: 3,
+        title: 'FBX Olarak Dışa Aktarın ve ksEditor ile Açın',
+        description: 'Modelinizi Blender’dan FBX formatında (Scale: 0.01 veya FBX Units Scale ile) dışa aktarın. FBX dosyasının yanındaki "texture" klasöründe tüm dokularınız bulunmalıdır. Ardından "assettocorsa/sdk/editor/ksEditor.exe" programını açıp FBX dosyanızı yükleyin.',
+        tip: 'ksEditor açılırken pembe veya siyah parça görüyorsanız ilgili materyale henüz doku atanmamıştır.',
+      },
+      {
+        stepNumber: 4,
+        title: 'ksPerPixelMultiMap Shader Ayarları ve .KN5 Kaydı',
+        description: 'ksEditor içinde araç gövdesine "ksPerPixelMultiMap_damage_dirt", camlara "ksPerPixelAlpha", kadran ışıklarına ve farlara "ksPerPixelMultiMap_emissive" shaderlarını atayın. Ayarları ".ini" persistence dosyası olarak kaydettikten sonra "File > Save KN5 > Car" seçeneğiyle aracın 3D modelini "content/cars/arac_adiniz/" klasörüne kaydedin.',
+        tip: 'Persistence (.ini) dosyasını her zaman yedekleyin; böylece modelde değişiklik yaptığınızda shader ayarlarını baştan yapmazsınız.',
+      },
+      {
+        stepNumber: 5,
+        title: 'Fizik Verileri (data) ve ext_config.ini Yapılandırması',
+        description: 'Aracın motor tork eğrisi (engine.ini, power.lut), vites oranları (drivetrain.ini), süspansiyon yüksekliği (suspensions.ini) ve lastik tutuşu (tyres.ini) "data" klasöründe yer alır. CSP gelişmiş ışıklandırma, silecek (wiper) animasyonu ve PBR materyaller için ise "extension/ext_config.ini" dosyasını yapılandırın.',
+        tip: 'Hazırladığınız modu toplulukla paylaşmak isterseniz sitemizdeki "Modunu Yayınla" sayfasından bize gönderebilirsiniz!',
+      },
+    ],
+    tips: [
+      'Content Manager içerisindeki "Custom Showroom" aracını kullanarak oyuna girmeden aracınızın boya yansımalarını, kapı animasyonlarını ve far (emissive) kanallarını canlı olarak test edebilirsiniz.',
+    ],
+    troubleshooting: [
+      {
+        problem: 'ksEditor FBX dosyasını açarken hata veriyor veya çöküyor.',
+        solution: 'Blender’da herhangi bir objede birden fazla UV Map kalmış veya materyalsiz (boş) bir mesh unutulmuş olabilir. Tüm objelerin tek bir aktif UV kanalı ve en az bir materyali olduğundan emin olun.',
+      },
+    ],
+    youtubeVideo: {
+      id: 'PDVR1IeUS0P',
+      title: 'Assetto Corsa 3D Araç Modu Yapımı: Blender’dan Oyuna Aktarma',
+      channel: 'Zecution Sim Studio',
+      duration: '18:40',
+      description: 'Blender dummy yerleşimi, FBX export ayarları, ksEditor shader yapılandırması ve KN5 model çıktısı alma rehberi.',
+    },
+  },
 ]
 
 export const GUIDE_CATEGORIES = [
   'Tümü',
   'Assetto Corsa',
   'BeamNG.drive',
+  'Euro Truck Simulator 2',
   'Grafik & CSP',
   'Donanım & Ayarlar',
 ]
+
+export function mergeGuidesWithDefaults(apiGuides = []) {
+  const validApi = (Array.isArray(apiGuides) ? apiGuides : []).filter(
+    (g) => g && g.slug && g.isActive !== false
+  )
+  const seenSlugs = new Set(validApi.map((g) => g.slug))
+  const fallbackExtras = GUIDES.filter((g) => !seenSlugs.has(g.slug))
+  return [...validApi, ...fallbackExtras]
+}
+

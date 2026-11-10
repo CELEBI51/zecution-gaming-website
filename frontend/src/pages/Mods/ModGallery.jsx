@@ -21,7 +21,9 @@ import {
   X,
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
+import { DEFAULT_MODS } from '../../data/modsData.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
+import LegalFooterLinks from '../../components/LegalFooterLinks.jsx'
 import './ModGallery.css'
 
 const GAME_META = {
@@ -94,13 +96,27 @@ const DEFAULT_CATEGORIES = [
   },
 ]
 
+const FALLBACK_GALLERY_MODS = DEFAULT_MODS.map((m) => ({
+  id: m.id,
+  slug: m.slug,
+  name: m.name,
+  producer: m.producer || 'Zecution Gaming',
+  description: m.description || '',
+  game: m.gameCode || 'assetto-corsa',
+  category: m.category?.toLowerCase().includes('harita') ? 'maps' : 'vehicles',
+  image: m.image,
+  downloadUrl: m.downloadUrl,
+  viewCount: 1200,
+  downloadCount: 340,
+}))
+
 function ModGallery() {
   const [selectedGame, setSelectedGame] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [games, setGames] = useState(DEFAULT_GAMES)
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
-  const [mods, setMods] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [mods, setMods] = useState(FALLBACK_GALLERY_MODS)
+  const [loading, setLoading] = useState(false)
 
   // Arama Durumları
   const [searchParams, setSearchParams] = useSearchParams()
@@ -227,12 +243,16 @@ function ModGallery() {
           return 0
         })
 
-        setMods(sortedMods)
+        if (sortedMods.length > 0) {
+          setMods(sortedMods)
+        } else {
+          setMods(FALLBACK_GALLERY_MODS)
+        }
       } catch (err) {
         console.error('Galeri yükleme hatası:', err)
         setGames(DEFAULT_GAMES)
         setCategories(DEFAULT_CATEGORIES)
-        setMods([])
+        setMods(FALLBACK_GALLERY_MODS)
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -740,8 +760,9 @@ function ModGallery() {
         </section>
       </main>
 
-      <footer className="mods-footer">
+      <footer className="mods-footer" style={{ flexWrap: 'wrap', gap: '1rem' }}>
         <span>© {new Date().getFullYear()} Zecution Gaming</span>
+        <LegalFooterLinks />
         <a href="https://www.instagram.com/zecution_gaming/" target="_blank" rel="noreferrer">
           Özel mod talebi <ArrowUpRight size={16} />
         </a>

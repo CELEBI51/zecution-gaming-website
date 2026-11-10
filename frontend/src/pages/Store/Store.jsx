@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { api, getMediaUrl } from '../../services/api.js'
 import UserNavButton from '../../components/UserNavButton.jsx'
+import LegalFooterLinks from '../../components/LegalFooterLinks.jsx'
 import './Store.css'
 import { categoryRows } from '../../utils/categories.js'
 import {
@@ -244,8 +245,9 @@ function Store() {
         </section>
       </main>
 
-      <footer className="store-footer">
+      <footer className="store-footer" style={{ flexWrap: 'wrap', gap: '1rem' }}>
         <span>© {new Date().getFullYear()} Zecution Gaming</span>
+        <LegalFooterLinks />
         <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
           Satın alma için iletişim <ArrowUpRight size={16} />
         </a>
